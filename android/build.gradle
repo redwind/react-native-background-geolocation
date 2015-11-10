@@ -1,0 +1,30 @@
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion 23
+    buildToolsVersion "23.0.1"
+
+    defaultConfig {
+        minSdkVersion 15
+        targetSdkVersion 23
+        versionCode 1
+        versionName "1.0"
+        multiDexEnabled true
+    }
+}
+
+repositories{
+    jcenter()
+    flatDir{
+        dirs 'libs'
+    }
+}
+
+dependencies {
+	compile 'com.android.support:multidex:1.0.0'
+    compile 'com.facebook.react:react-native:0.13.+'
+    compile 'com.google.android.gms:play-services:+'
+    compile 'de.greenrobot:eventbus:3.0.0-beta1'
+    compile 'com.mcxiaoke.volley:library:1.0.18'
+    compile(name:'tslocationmanager', ext:'aar')
+}

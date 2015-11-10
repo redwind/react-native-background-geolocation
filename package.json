@@ -1,0 +1,32 @@
+{
+  "name": "react-native-background-geolocation-android",
+  "version": "0.0.1",
+  "description": "Sophisticated background location-tracking with battery-conscious motion-detection",
+  "main": "RNBackgroundGeolocation.android.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/transistorsoft/react-native-background-geolocation-android.git"
+  },
+  "keywords": [
+    "react-native",
+    "react-component",
+    "ios",
+    "android",
+    "background",
+    "geolocation"
+  ],
+  "author": "Chris Scott <chris@transistorsoft.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/transistorsoft/react-native-background-geolocation-android/issues"
+  },
+  "homepage": "https://transistorsoft.github.io/react-native-background-geolocation-android",
+  "dependencies": {},
+  "peerDependencies": {
+    "react-native": ">=0.8.0"
+  },
+  "devDependencies": {}
+}
