@@ -11,7 +11,8 @@ Follows the [React Native Modules spec](https://facebook.github.io/react-native/
 ## Installing the Plugin
 
 ```
-$ npm install https://github.com/transistorsoft/react-native-background-geolocation-android.git --save
+$ npm install git+https://git@github.com:transistorsoft/react-native-background-geolocation-android.git --save
+
 ```
 
 [See Wiki](../..//wiki/Installation)
