@@ -40,19 +40,21 @@ var BackgroundGeolocation = require('react-native-background-geolocation-android
 var BackgroundGeolocation = require('react-native-background-geolocation-android');
 
 BackgroundGeolocation.configure({
+  // License validations
   orderId: '<your order ID>',
   license: '<your license key>',
+  
+  // Geolocation config
   desiredAccuracy: 0,
-  stationaryRadius: 50,
   distanceFilter: 50,
-  disableElasticity: false, // <-- [iOS] Default is 'false'.  Set true to disable speed-based distanceFilter elasticity
   locationUpdateInterval: 5000,
-  minimumActivityRecognitionConfidence: 80,   // 0-100%.  Minimum activity-confidence for a state-change 
   fastestLocationUpdateInterval: 5000,
+  
+  // Activity Recognition config
+  minimumActivityRecognitionConfidence: 80,   // 0-100%.  Minimum activity-confidence for a state-change 
   activityRecognitionInterval: 10000,
   stopDetectionDelay: 1,  // <--  minutes to delay after motion stops before engaging stop-detection system
   stopTimeout: 2, // 2 minutes
-  activityType: 'AutomotiveNavigation',
 
   // Application config
   debug: true, // <-- enable this hear sounds for background-geolocation life-cycle.
@@ -65,6 +67,7 @@ BackgroundGeolocation.configure({
   // HTTP / SQLite config
   url: 'http://posttestserver.com/post.php?dir=cordova-background-geolocation',
   batchSync: false,       // <-- [Default: false] Set true to sync locations to server in a single HTTP request.
+  maxBatchSize: 100       // <-- If using batchSync: true, specifies the max number of records send with each HTTP request.
   autoSync: true,         // <-- [Default: true] Set true to sync each location to server as it arrives.
   maxDaysToPersist: 1,    // <-- Maximum days to persist a location in plugin's SQLite database when HTTP fails
   headers: {
@@ -92,6 +95,7 @@ var Foo = React.createClass({
 
     // This handler fires when movement states changes (stationary->moving; moving->stationary)
     BackgroundGeolocation.on('motionchange', function(location) {
+      var isMoving = location.is_moving;
       console.log('- [js]motionchanged: ', JSON.stringify(location));
     });
     
