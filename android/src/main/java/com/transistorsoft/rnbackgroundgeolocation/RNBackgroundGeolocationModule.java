@@ -652,7 +652,6 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
     private void onLocationError(Bundle event) {
         Integer code = event.getInt("code");
         if (code == BackgroundGeolocationService.LOCATION_ERROR_DENIED) {
-            setEnabled(false);
             if (isDebugging()) {
                 Toast.makeText(activity, "Location services disabled!", Toast.LENGTH_SHORT).show();
             }
