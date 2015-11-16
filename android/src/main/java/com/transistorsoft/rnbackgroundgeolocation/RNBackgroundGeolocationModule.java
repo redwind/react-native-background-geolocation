@@ -369,83 +369,12 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
 
         editor.putBoolean("activityIsActive", true);
 
-        if (config.hasKey("distanceFilter")) {
-            editor.putFloat("distanceFilter", config.getInt("distanceFilter"));
-        }
-        if (config.hasKey("desiredAccuracy")) {
-            editor.putInt("desiredAccuracy", config.getInt("desiredAccuracy"));
-        }
-        if (config.hasKey("locationUpdateInterval")) {
-            editor.putInt("locationUpdateInterval", config.getInt("locationUpdateInterval"));
-        }
-        if (config.hasKey("fastestLocationUpdateInterval")) {
-            editor.putInt("fastestLocationUpdateInterval", config.getInt("fastestLocationUpdateInterval"));
-        }
-        if (config.hasKey("activityRecognitionInterval")) {
-            editor.putLong("activityRecognitionInterval", config.getInt("activityRecognitionInterval"));
-        }
-        if (config.hasKey("minimumActivityRecognitionConfidence")) {
-            editor.putInt("minimumActivityRecognitionConfidence", config.getInt("minimumActivityRecognitionConfidence"));
-        }
-        if (config.hasKey("triggerActivities")) {
-            editor.putString("triggerActivities", config.getString("triggerActivities"));
-        }
-        if (config.hasKey("stopTimeout")) {
-            editor.putLong("stopTimeout", (long)config.getInt("stopTimeout"));
-        }
-        if (config.hasKey("debug")) {
-            editor.putBoolean("debug", config.getBoolean("debug"));
-        }
-        if (config.hasKey("stopAfterElapsedMinutes")) {
-            editor.putInt("stopAfterElapsedMinutes", config.getInt("stopAfterElapsedMinutes"));
-        }
         if (config.hasKey("stopOnTerminate")) {
             stopOnTerminate = config.getBoolean("stopOnTerminate");
             editor.putBoolean("stopOnTerminate", stopOnTerminate);
         }
-        if (config.hasKey("startOnBoot")) {
-            editor.putBoolean("startOnBoot", config.getBoolean("startOnBoot"));
-        }
-        if (config.hasKey("forceReloadOnLocationChange")) {
-            editor.putBoolean("forceReloadOnLocationChange", config.getBoolean("forceReloadOnLocationChange"));
-        }
-        if (config.hasKey("forceReload")) { // @deprecated, alias to #forceReloadOnLocationChange
-            editor.putBoolean("forceReloadOnLocationChange", config.getBoolean("forceReload"));
-        }
-        if (config.hasKey("forceReloadOnMotionChange")) {
-            editor.putBoolean("forceReloadOnMotionChange", config.getBoolean("forceReloadOnMotionChange"));
-        }
-        if (config.hasKey("forceReloadOnGeofence")) {
-            editor.putBoolean("forceReloadOnGeofence", config.getBoolean("forceReloadOnGeofence"));
-        }
-        if (config.hasKey("maxDaysToPersist")) {
-            editor.putInt("maxDaysToPersist", config.getInt("maxDaysToPersist"));
-        }
-        if (config.hasKey("url")) {
-            editor.putString("url", config.getString("url"));
-        }
-        if (config.hasKey("method")) {
-            editor.putString("method", config.getString("method"));
-        }
-        if (config.hasKey("autoSync")) {
-            editor.putBoolean("autoSync", config.getBoolean("autoSync"));
-        }
-        if (config.hasKey("batchSync")) {
-            editor.putBoolean("batchSync", config.getBoolean("batchSync"));
-        }
-        if (config.hasKey("params")) {
-            editor.putString("params", mapToJson(config.getMap("params")).toString());
-        }
-        if (config.hasKey("headers")) {
-            editor.putString("headers", mapToJson(config.getMap("headers")).toString());
-        }
-        // License
-        if (config.hasKey("license")) {
-            editor.putString("license", config.getString("license"));
-        }
-        if (config.hasKey("orderId")) {
-            editor.putString("orderId", config.getString("orderId"));
-        }
+
+        editor.putString("config", mapToJson(config).toString());
         editor.commit();
     }
 
