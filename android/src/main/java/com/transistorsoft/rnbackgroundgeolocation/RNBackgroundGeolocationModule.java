@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Location;
+import android.media.AudioManager;
 import android.media.ToneGenerator;
 import android.os.Bundle;
 import android.util.Log;
@@ -16,7 +17,7 @@ import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 
 import com.facebook.react.bridge.ReadableMap;
-import com.facebook.react.bridge.ReadableMapKeySeyIterator;
+import com.facebook.react.bridge.ReadableMapKeySetIterator;
 import com.facebook.react.bridge.ReadableType;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
@@ -155,6 +156,10 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void sync(Callback success, Callback failure) {
+        if (syncCallback != null) {
+            // Outstanding sync-action is currently running.  Wait for it to complete
+            return;
+        }
         syncCallback = new HashMap();
         syncCallback.put("success", success);
         syncCallback.put("failure", failure);
@@ -292,6 +297,17 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
             success.invoke(rs);
         }
     }
+
+    @ReactMethod
+    public void playSound( int soundId) {
+        int duration = 1000;
+
+        if (toneGenerator == null) {
+            toneGenerator = new ToneGenerator(AudioManager.STREAM_NOTIFICATION, 100);
+        }
+        toneGenerator.startTone(soundId, duration);
+    }
+
     @Subscribe
     public void onEventMainThread(ActivityRecognitionResult result) {
         currentActivity = result.getMostProbableActivity();
@@ -379,7 +395,7 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
     }
 
     private JSONObject mapToJson(ReadableMap map) {
-        ReadableMapKeySeyIterator iterator = map.keySetIterator();
+        ReadableMapKeySetIterator iterator = map.keySetIterator();
         JSONObject json = new JSONObject();
 
         try {

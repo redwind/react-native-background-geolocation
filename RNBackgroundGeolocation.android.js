@@ -87,6 +87,9 @@ var API = {
   getGeofences: function(success, failure) {
     failure = failure || emptyFn;
     RNBackgroundGeolocation.getGeofences(success, failure);
+  },
+  playSound: function(soundId) {
+    RNBackgroundGeolocation.playSound(soundId);
   }
 };
 
