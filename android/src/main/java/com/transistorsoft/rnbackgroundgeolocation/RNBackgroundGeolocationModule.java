@@ -428,7 +428,7 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
 
     private void setEnabled(boolean value) {
         // Don't set a state that we're already in.
-        Log.i(TAG, "- setEnabled:  current value: " + isEnabled);
+        Log.i(TAG, "- setEnabled:  " + value + ", current value: " + isEnabled);
         if (value == isEnabled) {
             return;
         }
@@ -469,6 +469,9 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
     }
 
     private void onStart(Bundle event) {
+        if (startCallback == null) {
+            return;
+        }
         Callback success = startCallback.get("success");
         success.invoke();
         startCallback = null;
@@ -484,7 +487,6 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
                 Log.w(TAG, e);
             }
         }
-
     }
     private void onGetLocations(Bundle event) {
         try {
@@ -768,5 +770,13 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
     }
     private void sendEvent(String eventName, WritableMap params) {
         reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit(TAG + ":" + eventName, params);
+    }
+    @Override
+    public void onCatalystInstanceDestroy() {
+        Log.i(TAG, "- RNBackgroundGeolocationModule#destroy");
+        EventBus eventBus = EventBus.getDefault();
+        if (eventBus.isRegistered(this)) {
+            eventBus.unregister(this);
+        }
     }
 }
