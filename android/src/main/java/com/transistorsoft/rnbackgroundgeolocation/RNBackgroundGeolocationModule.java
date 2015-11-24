@@ -83,6 +83,7 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
     Activity activity;
 
     public RNBackgroundGeolocationModule(ReactApplicationContext reactContext, Activity activity) {
+
         super(reactContext);
         this.reactContext   = reactContext;
         this.activity       = activity;
@@ -134,7 +135,10 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
     @ReactMethod
     public void setConfig(ReadableMap config) {
         applyConfig(config);
-
+        Bundle event = new Bundle();
+        event.putString("name", BackgroundGeolocationService.ACTION_SET_CONFIG);
+        event.putBoolean("request", true);
+        EventBus.getDefault().post(event);
     }
 
     @ReactMethod
@@ -549,14 +553,15 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
     private void onLocationChange(WritableMap data) {
         Log.i(TAG, "- RNackgroundGeolocation Rx Location: " + isEnabled);
 
-        if (isAcquiringCurrentPosition) {
-            finishAcquiringCurrentPosition(true);
+        if (isAcquiringCurrentPosition && !currentPositionCallbacks.isEmpty()) {
             // Execute callbacks.
-            for (HashMap<String, Callback> callback : currentPositionCallbacks) {
-                Callback success = callback.get("success");
-                success.invoke(data);
+            HashMap<String, Callback> callback = currentPositionCallbacks.get(0);
+            Callback success = callback.get("success");
+            success.invoke(data);
+            currentPositionCallbacks.remove(callback);
+            if (currentPositionCallbacks.isEmpty()) {
+                finishAcquiringCurrentPosition(true);
             }
-            currentPositionCallbacks.clear();
         }
     }
 
