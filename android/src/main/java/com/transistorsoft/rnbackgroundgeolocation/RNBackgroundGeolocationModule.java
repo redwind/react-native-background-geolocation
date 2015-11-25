@@ -27,6 +27,7 @@ import com.facebook.react.modules.core.DeviceEventManagerModule;
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingEvent;
 import com.transistorsoft.locationmanager.BackgroundGeolocationService;
+import com.transistorsoft.locationmanager.Settings;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -41,6 +42,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.TimeZone;
 import de.greenrobot.event.EventBus;
 import de.greenrobot.event.Subscribe;
@@ -88,6 +90,7 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
         this.reactContext   = reactContext;
         this.activity       = activity;
         backgroundServiceIntent = new Intent(reactContext, BackgroundGeolocationService.class);
+        backgroundServiceIntent.putExtra("enabled", isEnabled);
     }
 
     @Override
@@ -109,8 +112,13 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void configure(ReadableMap config) {
+    public void configure(ReadableMap config, Callback callback) {
         applyConfig(config);
+
+        SharedPreferences settings = reactContext.getSharedPreferences("TSLocationManager", 0);
+        setEnabled(settings.getBoolean("enabled", isEnabled));
+        
+        getState(callback);
     }
     @ReactMethod
     public void changePace(Boolean moving, Callback success, Callback failure) {
@@ -142,8 +150,20 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void getState() {
+    public void getState(Callback callback) {
+        SharedPreferences settings = activity.getSharedPreferences("TSLocationManager", 0);
 
+        Bundle values = Settings.values;
+        WritableMap state = new WritableNativeMap();
+        Set<String> keys = values.keySet();
+        state.putBoolean("enabled", isEnabled);
+        state.putBoolean("isMoving", isMoving);
+        /* TODO
+        for (String key : keys) {
+            state.put(key, JSONObject.wrap(values.get(key)));
+        }
+        */
+        callback.invoke(state);
     }
 
     @ReactMethod
@@ -177,7 +197,6 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
     @ReactMethod
     public void getCurrentPosition(ReadableMap options, Callback successCallback, Callback failureCallback) {
         currentPositionOptions          = options;
-        isAcquiringCurrentPosition      = true;
         isAcquiringCurrentPositionSince = System.nanoTime();
 
         HashMap<String, Callback> callback = new HashMap();
@@ -185,6 +204,10 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
         callback.put("failure", failureCallback);
         currentPositionCallbacks.add(callback);
 
+        if (isAcquiringCurrentPosition) {
+            return;
+        }
+        isAcquiringCurrentPosition = true;
         if (!isEnabled) {
             EventBus eventBus = EventBus.getDefault();
             if (!eventBus.isRegistered(this)) {
@@ -372,8 +395,6 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
             this.onMotionChange(event);
         } else if (BackgroundGeolocationService.ACTION_GOOGLE_PLAY_SERVICES_CONNECT_ERROR.equalsIgnoreCase(name)) {
             GoogleApiAvailability.getInstance().getErrorDialog(activity, event.getInt("errorCode"), 1001).show();
-        } else if (BackgroundGeolocationService.ACTION_GET_CURRENT_POSITION.equalsIgnoreCase(name)) {
-            this.onCurrentPositionTimeout(event);
         } else if (BackgroundGeolocationService.ACTION_LOCATION_ERROR.equalsIgnoreCase(name)) {
             this.onLocationError(event);
         } else if (BackgroundGeolocationService.ACTION_HTTP_RESPONSE.equalsIgnoreCase(name)) {
@@ -386,7 +407,7 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
 
         SharedPreferences settings = reactContext.getSharedPreferences("TSLocationManager", 0);
         SharedPreferences.Editor editor = settings.edit();
-
+    
         editor.putBoolean("activityIsActive", true);
 
         if (config.hasKey("stopOnTerminate")) {
@@ -431,11 +452,7 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
     }
 
     private void setEnabled(boolean value) {
-        // Don't set a state that we're already in.
         Log.i(TAG, "- setEnabled:  " + value + ", current value: " + isEnabled);
-        if (value == isEnabled) {
-            return;
-        }
         isEnabled = value;
 
         Intent launchIntent = activity.getIntent();
@@ -450,7 +467,6 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
             } catch (JSONException e) {
                 Log.w(TAG, e);
             }
-
         }
 
         SharedPreferences settings = reactContext.getSharedPreferences("TSLocationManager", 0);
@@ -465,6 +481,11 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
             }
             if (!BackgroundGeolocationService.isInstanceCreated()) {
                 reactContext.startService(backgroundServiceIntent);
+            } else {
+                Bundle event = new Bundle();
+                event.putString("name", BackgroundGeolocationService.ACTION_GET_CURRENT_POSITION);
+                event.putBoolean("request", true);
+                EventBus.getDefault().post(event);
             }
         } else {
             EventBus.getDefault().unregister(this);
@@ -553,15 +574,14 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
     private void onLocationChange(WritableMap data) {
         Log.i(TAG, "- RNackgroundGeolocation Rx Location: " + isEnabled);
 
-        if (isAcquiringCurrentPosition && !currentPositionCallbacks.isEmpty()) {
+        if (isAcquiringCurrentPosition) {
+            finishAcquiringCurrentPosition(true);
             // Execute callbacks.
-            HashMap<String, Callback> callback = currentPositionCallbacks.get(0);
-            Callback success = callback.get("success");
-            success.invoke(data);
-            currentPositionCallbacks.remove(callback);
-            if (currentPositionCallbacks.isEmpty()) {
-                finishAcquiringCurrentPosition(true);
+            for (HashMap<String, Callback> callback : currentPositionCallbacks) {
+                Callback success = callback.get("success");
+                success.invoke(data);
             }
+            currentPositionCallbacks.clear();            
         }
     }
 
@@ -586,21 +606,6 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
         sendEvent(EVENT_HTTP, params);
     }
 
-    private void onCurrentPositionTimeout(Bundle event) {
-        this.finishAcquiringCurrentPosition(false);
-        for (HashMap<String, Callback> callback : currentPositionCallbacks) {
-            Callback failure = callback.get("failure");
-            failure.invoke(event.getInt("code"));
-        }
-        currentPositionCallbacks.clear();
-
-        WritableMap params = new WritableNativeMap();
-        params.putString("type", "location");
-        params.putInt("code", event.getInt("code"));
-        params.putString("message", event.getString("message"));
-        sendEvent(EVENT_ERROR, params);
-    }
-
     private void onLocationError(Bundle event) {
         Integer code = event.getInt("code");
         if (code == BackgroundGeolocationService.LOCATION_ERROR_DENIED) {
@@ -608,9 +613,8 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
                 Toast.makeText(activity, "Location services disabled!", Toast.LENGTH_SHORT).show();
             }
         }
-
         if (isAcquiringCurrentPosition) {
-            finishAcquiringCurrentPosition(true);
+            finishAcquiringCurrentPosition(false);
             for (HashMap<String, Callback> callback : currentPositionCallbacks) {
                 Callback failure = callback.get("failure");
                 failure.invoke(code);
@@ -626,11 +630,10 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
     private void finishAcquiringCurrentPosition(boolean success) {
         // Current position has arrived:  release the hounds.
         isAcquiringCurrentPosition = false;
+        backgroundServiceIntent.removeExtra("command");
         // When currentPosition is explicitly requested while plugin is stopped, shut Service down again and stop listening to EventBus
         if (!isEnabled) {
-            backgroundServiceIntent.removeExtra("command");
             EventBus.getDefault().unregister(this);
-            reactContext.stopService(backgroundServiceIntent);
         }
     }
 
@@ -783,5 +786,7 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
         if (eventBus.isRegistered(this)) {
             eventBus.unregister(this);
         }
+        currentPositionCallbacks.clear();
+        reactContext.stopService(backgroundServiceIntent);
     }
 }
