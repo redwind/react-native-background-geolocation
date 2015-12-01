@@ -75,6 +75,7 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
     private HashMap<String, Callback> getOdometerCallback;
     private HashMap<String, Callback> resetOdometerCallback;
     private HashMap<String, Callback> paceChangeCallback;
+    private HashMap<String, Callback> clearDatabaseCallback;
 
     private List<HashMap<String, Callback>> currentPositionCallbacks = new ArrayList<HashMap<String, Callback>>();
     private ReadableMap currentPositionOptions;
@@ -174,6 +175,22 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
 
         Bundle event = new Bundle();
         event.putString("name", BackgroundGeolocationService.ACTION_GET_LOCATIONS);
+        event.putBoolean("request", true);
+        EventBus.getDefault().post(event);
+    }
+
+    @ReactMethod
+    public void clearDatabase(Callback successCallback, Callback failureCallback) {
+        if (clearDatabaseCallback != null) {
+            Log.i(TAG, "- a clearDatabase action is already outstanding");
+            return;
+        }
+        clearDatabaseCallback = new HashMap();
+        clearDatabaseCallback.put("success", successCallback);
+        clearDatabaseCallback.put("failure", failureCallback);
+
+        Bundle event = new Bundle();
+        event.putString("name", BackgroundGeolocationService.ACTION_CLEAR_DATABASE);
         event.putBoolean("request", true);
         EventBus.getDefault().post(event);
     }
@@ -399,6 +416,8 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
             this.onLocationError(event);
         } else if (BackgroundGeolocationService.ACTION_HTTP_RESPONSE.equalsIgnoreCase(name)) {
             this.onHttpResponse(event);
+        } else if (BackgroundGeolocationService.ACTION_CLEAR_DATABASE.equalsIgnoreCase(name)) {
+            this.onClearDatabase(event);
         }
     }
 
@@ -529,6 +548,11 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
             failure.invoke(e.getMessage());
         }
         getLocationsCallback = null;
+    }
+    private void onClearDatabase(Bundle event) {
+        Callback success    = clearDatabaseCallback.get("success");
+        success.invoke(true);
+        clearDatabaseCallback = null;
     }
     private void onSync(Bundle event) {
         Boolean success = event.getBoolean("success");
