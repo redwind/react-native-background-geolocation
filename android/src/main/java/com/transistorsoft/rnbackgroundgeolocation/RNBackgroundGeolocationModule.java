@@ -505,6 +505,12 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
                 event.putString("name", BackgroundGeolocationService.ACTION_GET_CURRENT_POSITION);
                 event.putBoolean("request", true);
                 EventBus.getDefault().post(event);
+
+                if (startCallback != null) {
+                    Callback success = startCallback.get("success");
+                    success.invoke();
+                    startCallback = null;
+                }
             }
         } else {
             EventBus.getDefault().unregister(this);
