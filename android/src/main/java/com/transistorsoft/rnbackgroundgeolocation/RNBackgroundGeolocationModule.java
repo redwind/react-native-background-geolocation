@@ -47,6 +47,8 @@ import java.util.TimeZone;
 import de.greenrobot.event.EventBus;
 import de.greenrobot.event.Subscribe;
 
+
+
 /**
  * Created by chris on 2015-10-30.
  */
@@ -205,10 +207,20 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
         syncCallback.put("success", success);
         syncCallback.put("failure", failure);
 
-        Bundle event = new Bundle();
-        event.putString("name", BackgroundGeolocationService.ACTION_SYNC);
-        event.putBoolean("request", true);
-        EventBus.getDefault().post(event);
+        EventBus eventBus = EventBus.getDefault();
+        if (!eventBus.isRegistered(this)) {
+            eventBus.register(this);
+        }
+        if (!BackgroundGeolocationService.isInstanceCreated()) {
+            Intent syncIntent = new Intent(activity, BackgroundGeolocationService.class);
+            syncIntent.putExtra("command", BackgroundGeolocationService.ACTION_SYNC);
+            reactContext.startService(syncIntent);
+        } else {
+            Bundle event = new Bundle();
+            event.putString("name", BackgroundGeolocationService.ACTION_SYNC);
+            event.putBoolean("request", true);
+            eventBus.post(event);
+        } 
     }
 
     @ReactMethod
