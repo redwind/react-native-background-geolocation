@@ -78,6 +78,7 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
     private HashMap<String, Callback> resetOdometerCallback;
     private HashMap<String, Callback> paceChangeCallback;
     private HashMap<String, Callback> clearDatabaseCallback;
+    private HashMap<String, HashMap> addGeofenceCallbacks = new HashMap();
 
     private List<HashMap<String, Callback>> currentPositionCallbacks = new ArrayList<HashMap<String, Callback>>();
     private ReadableMap currentPositionOptions;
@@ -296,12 +297,13 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
     @ReactMethod
     public void addGeofence(ReadableMap options, Callback success, Callback failure) {
         Bundle event = new Bundle();
+        String identifier = options.getString("identifier");
         event.putString("name", BackgroundGeolocationService.ACTION_ADD_GEOFENCE);
         event.putBoolean("request", true);
         event.putFloat("radius", (float) options.getDouble("radius"));
         event.putDouble("latitude", options.getDouble("latitude"));
         event.putDouble("longitude", options.getDouble("longitude"));
-        event.putString("identifier", options.getString("identifier"));
+        event.putString("identifier", identifier);
         if (options.hasKey("notifyOnEntry")) {
             event.putBoolean("notifyOnEntry", options.getBoolean("notifyOnEntry"));
         }
@@ -312,6 +314,12 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
 
         // TODO no error checking here
         success.invoke();
+
+        HashMap<String, Callback> callbacks = new HashMap();
+        callbacks.put("success", success);
+        callbacks.put("failure", failure);
+
+        addGeofenceCallbacks.put(identifier, callbacks);
     }
 
     @ReactMethod
@@ -430,6 +438,8 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
             this.onHttpResponse(event);
         } else if (BackgroundGeolocationService.ACTION_CLEAR_DATABASE.equalsIgnoreCase(name)) {
             this.onClearDatabase(event);
+        } else if (BackgroundGeolocationService.ACTION_ADD_GEOFENCE.equalsIgnoreCase(name)) {
+            this.onAddGeofence(event);
         }
     }
 
@@ -669,6 +679,21 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
         sendEvent(EVENT_ERROR, params);
     }
 
+    private void onAddGeofence(Bundle event) {
+        boolean success = event.getBoolean("success");
+        String identifier = event.getString("identifier");
+        if (addGeofenceCallbacks.containsKey(identifier)) {
+            HashMap<String, Callback> callbacks = addGeofenceCallbacks.get(identifier);
+            if (success) {
+                Callback callback = callbacks.get("success");
+                callback.invoke();
+            } else {
+                Callback callback = callbacks.get("failure");
+                callback.invoke(event.getString("message"));
+            }
+            addGeofenceCallbacks.remove(identifier);
+        }
+    }
     private void finishAcquiringCurrentPosition(boolean success) {
         // Current position has arrived:  release the hounds.
         isAcquiringCurrentPosition = false;

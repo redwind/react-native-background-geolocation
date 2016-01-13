@@ -40,6 +40,7 @@ bgGeo.setConfig({
 | [`stopTimeout`](#param-integer-minutes-stoptimeout) | `Integer` | Required | `5 minutes` | The number of miutes to wait before turning off the GPS after the ActivityRecognition System (ARS) detects the device is `STILL` (**Android:** defaults to 0, no timeout, **iOS:** defaults to 5min). If you don't set a value, the plugin is eager to turn off the GPS ASAP. An example use-case for this configuration is to delay GPS OFF while in a car waiting at a traffic light. |
 | [`minimumActivityRecognitionConfidence`](#param-integer-millis-minimumactivityrecognitionconfidence) | `Integer` | Optional (**Android**)| `80` | Each activity-recognition-result returned by the API is tagged with a "confidence" level expressed as a %. You can set your desired confidence to trigger a state-change.|
 | [`stopDetectionDelay`](#param-integer-minutes-stopdetectiondelay-0) | `Integer` | Optional (**iOS**)| 0 | Allows the stop-detection system to be delayed from activating. When the stop-detection system is engaged, the GPS is off and only the accelerometer is monitored. Stop-detection will only engage if this timer expires. The timer is cancelled if any movement is detected before expiration |
+| [`disableMotionActivityUpdates`](#param-boolean-disablemotionactivityupdates) | `Boolean` | Optional (**iOS**)| 0 | Disable iOS motion-activity updates (eg: "walking", "in_vehicle").  This feature requires a device having the **M7** co-processor (ie: iPhone 5s and up).  **NOTE** This feature will ask the user for "Health updates".  If you do not wish to ask the user for the "Health updates", set this option to `false`; However, you will no longer recieve activity data in the recorded locations. | 
 
 ## HTTP / Persistence Options
 
@@ -219,8 +220,9 @@ The number of miutes to wait before turning off the GPS after the ActivityRecogn
 
 Allows the stop-detection system to be delayed from activating. When the stop-detection system is engaged, the GPS is off and only the accelerometer is monitored. Stop-detection will only engage if this timer expires. The timer is cancelled if any movement is detected before expiration. If a value of `0` is specified, the stop-detection system will engage as soon as the device is detected to be stationary.
 
-####`@param {Boolan} disableMotionActivityUpdates [false]`
+####`@param {Boolean} disableMotionActivityUpdates [false]`
 
+Set `true` to isable iOS `CMMotionActivity` updates (eg: "walking", "in_vehicle").  This feature requires a device having the **M7** co-processor (ie: iPhone 5s and up).  **NOTE** This feature will ask the user for "Health updates".  If you do not wish to ask the user for the "Health updates", set this option to `false`; However, you will no longer recieve activity data in the recorded locations.
 
 # HTTP / Persistence Options
 
@@ -537,14 +539,16 @@ bgGeo.changePace(false); // <-- Disable aggressive GPS monitoring. Engages stati
 ```
 
 ####`addGeofence({Object})`
-Adds a geofence to be monitored by the native plugin. Monitoring of a geofence is halted after a crossing occurs. The `config` object accepts the following params.
+Adds a geofence to be monitored by the native plugin.  Monitoring of a geofence is halted after a crossing occurs.  The `config` object accepts the following params.
 
 ######@config {String} identifier The name of your geofence, eg: "Home", "Office"
-######@config {Float} radius The radius (meters) of the geofence. In practice, you should make this >= 100 meters.
+######@config {Float} radius The radius (meters) of the geofence.  In practice, you should make this >= 100 meters.
 ######@config {Float} latitude Latitude of the center-point of the circular geofence.
 ######@config {Float} longitude Longitude of the center-point of the circular geofence.
 ######@config {Boolean} notifyOnExit Whether to listen to EXIT events
 ######@config {Boolean} notifyOnEntry Whether to listen to ENTER events
+######@config {Boolean} notifyOnDwell (Android only) Whether to listen to DWELL events
+######@config {Integer milliseconds} loiteringDelay (Android only) When `notifyOnDwell` is `true`, the delay before DWELL event is fired after entering a geofence.
 
 ```
 bgGeo.addGeofence({
@@ -553,7 +557,13 @@ bgGeo.addGeofence({
     latitude: 45.51921926,
     longitude: -73.61678581,
     notifyOnEntry: true,
-    notifyOnExit: false
+    notifyOnExit: false,
+    notifyOnDwell: true,
+    loiteringDelay: 30000 // <-- 30 seconds
+}, function() {
+    console.log("Successfully added geofence");
+}, function(error) {
+    console.warn("Failed to add geofence", error);
 });
 ```
 
