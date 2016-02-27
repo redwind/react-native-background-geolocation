@@ -108,6 +108,10 @@ var API = {
     failure = failure || emptyFn;
     RNBackgroundGeolocation.getLog(success, failure);
   },
+  emailLog: function(email, success, failure) {
+    failure = failure || emptyFn;
+    RNBackgroundGeolocation.emailLog(email, success, failure);
+  },
   playSound: function(soundId) {
     RNBackgroundGeolocation.playSound(soundId);
   }
