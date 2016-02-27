@@ -31,6 +31,7 @@ bgGeo.setConfig({
 | [`disableElasticity`](#param-boolean-disableelasticity-false) | `bool`  |  Optional (**iOS**)| `false`  | Set `true` disables automatic speed-based `#distanceFilter` elasticity. eg: When device is moving at highway speeds, locations are returned at ~ 1 / km. |
 | [`activityType`](#param-string-activitytype-automotivenavigation-othernavigation-fitness-other) | `String` | Required (**iOS**)| `Other` | Presumably, this affects iOS GPS algorithm. See [Apple docs](https://developer.apple.com/library/ios/documentation/CoreLocation/Reference/CLLocationManager_Class/CLLocationManager/CLLocationManager.html#//apple_ref/occ/instp/CLLocationManager/activityType) for more information | Set the desired interval for active location updates, in milliseconds. |
 | [`useSignificantChangesOnly`](#param-boolean-usesignificantchangesonly-false) | `Boolean` | Optional (**iOS**)| `false` | Set `true` in order to disable constant background-tracking and use only the iOS [Significant Changes API](https://developer.apple.com/library/ios/documentation/CoreLocation/Reference/CLLocationManager_Class/index.html#//apple_ref/occ/instm/CLLocationManager/startMonitoringSignificantLocationChanges). If Apple has denied your application due to background-tracking, this can be a solution. **NOTE** The Significant Changes API will report a location only when a significant change from the last location has occurred. Many of the configuration parameters **will be ignored**, such as `#distanceFilter`, `#stationaryRadius`, `#activityType`, etc. |
+| [`deferTime`](#param-integer-deferTime) | `Integer` | Optional (**Android**)| `0` | Sets the maximum wait time in milliseconds for location updates.  If you pass a value at least 2x larger than the interval specified with `locationUpdateInterval`, then location delivery may be delayed and multiple locations can be delivered at once. Locations are determined at the `locationUpdateInterval` rate, but can be delivered in batch after the interval you set in this method. This can consume less battery and give more accurate locations, depending on the device's hardware capabilities. You should set this value to be as large as possible for your needs if you don't need immediate location delivery. |
 
 ## Activity Recognition Options
 
@@ -52,6 +53,7 @@ bgGeo.setConfig({
 | [`method`](#param-string-method-post) | `String` | Optional | `POST` | The HTTP method. Some servers require `PUT`.
 | [`autoSync`](#param-string-autosync-true) | `Boolean` | Optional | `true` | If you've enabled the HTTP feature by configuring an `#url`, the plugin will attempt to HTTP POST each location to your server **as it is recorded**. If you set `autoSync: false`, it's up to you to **manually** execute the `#sync` method to initate the HTTP POST (**NOTE** The plugin will continue to persist **every** recorded location in the SQLite database until you execute `#sync`). |
 | [`batchSync`](#param-string-batchsync-false) | `Boolean` | Optional | `false` | If you've enabled HTTP feature by configuring an `#url`, `batchSync: true` will POST all the locations currently stored in native SQLite datbase to your server in a single HTTP POST request. With `batchSync: false`, an HTTP POST request will be initiated for **each** location in database. |
+| [`maxBatchSize`](#param-integer-maxbatchsize-undefined) | `Integer` | Optional | `undefined` | If you've enabled HTTP feature by configuring an `#url` and `batchSync: true`, this parameter will limit the number of records attached to each batch.  If the current number of records exceeds the `maxBatchSize`, multiple HTTP requests will be generated until the location queue is empty. |
 | [`maxDaysToPersist`](#param-integer-maxdaystopersist) | `Integer` | Optional | `1` | Maximum number of days to store a geolocation in plugin's SQLite database when your server fails to respond with `HTTP 200 OK`. The plugin will continue attempting to sync with your server until `maxDaysToPersist` when it will give up and remove the location from the database. |
 
 ## Application Options
@@ -89,6 +91,8 @@ The following events can all be listened-to via the method `#on(eventName, callb
 | [`getCurrentPosition`](#getcurrentpositionoptions-successfn-failurefn) | `{options}, `successFn`, `failureFn` | Retrieves the current position. This method instructs the native code to fetch exactly one location using maximum power & accuracy. |
 | [`changePace`](#changepaceboolean) | `isMoving` | Initiate or cancel immediate background tracking. When set to true, the plugin will begin aggressively tracking the devices Geolocation, bypassing stationary monitoring. If you were making a "Jogging" application, this would be your [Start Workout] button to immediately begin GPS tracking. Send false to disable aggressive GPS monitoring and return to stationary-monitoring mode. |
 | [`getLocations`](#getlocationscallbackfn) | `callbackFn` | Fetch all the locations currently stored in native plugin's SQLite database. Your callbackFn`` will receive an `Array` of locations in the 1st parameter. |
+| [`getCount`](#getcountcallbackfn-failurefn) | `callbackFn` | Fetches count of SQLite locations table `SELECT count(*) from locations` |
+| [`clearDatabase`](#cleardatabasecallbackfn-failurefn) | `callbackFn` | Delete all records in plugin's SQLite database |
 | [`sync`](#synccallbackfn) | - | If the plugin is configured for HTTP with an `#url` and `#autoSync: false`, this method will initiate POSTing the locations currently stored in the native SQLite database to your configured `#url`. |
 | [`getOdometer`](#getodometercallbackfn) | `callbackFn` | The plugin constantly tracks distance travelled. The supplied callback will be executed and provided with a `distance` as the 1st parameter. |
 | [`resetOdometer`](#resetodometercallbackfn) | `callbackFn` | Reset the **odometer** to `0`. The plugin never automatically resets the odometer -- this is **up to you**. |
@@ -197,6 +201,10 @@ If ```#fastestLocationUpdateInterval``` is set slower than ```#locationUpdateInt
 ========
 An interval of 0 is allowed, but not recommended, since location updates may be extremely fast on future implementations.
 
+####`@param {Integer} deferTime
+
+Defaults to `0` (no defer).  Sets the maximum wait time in milliseconds for location updates.  If you pass a value at least 2x larger than the interval specified with `locationUpdateInterval`, then location delivery may be delayed and multiple locations can be delivered at once. Locations are determined at the `locationUpdateInterval` rate, but can be delivered in batch after the interval you set in this method. This can consume less battery and give more accurate locations, depending on the device's hardware capabilities. You should set this value to be as large as possible for your needs if you don't need immediate location delivery.
+
 ####`@param {String} triggerActivities`
 
 These are the comma-delimited list of [activity-names](https://developers.google.com/android/reference/com/google/android/gms/location/DetectedActivity) returned by the `ActivityRecognition` API which will trigger a state-change from **stationary** to **moving**. By default, this list is set to all five **moving-states**:  `"in_vehicle, on_bicycle, on_foot, running, walking"`. If you wish, you could configure the plugin to only engage **moving-mode** for vehicles by providing only `"in_vehicle"`.
@@ -241,6 +249,10 @@ The HTTP method to use when creating an HTTP request to your configured `#url`. 
 ####`@param {String} batchSync [false]`
 
 Default is ```false```. If you've enabled HTTP feature by configuring an ```#url```, ```batchSync: true``` will POST all the locations currently stored in native SQLite datbase to your server in a single HTTP POST request. With ```batchSync: false```, an HTTP POST request will be initiated for **each** location in database.
+
+####`@param {Integer} maxBatchSize [undefined]`
+
+If you've enabled HTTP feature by configuring an `#url` with `batchSync: true`, this parameter will limit the number of records attached to **each** batch request.  If the current number of records exceeds the `maxBatchSize`, multiple HTTP requests will be generated until the location queue is empty.
 
 ####`@param {String} autoSync [true]`
 
@@ -625,6 +637,61 @@ The `callbackFn` will be executed with following params:
         } catch(e) {
             console.error("An error occurred in my application code");
         }
+    });
+```
+
+####`getCount(callbackFn, failureFn)`
+Fetches count of SQLite locations table `SELECT count(*) from locations`.  The `callbackFn` will be executed with count as the only parameter.
+
+######@param {Integer} count
+
+```
+    bgGeo.getCount(function(count) {
+        console.log('- count: ', count);
+    });
+```
+
+####`insertLocation(params, callbackFn, failureFn)`
+Manually insert a location into the native plugin's SQLite database.  Your ```callbackFn`` will be executed if the operation was successful.  The inserted location's schema must match this plugin's published [Location Data Schema](wiki/Location-Data-Schema).  The plugin will have no problem inserting a location retrieved from the plugin itself.
+
+######@param {Object} params.  The location params/object matching the [Location Data Schema](wiki/Location-Data-Schema).
+
+```
+    bgGeo.insertLocation({
+    "uuid": "f8424926-ff3e-46f3-bd48-2ec788c9e761", // <-- required
+    "coords": {                   // <-- required
+      "latitude": 45.5192746,
+      "longitude": -73.616909,
+      "accuracy": 22.531999588012695,
+      "speed": 0,
+      "heading": 0,
+      "altitude": 0
+    },
+    "timestamp": "2016-02-10T22:25:54.905Z"     // <-- required
+    }, function() {
+        console.log('- Inserted location success');
+    }, function(error) {
+      console.warn('- Failed to insert location: ', error);
+    });
+
+    // insertLocation can easily consume any location which it returned.  Note that #getCurrentPosition ALWAYS persists so this example
+    // will manually persist a 2nd version of the same location.  The purpose here is to show that the plugin can consume any location object which it generated.
+    bgGeo.getCurrentPosition(function(location, taskId) {
+      location.extras = {foo: 'bar'}; // <-- add some arbitrary extras-data
+
+      // Insert it.
+      bgGeo.insertLocation(location, function() {
+        bgGeo.finish(taskId);
+      });
+    });
+```
+
+####`clearDatabase(callbackFn, failureFn)`
+Remove all records in plugin's SQLite database.
+
+```
+    bgGeo.clearDatabase(function() {
+      console.log('- cleared database'); 
     });
 ```
 

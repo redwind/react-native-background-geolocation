@@ -36,7 +36,11 @@ import org.json.JSONObject;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.location.ActivityRecognitionResult;
 import com.google.android.gms.location.DetectedActivity;
+import com.transistorsoft.locationmanager.TSLog;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -44,6 +48,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.TimeZone;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import de.greenrobot.event.EventBus;
 import de.greenrobot.event.Subscribe;
 
@@ -79,6 +86,9 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
     private HashMap<String, Callback> paceChangeCallback;
     private HashMap<String, Callback> clearDatabaseCallback;
     private HashMap<String, HashMap> addGeofenceCallbacks = new HashMap();
+    private List<HashMap> getCountCallbacks = new ArrayList<>();
+    private HashMap<String, HashMap> insertLocationCallbacks = new HashMap();
+    private List<HashMap> getLogCallbacks = new ArrayList<>();
 
     private List<HashMap<String, Callback>> currentPositionCallbacks = new ArrayList<HashMap<String, Callback>>();
     private ReadableMap currentPositionOptions;
@@ -183,6 +193,88 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
+    public void getCount(Callback successCallback, Callback failureCallback) {
+        Log.i(TAG, "- getCount");
+        Bundle event = new Bundle();
+        event.putString("name", BackgroundGeolocationService.ACTION_GET_COUNT);
+        event.putBoolean("request", true);
+
+        HashMap<String, Callback> callbacks = new HashMap();
+        callbacks.put("success", successCallback);
+        callbacks.put("failure", failureCallback);
+        getCountCallbacks.add(callbacks);
+
+        EventBus.getDefault().post(event);
+    }
+    
+    @ReactMethod
+    public void insertLocation(ReadableMap params, Callback successCallback, Callback failureCallback) {
+        Log.i(TAG, "- insertLocation" + params.toString());
+
+        if (!BackgroundGeolocationService.isInstanceCreated()) {
+            Log.i(TAG, "Cannot insertLocation when the BackgroundGeolocationService is not running.  Plugin must be started first");
+            return;
+        }
+        if (!params.hasKey("uuid")) {
+            failureCallback.invoke("insertLocation params must contain uuid");
+            return;
+        }
+        if (!params.hasKey("timestamp")) {
+            failureCallback.invoke("insertLocation params must contain timestamp");
+            return;
+        }
+        if (!params.hasKey("coords")) {
+            failureCallback.invoke("insertLocation params must contains a coords {}");
+            return;
+        }
+        String uuid = params.getString("uuid");
+
+        Bundle event = new Bundle();
+        event.putString("name", BackgroundGeolocationService.ACTION_INSERT_LOCATION);
+        event.putBoolean("request", true);
+        event.putString("location", mapToJson(params).toString());
+
+        HashMap<String, Callback> callbacks = new HashMap();
+        callbacks.put("success", successCallback);
+        callbacks.put("failure", failureCallback);
+        insertLocationCallbacks.put(uuid, callbacks);
+
+        EventBus.getDefault().post(event);
+    }
+
+    @ReactMethod
+    public void getLog(Callback successCallback, Callback failureCallback) {
+
+        String log = readLog();
+        if (log == null) {
+            failureCallback.invoke("Could not read log");
+            return;
+        }
+        successCallback.invoke(log);
+    }
+
+    @ReactMethod
+    public void emailLog(String email, Callback success, Callback error) {
+        String log = readLog();
+        if (log == null) {
+            error.invoke(500);
+            return;
+        }
+        Intent mailer = new Intent(Intent.ACTION_SEND);
+        mailer.setType("message/rfc822");
+        mailer.putExtra(Intent.EXTRA_EMAIL, new String[]{email});
+        mailer.putExtra(Intent.EXTRA_SUBJECT, "BackgroundGeolocation log");
+        mailer.putExtra(Intent.EXTRA_TEXT, log);
+        try {
+            activity.startActivity(Intent.createChooser(mailer, "Send log: " + email + "..."));
+            success.invoke();
+        } catch (android.content.ActivityNotFoundException ex) {
+            Toast.makeText(activity, "There are no email clients installed.", Toast.LENGTH_SHORT).show();
+            error.invoke("There are no email clients installed");
+        }
+    }
+
+    @ReactMethod
     public void clearDatabase(Callback successCallback, Callback failureCallback) {
         if (clearDatabaseCallback != null) {
             Log.i(TAG, "- a clearDatabase action is already outstanding");
@@ -277,6 +369,8 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
         getOdometerCallback = new HashMap();
         getOdometerCallback.put("success", success);
         getOdometerCallback.put("failure", failure);
+
+        Log.i(TAG, "-------------- set getOdometerCallback: " + getOdometerCallback);
 
         Bundle event = new Bundle();
         event.putString("name", BackgroundGeolocationService.ACTION_GET_ODOMETER);
@@ -393,10 +487,24 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
 
     @Subscribe
     public void onEventMainThread(Location location) {
-        this.onLocationChange(locationToMap(location));
+
+        WritableMap locationData = locationToMap(location);
+        Bundle meta = location.getExtras();
+        if (meta != null) {
+            if (meta.containsKey("action")) {
+                String action = meta.getString("action");
+                boolean motionChanged = action.equalsIgnoreCase(BackgroundGeolocationService.ACTION_ON_MOTION_CHANGE);
+                if (motionChanged) {
+                    boolean nowMoving = meta.getBoolean("isMoving");
+                    onMotionChange(nowMoving, locationData);
+                }
+            }
+        }
+
+        this.onLocationChange(locationData);
 
         // Fire "location" event on React EventBus
-        sendEvent(EVENT_LOCATION, locationToMap(location));
+        sendEvent(EVENT_LOCATION, locationData);
     }
 
     @Subscribe
@@ -411,6 +519,8 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
      */
     @Subscribe
     public void onEventMainThread(Bundle event) {
+        Log.i(TAG, "---- Event: " + event);
+
         if (event.containsKey("request")) {
             return;
         }
@@ -428,8 +538,6 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
             this.onResetOdometer(event);
         } else if (BackgroundGeolocationService.ACTION_CHANGE_PACE.equalsIgnoreCase(name)) {
             this.onChangePace(event);
-        } else if (BackgroundGeolocationService.ACTION_ON_MOTION_CHANGE.equalsIgnoreCase(name)) {
-            this.onMotionChange(event);
         } else if (BackgroundGeolocationService.ACTION_GOOGLE_PLAY_SERVICES_CONNECT_ERROR.equalsIgnoreCase(name)) {
             GoogleApiAvailability.getInstance().getErrorDialog(activity, event.getInt("errorCode"), 1001).show();
         } else if (BackgroundGeolocationService.ACTION_LOCATION_ERROR.equalsIgnoreCase(name)) {
@@ -440,6 +548,10 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
             this.onClearDatabase(event);
         } else if (BackgroundGeolocationService.ACTION_ADD_GEOFENCE.equalsIgnoreCase(name)) {
             this.onAddGeofence(event);
+        } else if (BackgroundGeolocationService.ACTION_GET_COUNT.equalsIgnoreCase(name)) {
+            this.onGetCount(event);
+        } else if (BackgroundGeolocationService.ACTION_INSERT_LOCATION.equalsIgnoreCase(name)) {
+            this.onInsertLocation(event);
         }
     }
 
@@ -607,6 +719,8 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
         syncCallback = null;
     }
     private void onGetOdometer(Bundle event) {
+        Log.i(TAG, "---------- onGetOdometer: " + getOdometerCallback);
+
         Callback success    = getOdometerCallback.get("success");
         Double distance     = (double) event.getFloat("data");
         success.invoke(distance);
@@ -624,8 +738,6 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
     }
 
     private void onLocationChange(WritableMap data) {
-        Log.i(TAG, "- RNackgroundGeolocation Rx Location: " + isEnabled);
-
         if (isAcquiringCurrentPosition) {
             finishAcquiringCurrentPosition(true);
             // Execute callbacks.
@@ -637,18 +749,13 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
         }
     }
 
-    private void onMotionChange(Bundle event) {
-        isMoving = event.getBoolean("isMoving");
+    private void onMotionChange(boolean nowMoving, WritableMap locationData) {
+        isMoving = nowMoving;
         WritableMap params = new WritableNativeMap();
-        try {
-            params.putMap("location", locationToMap(new JSONObject(event.getString("location"))));
-            params.putBoolean("isMoving", isMoving);
-            sendEvent(EVENT_MOTIONCHANGE, params);
-        } catch (JSONException e) {
-            e.printStackTrace();
-            params.putString("message", e.getMessage());
-            sendEvent(EVENT_ERROR, params);
-        }
+
+        params.putMap("location", locationData);
+        params.putBoolean("isMoving", isMoving);
+        sendEvent(EVENT_MOTIONCHANGE, params);
     }
 
     public void onHttpResponse(Bundle event) {
@@ -694,6 +801,29 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
             addGeofenceCallbacks.remove(identifier);
         }
     }
+
+    private void onGetCount(Bundle event) {
+        int count = event.getInt("count");
+        for (HashMap<String,Callback> callback : getCountCallbacks) {
+            Callback success = callback.get("success");
+            success.invoke(count);
+        }
+        getCountCallbacks.clear();
+    }
+
+    private void onInsertLocation(Bundle event) {
+        String uuid = event.getString("uuid");
+        Log.i(TAG, "- onInsertLocation: " + uuid);
+        if (insertLocationCallbacks.containsKey(uuid)) {
+            HashMap<String, Callback> callbacks = insertLocationCallbacks.get(uuid);
+            Callback success = callbacks.get("success");
+            success.invoke();
+            insertLocationCallbacks.remove(uuid);
+        } else {
+            Log.i(TAG, "- onInsertLocation failed to find its success-callback for " + uuid);
+        }
+    }
+
     private void finishAcquiringCurrentPosition(boolean success) {
         // Current position has arrived:  release the hounds.
         isAcquiringCurrentPosition = false;
@@ -783,6 +913,11 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
         // Meta-data
         Bundle meta = location.getExtras();
         if (meta != null) {
+            if (meta.containsKey("action")) {
+                if (meta.getString("action").equalsIgnoreCase(BackgroundGeolocationService.ACTION_ON_MOTION_CHANGE)) {
+                    data.putString("event", EVENT_MOTIONCHANGE);
+                }
+            }
             if (meta.containsKey("uuid")) {
                 data.putString("uuid", meta.getString("uuid"));
             }
@@ -799,6 +934,7 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
                 geofence.putString("identifier", meta.getString("geofence_identifier"));
                 geofence.putString("action", meta.getString("geofence_action"));
                 data.putMap("geofence", geofence);
+                data.putString("event", EVENT_GEOFENCE);
             }
         }
         if (isAcquiringCurrentPosition && currentPositionOptions.hasKey("extras")) {
@@ -843,6 +979,25 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
 
         return params;
     }
+
+    private String readLog() {
+        try {
+            Process process = Runtime.getRuntime().exec("logcat -d");
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+
+            StringBuilder log = new StringBuilder();
+            String line = "";
+            while ((line = bufferedReader.readLine()) != null) {
+                log.append(line + "\n");
+            }
+            return log.toString();
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     private void sendEvent(String eventName, WritableMap params) {
         reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit(TAG + ":" + eventName, params);
     }
