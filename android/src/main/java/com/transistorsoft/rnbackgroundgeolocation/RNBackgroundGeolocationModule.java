@@ -487,8 +487,6 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
 
     @Subscribe
     public void onEventMainThread(Location location) {
-
-        WritableMap locationData = locationToMap(location);
         Bundle meta = location.getExtras();
         if (meta != null) {
             if (meta.containsKey("action")) {
@@ -496,11 +494,12 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
                 boolean motionChanged = action.equalsIgnoreCase(BackgroundGeolocationService.ACTION_ON_MOTION_CHANGE);
                 if (motionChanged) {
                     boolean nowMoving = meta.getBoolean("isMoving");
-                    onMotionChange(nowMoving, locationData);
+                    onMotionChange(nowMoving, locationToMap(location));
                 }
             }
         }
 
+        WritableMap locationData = locationToMap(location);
         this.onLocationChange(locationData);
 
         // Fire "location" event on React EventBus
@@ -627,8 +626,8 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
         editor.putBoolean("enabled", isEnabled);
         editor.commit();
 
+        EventBus eventBus = EventBus.getDefault();
         if (isEnabled) {
-            EventBus eventBus = EventBus.getDefault();
             if (!eventBus.isRegistered(this)) {
                 eventBus.register(this);
             }
@@ -647,7 +646,9 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
                 }
             }
         } else {
-            EventBus.getDefault().unregister(this);
+            if (eventBus.isRegistered(this)) {
+                eventBus.unregister(this);
+            }
             reactContext.stopService(backgroundServiceIntent);
         }
     }
@@ -830,7 +831,10 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
         backgroundServiceIntent.removeExtra("command");
         // When currentPosition is explicitly requested while plugin is stopped, shut Service down again and stop listening to EventBus
         if (!isEnabled) {
-            EventBus.getDefault().unregister(this);
+            EventBus eventBus = EventBus.getDefault();
+            if (eventBus.isRegistered(this)) {
+                eventBus.unregister(this);
+            }
         }
     }
 
