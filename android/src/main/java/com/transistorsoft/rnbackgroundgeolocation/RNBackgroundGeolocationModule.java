@@ -131,7 +131,7 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
 
         SharedPreferences settings = reactContext.getSharedPreferences("TSLocationManager", 0);
         setEnabled(settings.getBoolean("enabled", isEnabled));
-        
+
         getState(callback);
     }
     @ReactMethod
@@ -206,7 +206,7 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
 
         EventBus.getDefault().post(event);
     }
-    
+
     @ReactMethod
     public void insertLocation(ReadableMap params, Callback successCallback, Callback failureCallback) {
         Log.i(TAG, "- insertLocation" + params.toString());
@@ -313,7 +313,7 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
             event.putString("name", BackgroundGeolocationService.ACTION_SYNC);
             event.putBoolean("request", true);
             eventBus.post(event);
-        } 
+        }
     }
 
     @ReactMethod
@@ -499,11 +499,10 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
             }
         }
 
-        WritableMap locationData = locationToMap(location);
-        this.onLocationChange(locationData);
+        this.onLocationChange(locationToMap(location));
 
         // Fire "location" event on React EventBus
-        sendEvent(EVENT_LOCATION, locationData);
+        sendEvent(EVENT_LOCATION, locationToMap(location));
     }
 
     @Subscribe
@@ -559,7 +558,7 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
 
         SharedPreferences settings = reactContext.getSharedPreferences("TSLocationManager", 0);
         SharedPreferences.Editor editor = settings.edit();
-    
+
         editor.putBoolean("activityIsActive", true);
 
         if (config.hasKey("stopOnTerminate")) {
@@ -746,7 +745,7 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
                 Callback success = callback.get("success");
                 success.invoke(data);
             }
-            currentPositionCallbacks.clear();            
+            currentPositionCallbacks.clear();
         }
     }
 
@@ -848,6 +847,10 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
 
         try {
             data.putString("timestamp", json.getString("timestamp"));
+
+            if (json.has("odometer")) {
+                data.putDouble("odometer", data.getDouble("odometer"));
+            }
             data.putBoolean("is_moving", isMoving);
             data.putString("uuid", json.getString("uuid"));
 
@@ -917,6 +920,9 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
         // Meta-data
         Bundle meta = location.getExtras();
         if (meta != null) {
+            if (meta.containsKey("odometer")) {
+                data.putDouble("odometer", (double)meta.getFloat("odometer"));
+            }
             if (meta.containsKey("action")) {
                 if (meta.getString("action").equalsIgnoreCase(BackgroundGeolocationService.ACTION_ON_MOTION_CHANGE)) {
                     data.putString("event", EVENT_MOTIONCHANGE);
