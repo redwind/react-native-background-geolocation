@@ -100,6 +100,8 @@ The following events can all be listened-to via the method `#on(eventName, callb
 | [`addGeofence`](#addgeofenceobject) | `{config}` | Adds a geofence to be monitored by the native plugin. Monitoring of a geofence is halted after a crossing occurs. |
 | [`removeGeofence`](#removegeofenceidentifier) | `identifier` | Removes a geofence identified by the provided `identifier`. |
 | [`getGeofences`](#getgeofencescallbackfn) | `callbackFn` | Fetch the list of monitored geofences. Your callbackFn will be provided with an Array of geofences. If there are no geofences being monitored, you'll receive an empty `Array []`.|
+| [`getLog`](#getlogcallbackfn) | `calbackFn` | Fetch the entire contents of the current circular log and return it as a String.|
+| [`emailLog`](#emaillogemail-callbackfn) | `email`, `callbackFn` | Fetch the entire contents of the current circular log and email it to a recipient using the device's native email client.|
 
 # Geolocation Options
 
@@ -728,6 +730,41 @@ The plugin constantly tracks distance travelled. To fetch the current **odometer
 ####`resetOdometer(callbackFn)`
 
 Reset the **odometer** to zero. The plugin never automatically resets the odometer so it's up to you to reset it as desired.
+
+####`getLog(callbackFn)`
+
+Fetches the entire contents of the current circular-log and return it as a String.
+
+```
+    bgGeo.getLog(function(log) {
+        console.log(log);
+    });
+```
+
+####`emailLog(email, callbackFn)`
+
+Fetch the entire contents of the current circular log and email it to a recipient using the device's native email client.
+
+```
+    bgGeo.emailLog("foo@bar.com");
+```
+
+The following permissions are required in your `AndroidManifest.xml` in order to attach the `.log` file to the email:
+
+```
+<manifest>
+  <application>
+  ...
+  </application>
+
+  <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+  <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+</manifest>
+```
+
+2. Grant "Storage" permission `Settings->Apps->[Your App]->Permissions: (o) Storage`
+
+![](https://dl.dropboxusercontent.com/u/2319755/cordova-background-geolocaiton/Screenshot_20160218-183345.png)
 
 ####`playSound(soundId)`
 
