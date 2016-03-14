@@ -8,7 +8,7 @@
 - [Changed] Android `getState` method was only returning the value of `isMoving` and `isEnabled`.  It now returns the entire current-configuration as supplied to the `#configure` method.
 - [Added] Intelligence for `stopTimeout`.  When stop-timer is initiated, save a reference to the current-location.  If another location is recorded while during stop-timer, calculate the distance from location when stop-timer initiated:  if `distance > stationaryRadius`, cancel the stop-timer and stay in "moving" state.
 - [Added] New debug sound **"booooop"**:  Signals the initiation of stop-timer of `stopTimeout` minutes.
-- [Added] New debug sound **"boop-boop-boop": Signals the cancelation of stop-timer due to movement beyond `stationaryRadius`.
+- [Added] New debug sound **"boop-boop-boop"**: Signals the cancelation of stop-timer due to movement beyond `stationaryRadius`.
 - [Added] `mapToJson`, `jsonToMap` methods.
 - [Added] CHANGELOG
 - [Added] Document `#getLog`, `#emailLog`
