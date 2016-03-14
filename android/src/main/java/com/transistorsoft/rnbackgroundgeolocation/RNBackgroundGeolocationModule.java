@@ -6,7 +6,9 @@ import android.content.SharedPreferences;
 import android.location.Location;
 import android.media.AudioManager;
 import android.media.ToneGenerator;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -27,29 +29,28 @@ import com.facebook.react.modules.core.DeviceEventManagerModule;
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingEvent;
 import com.transistorsoft.locationmanager.BackgroundGeolocationService;
-import com.transistorsoft.locationmanager.Settings;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.android.gms.location.ActivityRecognitionResult;
 import com.google.android.gms.location.DetectedActivity;
 import com.transistorsoft.locationmanager.TSLog;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
-import java.util.Set;
 import java.util.TimeZone;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import de.greenrobot.event.EventBus;
 import de.greenrobot.event.Subscribe;
@@ -132,7 +133,7 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
         SharedPreferences settings = reactContext.getSharedPreferences("TSLocationManager", 0);
         setEnabled(settings.getBoolean("enabled", isEnabled));
 
-        getState(callback);
+        callback.invoke(getState());
     }
     @ReactMethod
     public void changePace(Boolean moving, Callback success, Callback failure) {
@@ -164,22 +165,38 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void getState(Callback callback) {
-        SharedPreferences settings = activity.getSharedPreferences("TSLocationManager", 0);
+    public void getState(Callback success, Callback failure) {
 
-        Bundle values = Settings.values;
-        WritableMap state = new WritableNativeMap();
-        Set<String> keys = values.keySet();
-        state.putBoolean("enabled", isEnabled);
-        state.putBoolean("isMoving", isMoving);
-        /* TODO
-        for (String key : keys) {
-            state.put(key, JSONObject.wrap(values.get(key)));
+        WritableMap state = getState();
+        if (!state.hasKey("error")) {
+            success.invoke(state);
+        } else {
+            failure.invoke(state);
         }
-        */
-        callback.invoke(state);
     }
 
+    private WritableMap getState() {
+        SharedPreferences settings = activity.getSharedPreferences("TSLocationManager", 0);
+
+        try {
+            if (settings.contains("config")) {
+                JSONObject config = new JSONObject(settings.getString("config", "{}"));
+                WritableMap state = jsonToMap(config);
+                state.putBoolean("enabled", isEnabled);
+                state.putBoolean("isMoving", isMoving);
+                return state;
+            } else {
+                WritableMap state = Arguments.createMap();
+                state.putString("error", "Could not location config from SharedPreferences");
+                return state;
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+            WritableMap state = Arguments.createMap();
+            state.putString("error", e.getMessage());
+            return state;
+        }
+    }
     @ReactMethod
     public void getLocations(Callback successCallback, Callback failureCallback) {
         getLocationsCallback = new HashMap();
@@ -260,13 +277,45 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
             error.invoke(500);
             return;
         }
+
         Intent mailer = new Intent(Intent.ACTION_SEND);
         mailer.setType("message/rfc822");
         mailer.putExtra(Intent.EXTRA_EMAIL, new String[]{email});
         mailer.putExtra(Intent.EXTRA_SUBJECT, "BackgroundGeolocation log");
-        mailer.putExtra(Intent.EXTRA_TEXT, log);
+
         try {
-            activity.startActivity(Intent.createChooser(mailer, "Send log: " + email + "..."));
+            JSONObject state = mapToJson(getState());
+
+            if (state.has("license")) {
+                state.put("license", "<SECRET>");
+            }
+            if (state.has("orderId")) {
+                state.put("orderId", "<SECRET>");
+            }
+
+            mailer.putExtra(Intent.EXTRA_TEXT, state.toString(2));
+        } catch (JSONException e) {
+            Log.w(TAG, "- Failed to write state to email body");
+            e.printStackTrace();
+        }
+        File file = new File(Environment.getExternalStorageDirectory(), "background-geolocation.log");
+        try {
+            FileOutputStream stream = new FileOutputStream(file);
+            try {
+                stream.write(log.getBytes());
+                stream.close();
+                mailer.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(file));
+                file.deleteOnExit();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } catch (FileNotFoundException e) {
+            Log.i(TAG, "FileNotFound");
+            e.printStackTrace();
+        }
+
+        try {
+            activity.startActivityForResult(Intent.createChooser(mailer, "Send log: " + email + "..."), 1);
             success.invoke();
         } catch (android.content.ActivityNotFoundException ex) {
             Toast.makeText(activity, "There are no email clients installed.", Toast.LENGTH_SHORT).show();
@@ -370,8 +419,6 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
         getOdometerCallback.put("success", success);
         getOdometerCallback.put("failure", failure);
 
-        Log.i(TAG, "-------------- set getOdometerCallback: " + getOdometerCallback);
-
         Bundle event = new Bundle();
         event.putString("name", BackgroundGeolocationService.ACTION_GET_ODOMETER);
         event.putBoolean("request", true);
@@ -447,7 +494,6 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
                 }
                 success.invoke(rs);
             } catch (JSONException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
                 failure.invoke(e.getMessage());
             }
@@ -464,25 +510,6 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
             toneGenerator = new ToneGenerator(AudioManager.STREAM_NOTIFICATION, 100);
         }
         toneGenerator.startTone(soundId, duration);
-    }
-
-    @Subscribe
-    public void onEventMainThread(ActivityRecognitionResult result) {
-        currentActivity = result.getMostProbableActivity();
-
-        if (isAcquiringCurrentPosition) {
-            long elapsedMillis = (System.nanoTime() - isAcquiringCurrentPositionSince) / 1000000;
-            if (elapsedMillis > GET_CURRENT_POSITION_TIMEOUT) {
-                isAcquiringCurrentPosition = false;
-                Log.i(TAG, "- getCurrentPosition timeout, giving up");
-                /* TODO
-                for (CallbackContext callback : currentPositionCallbacks) {
-                    callback.error(408); // aka HTTP 408 Request Timeout
-                }
-                currentPositionCallbacks.clear();
-                */
-            }
-        }
     }
 
     @Subscribe
@@ -517,8 +544,6 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
      */
     @Subscribe
     public void onEventMainThread(Bundle event) {
-        Log.i(TAG, "---- Event: " + event);
-
         if (event.containsKey("request")) {
             return;
         }
@@ -554,52 +579,36 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
     }
 
     private void applyConfig(ReadableMap config) {
-        Log.i(TAG, "- configure: " + config.toString());
-
         SharedPreferences settings = reactContext.getSharedPreferences("TSLocationManager", 0);
         SharedPreferences.Editor editor = settings.edit();
 
-        editor.putBoolean("activityIsActive", true);
-
-        if (config.hasKey("stopOnTerminate")) {
-            stopOnTerminate = config.getBoolean("stopOnTerminate");
-            editor.putBoolean("stopOnTerminate", stopOnTerminate);
-        }
-
-        editor.putString("config", mapToJson(config).toString());
-        editor.commit();
-    }
-
-    private JSONObject mapToJson(ReadableMap map) {
-        ReadableMapKeySetIterator iterator = map.keySetIterator();
-        JSONObject json = new JSONObject();
-
         try {
-            while (iterator.hasNextKey()) {
-                String key = iterator.nextKey();
-                ReadableType type = map.getType(key);
-                switch (map.getType(key)) {
-                    case String:
-                        json.put(key, map.getString(key));
-                        break;
-                    case Boolean:
-                        json.put(key, map.getBoolean(key));
-                        break;
-                    case Number:
-                        json.put(key, map.getDouble(key));
-                        break;
-                    case Map:
-                        json.put(key, mapToJson(map.getMap(key)));
-                        break;
-                    case Array:
-                        break;
-
+            JSONObject destination = new JSONObject();
+            if (settings.contains("config")) {
+                destination = new JSONObject(settings.getString("config", "{}"));
+            }
+            // Merge new config (source) onto existing config (destination)
+            JSONObject source = mapToJson(config);
+            JSONObject merged = new JSONObject();
+            JSONObject[] objs = new JSONObject[] { destination, source };
+            for (JSONObject obj : objs) {
+                Iterator it = obj.keys();
+                while (it.hasNext()) {
+                    String key = (String) it.next();
+                    merged.put(key, obj.get(key));
                 }
             }
+            editor.putBoolean("activityIsActive", true);
+
+            if (config.hasKey("stopOnTerminate")) {
+                stopOnTerminate = config.getBoolean("stopOnTerminate");
+                editor.putBoolean("stopOnTerminate", stopOnTerminate);
+            }
+            editor.putString("config", merged.toString());
+            editor.commit();
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        return json;
     }
 
     private void setEnabled(boolean value) {
@@ -842,6 +851,61 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
         return settings.contains("debug") && settings.getBoolean("debug", false);
     }
 
+    private WritableMap geofencingEventToMap(JSONObject event) {
+        WritableMap params = new WritableNativeMap();
+        try {
+            params.putString("identifier", event.getString("identifier"));
+            params.putString("action", event.getString("action"));
+            params.putMap("location", locationToMap(event.getJSONObject("location")));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return params;
+    }
+    private WritableMap geofencingEventToMap(GeofencingEvent event) {
+        WritableMap params = new WritableNativeMap();
+
+        Location location = event.getTriggeringLocation();
+        Geofence geofence = event.getTriggeringGeofences().get(0);
+
+        String action = "";
+        int transitionType = event.getGeofenceTransition();
+        if (transitionType == Geofence.GEOFENCE_TRANSITION_ENTER) {
+            action = BackgroundGeolocationService.GEOFENCE_ACTION_ENTER;
+        } else if (transitionType == Geofence.GEOFENCE_TRANSITION_EXIT) {
+            action = BackgroundGeolocationService.GEOFENCE_ACTION_EXIT;
+        } else {
+            action = BackgroundGeolocationService.GEOFENCE_ACTION_DWELL;
+        }
+        params.putMap("location", locationToMap(location));
+        params.putString("identifier", geofence.getRequestId());
+        params.putString("action", action);
+
+        return params;
+    }
+
+    private String readLog() {
+        try {
+            Process process = Runtime.getRuntime().exec("logcat -d");
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+
+            StringBuilder log = new StringBuilder();
+            String line = "";
+            while ((line = bufferedReader.readLine()) != null) {
+                log.append(line + "\n");
+            }
+            return log.toString();
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    private void sendEvent(String eventName, WritableMap params) {
+        reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit(TAG + ":" + eventName, params);
+    }
+
     private WritableMap locationToMap(JSONObject json) {
         WritableMap data = new WritableNativeMap();
 
@@ -849,7 +913,7 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
             data.putString("timestamp", json.getString("timestamp"));
 
             if (json.has("odometer")) {
-                data.putDouble("odometer", data.getDouble("odometer"));
+                data.putDouble("odometer", json.getDouble("odometer"));
             }
             data.putBoolean("is_moving", isMoving);
             data.putString("uuid", json.getString("uuid"));
@@ -957,60 +1021,88 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
         return data;
     }
 
-    private WritableMap geofencingEventToMap(JSONObject event) {
-        WritableMap params = new WritableNativeMap();
+    private static WritableMap jsonToMap(JSONObject jsonObject) throws JSONException {
+        WritableMap map = new WritableNativeMap();
+
+        Iterator<String> iterator = jsonObject.keys();
+        while (iterator.hasNext()) {
+            String key = iterator.next();
+            Object value = jsonObject.get(key);
+            if (value instanceof JSONObject) {
+                map.putMap(key, jsonToMap((JSONObject) value));
+            } else if (value instanceof  JSONArray) {
+                map.putArray(key, convertJsonToArray((JSONArray) value));
+            } else if (value instanceof  Boolean) {
+                map.putBoolean(key, (Boolean) value);
+            } else if (value instanceof  Integer) {
+                map.putInt(key, (Integer) value);
+            } else if (value instanceof  Double) {
+                map.putDouble(key, (Double) value);
+            } else if (value instanceof String)  {
+                map.putString(key, (String) value);
+            } else {
+                map.putString(key, value.toString());
+            }
+        }
+        return map;
+    }
+
+    private static WritableArray convertJsonToArray(JSONArray jsonArray) throws JSONException {
+        WritableArray array = new WritableNativeArray();
+
+        for (int i = 0; i < jsonArray.length(); i++) {
+            Object value = jsonArray.get(i);
+            if (value instanceof JSONObject) {
+                array.pushMap(jsonToMap((JSONObject) value));
+            } else if (value instanceof  JSONArray) {
+                array.pushArray(convertJsonToArray((JSONArray) value));
+            } else if (value instanceof  Boolean) {
+                array.pushBoolean((Boolean) value);
+            } else if (value instanceof  Integer) {
+                array.pushInt((Integer) value);
+            } else if (value instanceof  Double) {
+                array.pushDouble((Double) value);
+            } else if (value instanceof String)  {
+                array.pushString((String) value);
+            } else {
+                array.pushString(value.toString());
+            }
+        }
+        return array;
+    }
+
+    private JSONObject mapToJson(ReadableMap map) {
+        ReadableMapKeySetIterator iterator = map.keySetIterator();
+        JSONObject json = new JSONObject();
+
         try {
-            params.putString("identifier", event.getString("identifier"));
-            params.putString("action", event.getString("action"));
-            params.putMap("location", locationToMap(event.getJSONObject("location")));
+            while (iterator.hasNextKey()) {
+                String key = iterator.nextKey();
+                ReadableType type = map.getType(key);
+                switch (map.getType(key)) {
+                    case String:
+                        json.put(key, map.getString(key));
+                        break;
+                    case Boolean:
+                        json.put(key, map.getBoolean(key));
+                        break;
+                    case Number:
+                        json.put(key, map.getDouble(key));
+                        break;
+                    case Map:
+                        json.put(key, mapToJson(map.getMap(key)));
+                        break;
+                    case Array:
+                        break;
+
+                }
+            }
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        return params;
-    }
-    private WritableMap geofencingEventToMap(GeofencingEvent event) {
-        WritableMap params = new WritableNativeMap();
-
-        Location location = event.getTriggeringLocation();
-        Geofence geofence = event.getTriggeringGeofences().get(0);
-
-        String action = "";
-        int transitionType = event.getGeofenceTransition();
-        if (transitionType == Geofence.GEOFENCE_TRANSITION_ENTER) {
-            action = BackgroundGeolocationService.GEOFENCE_ACTION_ENTER;
-        } else if (transitionType == Geofence.GEOFENCE_TRANSITION_EXIT) {
-            action = BackgroundGeolocationService.GEOFENCE_ACTION_EXIT;
-        } else {
-            action = BackgroundGeolocationService.GEOFENCE_ACTION_DWELL;
-        }
-        params.putMap("location", locationToMap(location));
-        params.putString("identifier", geofence.getRequestId());
-        params.putString("action", action);
-
-        return params;
+        return json;
     }
 
-    private String readLog() {
-        try {
-            Process process = Runtime.getRuntime().exec("logcat -d");
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-
-            StringBuilder log = new StringBuilder();
-            String line = "";
-            while ((line = bufferedReader.readLine()) != null) {
-                log.append(line + "\n");
-            }
-            return log.toString();
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    private void sendEvent(String eventName, WritableMap params) {
-        reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit(TAG + ":" + eventName, params);
-    }
     @Override
     public void onCatalystInstanceDestroy() {
         Log.i(TAG, "- RNBackgroundGeolocationModule#destroy");

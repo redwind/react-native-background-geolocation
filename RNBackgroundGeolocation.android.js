@@ -7,14 +7,16 @@ var emptyFn = function() {};
 
 var API = {
   configure: function(config, callback) {
-    callback = callback || function() {};
+    callback = callback || emptyFn;
     RNBackgroundGeolocation.configure(config, callback);
   },
   setConfig: function(config) {
     RNBackgroundGeolocation.setConfig(config);
   },
-  getState: function(callback) {
-    RNBackgroundGeolocation.getState(callback);
+  getState: function(callback, failure) {
+    callback = callback || emptyFn;
+    failure = failure || emptyFn;
+    RNBackgroundGeolocation.getState(callback, failure);
   },
   on: function(event, callback) {
     return DeviceEventEmitter.addListener(TAG + ':' + event, callback);
@@ -68,11 +70,11 @@ var API = {
     RNBackgroundGeolocation.getLocations(success, failure);
   },
   getCount: function(success, failure) {
-    console.log('[js] getCount');
     failure = failure || emptyFn;
     RNBackgroundGeolocation.getCount(success, failure);
   },
   insertLocation: function(params, success, failure) {
+    success = success || emptyFn;
     failure = failure || emptyFn;
     RNBackgroundGeolocation.insertLocation(params, success, failure);
   },
@@ -109,6 +111,7 @@ var API = {
     RNBackgroundGeolocation.getLog(success, failure);
   },
   emailLog: function(email, success, failure) {
+    success = success || emptyFn;
     failure = failure || emptyFn;
     RNBackgroundGeolocation.emailLog(email, success, failure);
   },
