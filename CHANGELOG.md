@@ -1,6 +1,8 @@
 # Change Log
 
 ## [Unreleased]
+
+## [1.0.1]
 - [Changed] Standardize the Javascript API methods to send both a `success` as well as `failure` callbacks.
 - [Changed] Upgrade plugin for react-native `v0.21.0`
 - [Changed] Document new installation steps
@@ -12,6 +14,7 @@
 - [Added] `mapToJson`, `jsonToMap` methods.
 - [Added] CHANGELOG
 - [Added] Document `#getLog`, `#emailLog`
+- [Fixed] When using setConfig to change `distanceFilter` while location-updates are already engaged, was mistakenly using value for `desiredAccuracy`
 
 ## [1.0.0] - 2016-03-08
 - [Changed] Introduce new per-app licensing scheme.  I'm phasing out the unlimited 'god-mode' license in favour of generating a distinct license-key for each bundle ID.  This cooresponds with new Customer Dashboard for generating application keys and managing team-members.
