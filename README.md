@@ -68,7 +68,7 @@ BackgroundGeolocation.configure({
   // HTTP / SQLite config
   url: 'http://posttestserver.com/post.php?dir=cordova-background-geolocation',
   batchSync: false,       // <-- [Default: false] Set true to sync locations to server in a single HTTP request.
-  maxBatchSize: 100       // <-- If using batchSync: true, specifies the max number of records send with each HTTP request.
+  maxBatchSize: 100,      // <-- If using batchSync: true, specifies the max number of records send with each HTTP request.
   autoSync: true,         // <-- [Default: true] Set true to sync each location to server as it arrives.
   maxDaysToPersist: 1,    // <-- Maximum days to persist a location in plugin's SQLite database when HTTP fails
   headers: {
