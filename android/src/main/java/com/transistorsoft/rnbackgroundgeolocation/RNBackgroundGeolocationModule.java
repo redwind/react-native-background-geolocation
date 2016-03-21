@@ -565,6 +565,8 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
             GoogleApiAvailability.getInstance().getErrorDialog(activity, event.getInt("errorCode"), 1001).show();
         } else if (BackgroundGeolocationService.ACTION_LOCATION_ERROR.equalsIgnoreCase(name)) {
             this.onLocationError(event);
+        } else if (BackgroundGeolocationService.ACTION_GET_CURRENT_POSITION.equalsIgnoreCase(name)) {
+            this.onLocationError(event);
         } else if (BackgroundGeolocationService.ACTION_HTTP_RESPONSE.equalsIgnoreCase(name)) {
             this.onHttpResponse(event);
         } else if (BackgroundGeolocationService.ACTION_CLEAR_DATABASE.equalsIgnoreCase(name)) {
