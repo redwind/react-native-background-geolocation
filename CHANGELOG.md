@@ -3,6 +3,8 @@
 ## [Unreleased]
 - [Fixed] Android 5 geofence limit.  Refactored Geofence system.  Was using a `PendingIntent` per geofence; now uses a single `PendingIntent` for all geofences.
 - [Fixed] Edge-case issue when executing `#getCurrentPosition` followed immediately by `#start` in cases where location-timeout occurs.
+- [Changed] Volley dependency to official version `com.android.volley`
+- [Changed] When plugin is manually stopped, update state of `isMoving` to `false`.
 
 ## [1.0.1]
 - [Changed] Standardize the Javascript API methods to send both a `success` as well as `failure` callbacks.
