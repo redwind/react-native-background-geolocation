@@ -6,7 +6,7 @@
 - [Changed] Volley dependency to official version `com.android.volley`
 - [Changed] When plugin is manually stopped, update state of `isMoving` to `false`.
 
-## [1.0.1]
+## [1.0.1] 2016-03-14
 - [Changed] Standardize the Javascript API methods to send both a `success` as well as `failure` callbacks.
 - [Changed] Upgrade plugin for react-native `v0.21.0`
 - [Changed] Document new installation steps
