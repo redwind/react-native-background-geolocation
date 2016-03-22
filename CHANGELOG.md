@@ -5,6 +5,7 @@
 - [Fixed] Edge-case issue when executing `#getCurrentPosition` followed immediately by `#start` in cases where location-timeout occurs.
 - [Changed] Volley dependency to official version `com.android.volley`
 - [Changed] When plugin is manually stopped, update state of `isMoving` to `false`.
+- [Fixed] If location-request times-out while acquiring stationary-location, try to use last-known-location
 
 ## [1.0.1] 2016-03-14
 - [Changed] Standardize the Javascript API methods to send both a `success` as well as `failure` callbacks.
