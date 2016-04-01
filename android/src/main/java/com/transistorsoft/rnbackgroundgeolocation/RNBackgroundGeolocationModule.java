@@ -72,7 +72,7 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
     private static final long GET_CURRENT_POSITION_TIMEOUT = 30000;
 
     private Boolean isEnabled           = false;
-    private Boolean stopOnTerminate     = false;
+    private Boolean stopOnTerminate     = true;
     private Boolean isMoving            = false;
     private Boolean isAcquiringCurrentPosition = false;
     private long isAcquiringCurrentPositionSince;
@@ -351,8 +351,10 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
         syncCallback.put("failure", failure);
 
         EventBus eventBus = EventBus.getDefault();
-        if (!eventBus.isRegistered(this)) {
-            eventBus.register(this);
+        synchronized(eventBus) {
+            if (!eventBus.isRegistered(this)) {
+                eventBus.register(this);
+            }
         }
         if (!BackgroundGeolocationService.isInstanceCreated()) {
             Intent syncIntent = new Intent(activity, BackgroundGeolocationService.class);
@@ -382,8 +384,10 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
         isAcquiringCurrentPosition = true;
         if (!isEnabled) {
             EventBus eventBus = EventBus.getDefault();
-            if (!eventBus.isRegistered(this)) {
-                eventBus.register(this);
+            synchronized(eventBus) {
+                if (!eventBus.isRegistered(this)) {
+                    eventBus.register(this);
+                }
             }
             if (!BackgroundGeolocationService.isInstanceCreated()) {
                 backgroundServiceIntent.putExtra("command", BackgroundGeolocationService.ACTION_GET_CURRENT_POSITION);
@@ -628,8 +632,6 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
                     merged.put(key, obj.get(key));
                 }
             }
-            editor.putBoolean("activityIsActive", true);
-
             if (config.hasKey("stopOnTerminate")) {
                 stopOnTerminate = config.getBoolean("stopOnTerminate");
                 editor.putBoolean("stopOnTerminate", stopOnTerminate);
@@ -666,8 +668,10 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
 
         EventBus eventBus = EventBus.getDefault();
         if (isEnabled) {
-            if (!eventBus.isRegistered(this)) {
-                eventBus.register(this);
+            synchronized(eventBus) {
+                if (!eventBus.isRegistered(this)) {
+                    eventBus.register(this);
+                }
             }
             if (!BackgroundGeolocationService.isInstanceCreated()) {
                 reactContext.startService(backgroundServiceIntent);
@@ -684,8 +688,10 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
                 }
             }
         } else {
-            if (eventBus.isRegistered(this)) {
-                eventBus.unregister(this);
+            synchronized(eventBus) {
+                if (eventBus.isRegistered(this)) {
+                    eventBus.unregister(this);
+                }
             }
             reactContext.stopService(backgroundServiceIntent);
         }
@@ -870,8 +876,10 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
         // When currentPosition is explicitly requested while plugin is stopped, shut Service down again and stop listening to EventBus
         if (!isEnabled) {
             EventBus eventBus = EventBus.getDefault();
-            if (eventBus.isRegistered(this)) {
-                eventBus.unregister(this);
+            synchronized(eventBus) {
+                if (eventBus.isRegistered(this)) {
+                    eventBus.unregister(this);
+                }
             }
         }
     }
@@ -1137,10 +1145,15 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
     public void onCatalystInstanceDestroy() {
         Log.i(TAG, "- RNBackgroundGeolocationModule#destroy");
         EventBus eventBus = EventBus.getDefault();
-        if (eventBus.isRegistered(this)) {
-            eventBus.unregister(this);
+        synchronized(eventBus) {
+            if (eventBus.isRegistered(this)) {
+                eventBus.unregister(this);
+            }
         }
         currentPositionCallbacks.clear();
-        reactContext.stopService(backgroundServiceIntent);
+
+        if (isEnabled && stopOnTerminate) {
+            reactContext.stopService(backgroundServiceIntent);
+        }
     }
 }

@@ -9,6 +9,8 @@
 - [Added] `maxRecordsToPersist` to limit the max number of records persisted in plugin's SQLite database.
 - [Added] API methods `#addGeofences` (for adding a list-of-geofences), `#removeGeofences`
 - [Changed] The plugin will no longer delete geofences when `#stop` is called; it will merely stop monitoring them.  When the plugin is `#start`ed again, it will start monitoringt any geofences it holds in memory.  To completely delete geofences, use new method `#removeGeofences`.
+- [Fixed] Issue with `forceReloadOnX` params. These were not forcing the activity to reload on device reboot when configured with `startOnBoot: true`
+- [Fixed] `stopOnTerminate: false` was not working.
 
 ## [1.0.1] 2016-03-14
 - [Changed] Standardize the Javascript API methods to send both a `success` as well as `failure` callbacks.
