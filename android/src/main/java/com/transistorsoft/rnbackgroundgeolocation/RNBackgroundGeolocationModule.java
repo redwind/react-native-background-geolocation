@@ -18,6 +18,7 @@ import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 
+import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.ReadableMapKeySetIterator;
 import com.facebook.react.bridge.ReadableType;
@@ -453,14 +454,31 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
         }
         EventBus.getDefault().post(event);
 
-        // TODO no error checking here
-        success.invoke();
-
         HashMap<String, Callback> callbacks = new HashMap();
         callbacks.put("success", success);
         callbacks.put("failure", failure);
 
         addGeofenceCallbacks.put(identifier, callbacks);
+    }
+
+    @ReactMethod
+    public void addGeofences(ReadableArray geofences, Callback success, Callback failure) {
+        Bundle event = new Bundle();
+        event.putString("name", BackgroundGeolocationService.ACTION_ADD_GEOFENCES);
+        event.putBoolean("request", true);
+
+        JSONArray json = new JSONArray();
+        for (int n=0;n<geofences.size();n++) {
+            json.put(mapToJson(geofences.getMap(n)));
+        }
+        event.putString("geofences", json.toString());
+
+        HashMap<String, Callback> callbacks = new HashMap();
+        callbacks.put("success", success);
+        callbacks.put("failure", failure);
+        addGeofenceCallbacks.put(BackgroundGeolocationService.ACTION_ADD_GEOFENCES, callbacks);
+
+        EventBus.getDefault().post(event);
     }
 
     @ReactMethod
@@ -472,6 +490,16 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
         EventBus.getDefault().post(event);
 
         // TODO no error checking here
+        success.invoke();
+    }
+
+    @ReactMethod
+    public void removeGeofences(Callback success, Callback failure) {
+        Bundle event = new Bundle();
+        event.putString("name", BackgroundGeolocationService.ACTION_REMOVE_GEOFENCES);
+        event.putBoolean("request", true);
+        EventBus.getDefault().post(event);
+
         success.invoke();
     }
 

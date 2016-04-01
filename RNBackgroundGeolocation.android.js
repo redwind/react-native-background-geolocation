@@ -97,10 +97,20 @@ var API = {
     failure = failure || emptyFn;
     RNBackgroundGeolocation.addGeofence(config, success, failure);
   },
+  addGeofences: function(geofences, success, failure) {
+    success = success || emptyFn;
+    failure = failure || emptyFn;
+    RNBackgroundGeolocation.addGeofences(geofences, success, failure);
+  },
   removeGeofence: function(identifier, success, failure) {
     success = success || emptyFn;
     failure = failure || emptyFn;
     RNBackgroundGeolocation.removeGeofence(identifier, success, failure);
+  },
+  removeGeofences: function(success, failure) {
+    success = success || emptyFn;
+    failure = failure || emptyFn;
+    RNBackgroundGeolocation.removeGeofences(success, failure);
   },
   getGeofences: function(success, failure) {
     failure = failure || emptyFn;

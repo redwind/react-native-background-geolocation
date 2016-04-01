@@ -6,6 +6,9 @@
 - [Changed] Volley dependency to official version `com.android.volley`
 - [Changed] When plugin is manually stopped, update state of `isMoving` to `false`.
 - [Fixed] If location-request times-out while acquiring stationary-location, try to use last-known-location
+- [Added] `maxRecordsToPersist` to limit the max number of records persisted in plugin's SQLite database.
+- [Added] API methods `#addGeofences` (for adding a list-of-geofences), `#removeGeofences`
+- [Changed] The plugin will no longer delete geofences when `#stop` is called; it will merely stop monitoring them.  When the plugin is `#start`ed again, it will start monitoringt any geofences it holds in memory.  To completely delete geofences, use new method `#removeGeofences`.
 
 ## [1.0.1] 2016-03-14
 - [Changed] Standardize the Javascript API methods to send both a `success` as well as `failure` callbacks.
