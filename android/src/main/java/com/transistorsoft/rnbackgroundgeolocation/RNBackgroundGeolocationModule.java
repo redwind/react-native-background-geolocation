@@ -84,7 +84,6 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
     private HashMap<String, Callback> getLocationsCallback;
     private HashMap<String, Callback> syncCallback;
     private HashMap<String, Callback> getOdometerCallback;
-    private HashMap<String, Callback> resetOdometerCallback;
     private HashMap<String, Callback> paceChangeCallback;
     private HashMap<String, Callback> clearDatabaseCallback;
     private HashMap<String, HashMap> addGeofenceCallbacks = new HashMap();
@@ -420,25 +419,25 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
     }
     @ReactMethod
     public void getOdometer(Callback success, Callback failure) {
-        getOdometerCallback = new HashMap();
-        getOdometerCallback.put("success", success);
-        getOdometerCallback.put("failure", failure);
-
-        Bundle event = new Bundle();
-        event.putString("name", BackgroundGeolocationService.ACTION_GET_ODOMETER);
-        event.putBoolean("request", true);
-        EventBus.getDefault().post(event);
+        SharedPreferences settings = reactContext.getSharedPreferences("TSLocationManager", 0);
+        Float value = settings.getFloat("odometer", 0);
+        success.invoke(value);
     }
     @ReactMethod
     public void resetOdometer(Callback success, Callback failure) {
-        resetOdometerCallback = new HashMap();
-        resetOdometerCallback.put("success", success);
-        resetOdometerCallback.put("failure", failure);
+        SharedPreferences settings = reactContext.getSharedPreferences("TSLocationManager", 0);
+        SharedPreferences.Editor editor = settings.edit();
 
-        Bundle event = new Bundle();
-        event.putString("name", BackgroundGeolocationService.ACTION_RESET_ODOMETER);
-        event.putBoolean("request", true);
-        EventBus.getDefault().post(event);
+        editor.putFloat("odometer", 0);
+        editor.apply();
+
+        if (BackgroundGeolocationService.isInstanceCreated()) {
+            Bundle event = new Bundle();
+            event.putString("name", BackgroundGeolocationService.ACTION_RESET_ODOMETER);
+            event.putBoolean("request", true);
+            EventBus.getDefault().post(event);
+        }
+        success.invoke();
     }
     @ReactMethod
     public void addGeofence(ReadableMap options, Callback success, Callback failure) {
@@ -587,8 +586,6 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
             onGetLocations(event);
         } else if (BackgroundGeolocationService.ACTION_SYNC.equalsIgnoreCase(name)) {
             onSync(event);
-        } else if (BackgroundGeolocationService.ACTION_GET_ODOMETER.equalsIgnoreCase(name)) {
-            this.onGetOdometer(event);
         } else if (BackgroundGeolocationService.ACTION_RESET_ODOMETER.equalsIgnoreCase(name)) {
             this.onResetOdometer(event);
         } else if (BackgroundGeolocationService.ACTION_CHANGE_PACE.equalsIgnoreCase(name)) {
@@ -648,17 +645,30 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
         isEnabled = value;
 
         Intent launchIntent = activity.getIntent();
-        if (launchIntent.hasExtra("forceReload") && launchIntent.hasExtra("location")) {
-            try {
-                JSONObject location = new JSONObject(launchIntent.getStringExtra("location"));
-                onLocationChange(locationToMap(location));
-                sendEvent(EVENT_LOCATION, locationToMap(location));
-
-                launchIntent.removeExtra("forceReload");
-                launchIntent.removeExtra("location");
-            } catch (JSONException e) {
-                Log.w(TAG, e);
+        if (launchIntent.hasExtra("forceReload")) {
+            if (launchIntent.hasExtra("location")) {
+                try {
+                    JSONObject location = new JSONObject(launchIntent.getStringExtra("location"));
+                    onLocationChange(locationToMap(location));
+                    sendEvent(EVENT_LOCATION, locationToMap(location));
+                    launchIntent.removeExtra("location");
+                } catch (JSONException e) {
+                    Log.w(TAG, e);
+                }
             }
+            if (launchIntent.hasExtra("geofencingEvent")) {
+                try {
+                    JSONObject geofencingEvent  = new JSONObject(launchIntent.getStringExtra("geofencingEvent"));
+                    sendEvent(EVENT_GEOFENCE, geofencingEventToMap(geofencingEvent));
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    Log.w(TAG, e);
+                }
+                launchIntent.removeExtra("geofencingEvent");
+            }
+            launchIntent.removeExtra("forceReload");
+            activity.moveTaskToBack(true);
         }
 
         SharedPreferences settings = reactContext.getSharedPreferences("TSLocationManager", 0);
@@ -704,18 +714,6 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
         Callback success = startCallback.get("success");
         success.invoke();
         startCallback = null;
-
-        Intent launchIntent = activity.getIntent();
-        if (launchIntent.hasExtra("forceReload") && launchIntent.hasExtra("geofencingEvent")) {
-            try {
-                JSONObject geofencingEvent  = new JSONObject(launchIntent.getStringExtra("geofencingEvent"));
-                sendEvent(EVENT_GEOFENCE, geofencingEventToMap(geofencingEvent));
-
-            } catch (JSONException e) {
-                e.printStackTrace();
-                Log.w(TAG, e);
-            }
-        }
     }
     private void onGetLocations(Bundle event) {
         try {
@@ -762,19 +760,9 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
             cb.invoke(event.getString("message"));
         }
         syncCallback = null;
-    }
-    private void onGetOdometer(Bundle event) {
-        Log.i(TAG, "---------- onGetOdometer: " + getOdometerCallback);
-
-        Callback success    = getOdometerCallback.get("success");
-        Double distance     = (double) event.getFloat("data");
-        success.invoke(distance);
-        getOdometerCallback = null;
-    }
+    }    
     public void onResetOdometer(Bundle event) {
-        Callback success = resetOdometerCallback.get("success");
-        success.invoke();
-        resetOdometerCallback = null;
+        // Do Nothing.  Callback already called.
     }
     public void onChangePace(Bundle event) {
         Callback success    = paceChangeCallback.get("success");
