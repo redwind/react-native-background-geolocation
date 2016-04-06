@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.util.Log;
+import android.os.Bundle;
+
 /**
  * This boot receiver is meant to handle the case where device is first booted after power up.  
  * This boot the headless BackgroundGeolocationService as configured by this class.
@@ -15,19 +17,23 @@ public class BootReceiver extends BroadcastReceiver {
     
     @Override
     public void onReceive(Context context, Intent intent) {
-        SharedPreferences preferences = context.getSharedPreferences(TAG, 0);
         Settings.init(context.getSharedPreferences(TAG, 0));
         Settings.load();
 
-        boolean startOnBoot     = Settings.values.getBoolean("startOnBoot", false);
-        boolean enabled         = preferences.getBoolean("enabled", false);
+        boolean startOnBoot     = Settings.getStartOnBoot();
+        boolean enabled         = Settings.getEnabled();
 
         if (!startOnBoot || !enabled) {
             return;
         }
         Log.i(TAG, "- BootReceiver booting service");
         // Start the service.
-        context.startService(new Intent(context, BackgroundGeolocationService.class));
+
+        Intent launchIntent = new Intent(context, BackgroundGeolocationService.class);
+        Bundle event = new Bundle();
+        event.putString("command", BackgroundGeolocationService.ACTION_START_ON_BOOT);
+        launchIntent.putExtras(event);
+        context.startService(launchIntent);
     }
 }
 
