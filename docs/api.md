@@ -491,10 +491,6 @@ bgGeo.onHeartbeat(function(params) {
         console.log('- current location: ', location);
         bgGeo.finish(taskId);
     });
-}, function(response) {
-    var status = response.status;
-    var responseText = response.responseText;
-    console.log("- HTTP failure: ", status, responseText);
 })
 ```
 
