@@ -11,6 +11,8 @@ bgGeo.configure({
 	.
 	.
 	.
+}, function(state) {
+    console.log('- Configure success.  Current state: ', state);
 });
 
 // Use #setConfig if you need to change options after you've executed #configure
@@ -18,6 +20,8 @@ bgGeo.configure({
 bgGeo.setConfig({
 	desiredAccuracy: 10,
 	distanceFilter: 10
+}, function(state) {
+    console.log('- setConfig success.  Current state: ', state);
 });
 
 ```
@@ -88,7 +92,7 @@ The following events can all be listened-to via the method `#on(eventName, callb
 
 | Method Name | Arguments | Notes
 |---|---|---|
-| [`configure`](#configureobject) | `{config}` | Configures the plugin's parameters (@see following Config section for accepted config params. The locationCallback will be executed each time a new Geolocation is recorded and provided with the following parameters. |
+| [`configure`](#configureobject-callback) | `{config}` | Configures the plugin's parameters (@see following Config section for accepted config params. The locationCallback will be executed each time a new Geolocation is recorded and provided with the following parameters. |
 | [`setConfig`](#setconfigobject) | `{config}` | Re-configure the plugin with new values. |
 | [`start`](#startcallbackfn) | `callbackFn`| Enable location tracking. Supplied `callbackFn` will be executed when tracking is successfully engaged. |
 | [`stop`](#stop) | `callbackFn` | Disable location tracking. Supplied `callbackFn` will be executed when tracking is successfully engaged. |
@@ -496,25 +500,29 @@ bgGeo.onHeartbeat(function(params) {
 
 # Methods
 
-####`configure({Object})`
+####`configure({Object}, callback)`
 
-Configures the plugin's initial parameters. You must call this method **before** using the plugin and call it **only once**.
+Configures the plugin's initial parameters. You must call this method **before** using the plugin and call it **only once**.  The `callback` will be called after the configuration has been applied and provided with the current `state` object.  **NOTE** The plugin persists its `enabled` state between app restarts/device reboots and will automatically call `#start` upon itself once `#configure` is executed.  You can check the current state in the `callback` with `state.enabled`.
 
 ```
 bgGeo.configure({
     distanceFilter: 50,
     desiredAccuracy: 0,
     stationaryRadius: 25
+}, function(state) {
+    console.log('- Configure success.  Current state: ', state);
 });
 ```
 
-####`setConfig({Object})`
-Reconfigure plugin's configuration
+####`setConfig({Object}, callback)`
+Reconfigure plugin's configuration.
 
 ```
 bgGeo.setConfig({
     desiredAccuracy: 10,
     distanceFilter: 100
+}, function(state) {
+    console.log('- setConfig success.  Current state: ', state);
 });
 ```
 
