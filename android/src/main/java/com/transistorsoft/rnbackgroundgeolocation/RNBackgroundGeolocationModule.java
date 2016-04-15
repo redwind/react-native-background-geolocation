@@ -68,6 +68,7 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
     private static final String EVENT_ERROR = "error";
     private static final String EVENT_GEOFENCE = "geofence";
     private static final String EVENT_HTTP = "http";
+    private static final String EVENT_HEARTBEAT = "heartbeat";
 
     private static final long GET_CURRENT_POSITION_TIMEOUT = 30000;
 
@@ -75,6 +76,7 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
     private Boolean stopOnTerminate     = true;
     private Boolean isMoving            = false;
     private Boolean isAcquiringCurrentPosition = false;
+    private Boolean forceReload         = false;
     private long isAcquiringCurrentPositionSince;
     private Intent backgroundServiceIntent;
 
@@ -104,6 +106,12 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
         super(reactContext);
         this.reactContext   = reactContext;
         this.activity       = activity;
+
+        Intent launchIntent = activity.getIntent();
+        if (launchIntent.hasExtra("forceReload")) {
+            forceReload = true;
+        }
+
         backgroundServiceIntent = new Intent(reactContext, BackgroundGeolocationService.class);
         backgroundServiceIntent.putExtra("enabled", isEnabled);
     }
@@ -606,6 +614,8 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
             this.onGetCount(event);
         } else if (BackgroundGeolocationService.ACTION_INSERT_LOCATION.equalsIgnoreCase(name)) {
             this.onInsertLocation(event);
+        } else if (name.equalsIgnoreCase(BackgroundGeolocationService.ACTION_HEARTBEAT)) {
+            this.onHeartbeat(event);
         }
     }
 
@@ -645,7 +655,11 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
         isEnabled = value;
 
         Intent launchIntent = activity.getIntent();
-        if (launchIntent.hasExtra("forceReload")) {
+        if (forceReload) {
+            Integer eventCode = launchIntent.getIntExtra("eventCode", -1);
+            if (eventCode == BackgroundGeolocationService.FORCE_RELOAD_HEARTBEAT) {
+                onHeartbeat(launchIntent.getExtras());
+            }
             if (launchIntent.hasExtra("location")) {
                 try {
                     JSONObject location = new JSONObject(launchIntent.getStringExtra("location"));
@@ -713,6 +727,9 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
         }
         Callback success = startCallback.get("success");
         success.invoke();
+        if (forceReload) {
+            forceReload = false;
+        }
         startCallback = null;
     }
     private void onGetLocations(Bundle event) {
@@ -798,6 +815,18 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
         sendEvent(EVENT_HTTP, params);
     }
 
+    private void onHeartbeat(Bundle event) {
+        WritableMap params = new WritableNativeMap();
+        try {
+            JSONObject json = new JSONObject(event.getString("location"));
+            params.putMap("location", locationToMap(json));
+            params.putInt("shakes", -1);
+            sendEvent(EVENT_HEARTBEAT, params);
+        } catch (JSONException e) {
+            e.printStackTrace();
+
+        }
+    }
     private void onLocationError(Bundle event) {
         Integer code = event.getInt("code");
         if (code == BackgroundGeolocationService.LOCATION_ERROR_DENIED) {

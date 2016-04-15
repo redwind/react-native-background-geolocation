@@ -65,6 +65,7 @@ bgGeo.setConfig({
 |---|---|---|---|---|
 | [`debug`](#param-boolean-debug) | `Boolean` | Optional | `false` | When enabled, the plugin will emit sounds for life-cycle events of background-geolocation! **NOTE iOS**: In addition, you must manually enable the *Audio and Airplay* background mode in *Background Capabilities* to hear these debugging sounds. |
 | [`stopOnTerminate`](#param-boolean-stoponterminate) | `Boolean` | Optional | `true` | Enable this in order to force a stop() when the application terminated (e.g. on iOS, double-tap home button, swipe away the app). On Android, stopOnTerminate: false will cause the plugin to operate as a headless background-service (in this case, you should configure an #url in order for the background-service to send the location to your server) |
+| [`heartbeatInterval`](#param-integer-heartbeatinterval-undefined) | `Integer(seconds)` | Optional | `undefined` | Causes a `heartbeat` event to fire each `heartbeatInterval` seconds.  **NOTE** The `heartbeat` event will only fire when the device is in the **STATIONARY** state -- it will not fire when the device is moving.|
 | [`foregroundService`](#param-boolean-foregroundService-false) | `Boolean` | Optional **Android** | `false` | Make the Android service [run in the foreground](http://developer.android.com/intl/ru/reference/android/app/Service.html#startForeground(int, android.app.Notification)), supplying the ongoing notification to be shown to the user while in this state. By default services are background, meaning that if the system needs to kill them to reclaim more memory (such as to display a large page in a web browser).  @see `notificationTitle`, `notificationText` & `notificatinoColor`|
 | [`notificationTitle`](#param-string-notification-title) | `String` | Optional **Android** | App name | When running the service with `foregroundService: true`, Android requires a persistent notification in the Notification Bar.  Defaults to the application name|
 | [`notificationText`](#param-string-notification-text) | `String` | Optional **Android** | Location service activated | When running the service with `foregroundService: true`, Android requires a persistent notification in the Notification Bar.|
@@ -81,6 +82,7 @@ The following events can all be listened-to via the method `#on(eventName, callb
 | [`onMotionChange`](#onmotionchangecallbackfn) | Fired when the device changes stationary / moving state. |
 | [`onGeofence`](#ongeofencecallbackfn) | Fired when a geofence crossing event occurs. |
 | [`onHttp`](#onhttpsuccessfn) | Fired after a successful HTTP response. `response` object is provided with `status` and `responseText`. |
+| [`onHeartbeat`](#onheartbeatsuccessfn-failurefn) | Fired each `heartbeatInterval` while the plugin is in the **stationary** state with.  Your callback will be provided with a `params {}` containing the parameters `shakes {Integer}` (#shakes not implemented for Android) as well as the last known `location {Object}` |
 
 ## Methods
 
@@ -321,9 +323,29 @@ If the user closes the application while the background-tracking has been starte
 
 If the user reboots the device, setting `forceReloadOnBoot: true` will cause the foreground application (where your Javascript lives) to reload after the device is rebooted.  This option should be used in conjunction with `forceReloadOnLocationChange: true` or `forceReloadOnMotionChange: true`.
 
+####`@param {Boolean} forceReloadOnHeartbeat [false]`
+
+If the closes the app with a configured `heartbeatInterval`, `forceReloadOnHeartbeat: true` will cause the foreground application (where your Javascript lives) to reload at the next `heartbeatInterval`.
+
 ####`@param {Boolean} startOnBoot`
 
 Set to ```true``` to start the background-service whenever the device boots. Unless you configure the plugin to ```forceReload``` (ie: boot your app), you should configure the plugin's HTTP features so it can POST to your server in "headless" mode.
+
+####`@param {Integer} heartbeatInterval [undefined]`
+
+Causes a `heartbeat` event to fire each `heartbeatInterval` seconds.  **NOTE** The `heartbeat` event will only fire when the device is in the **STATIONARY** state -- it will not fire when the device is moving.  If the user closes the app with `stopOnTerminate: false`, you can cause the foreground Activity to reboot from a heartbeat with `forceReloadOnHeartbeat: true`
+
+```
+bgGeo.on("heartbeat", function(params) {
+    var lastKnownLocation = params.location;
+    console.log('- heartbeat: ', lastKnownLocation);
+    // Or you could request a new location
+    bgGeo.getCurrentPosition(function(location, taskId) {
+        console.log('- current position: ', location);
+        bgGeo.finish(taskId);
+    });
+});
+```
 
 ####`@param {Boolean} foregroundService [false]`
 
