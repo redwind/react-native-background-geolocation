@@ -1,7 +1,10 @@
 # Change Log
 
 ## [Unreleased]
+
+## [1.1.1] - 2016-04-15
 - [Fixed] Refactor `startOnBoot` system.  Added missing instruction to configure `BootReceiver` in `AndroidManifest`.  See [Installation Guide](https://github.com/transistorsoft/react-native-background-geolocation-android/wiki/Installation)
+- [Added] Android `heartbeat` event, configured with `heartbeatInterval`.
 
 ## [1.1.0] - 2016-04-04
 - [Fixed] Android 5 geofence limit.  Refactored Geofence system.  Was using a `PendingIntent` per geofence; now uses a single `PendingIntent` for all geofences.
