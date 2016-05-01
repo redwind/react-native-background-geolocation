@@ -1,5 +1,6 @@
 package com.transistorsoft.rnbackgroundgeolocation;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -37,7 +38,10 @@ import org.json.JSONObject;
 
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.location.DetectedActivity;
+import com.transistorsoft.locationmanager.Settings;
 import com.transistorsoft.locationmanager.TSLog;
+import com.transistorsoft.locationmanager.scheduler.ScheduleEvent;
+import com.transistorsoft.locationmanager.scheduler.ScheduleService;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -63,15 +67,24 @@ import de.greenrobot.event.Subscribe;
  */
 public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
     private static final String TAG = "TSLocationManager";
+
+    public static final String ACCESS_COARSE_LOCATION = Manifest.permission.ACCESS_COARSE_LOCATION;
+    public static final String ACCESS_FINE_LOCATION = Manifest.permission.ACCESS_FINE_LOCATION;
+
+    public static final int REQUEST_ACTION_START = 1;
+    public static final int REQUEST_ACTION_GET_CURRENT_POSITION = 2;
+
     private static final String EVENT_LOCATION = "location";
     private static final String EVENT_MOTIONCHANGE = "motionchange";
     private static final String EVENT_ERROR = "error";
     private static final String EVENT_GEOFENCE = "geofence";
     private static final String EVENT_HTTP = "http";
     private static final String EVENT_HEARTBEAT = "heartbeat";
+    private static final String EVENT_SCHEDULE = "schedule";
 
     private static final long GET_CURRENT_POSITION_TIMEOUT = 30000;
 
+    private ReadableMap mConfig;
     private Boolean isEnabled           = false;
     private Boolean stopOnTerminate     = true;
     private Boolean isMoving            = false;
@@ -102,16 +115,26 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
     Activity activity;
 
     public RNBackgroundGeolocationModule(ReactApplicationContext reactContext, Activity activity) {
-
         super(reactContext);
         this.reactContext   = reactContext;
         this.activity       = activity;
+
+        EventBus eventBus = EventBus.getDefault();
+        synchronized(eventBus) {
+            if (!eventBus.isRegistered(this)) {
+                eventBus.register(this);
+            }
+        }
+
+        // Load settings.
+        SharedPreferences settings = activity.getSharedPreferences("TSLocationManager", 0);
+        Settings.init(settings);
+        Settings.load();
 
         Intent launchIntent = activity.getIntent();
         if (launchIntent.hasExtra("forceReload")) {
             forceReload = true;
         }
-
         backgroundServiceIntent = new Intent(reactContext, BackgroundGeolocationService.class);
         backgroundServiceIntent.putExtra("enabled", isEnabled);
     }
@@ -123,12 +146,53 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void start(Callback success, Callback failure) {
-        startCallback = new HashMap();
-        startCallback.put("success", success);
-        startCallback.put("failure", failure);
-        setEnabled(true);
+        if (success != null) {
+            startCallback = new HashMap();
+            startCallback.put("success", success);
+            startCallback.put("failure", failure);
+        }
+        //setEnabled(true);
+        backgroundServiceIntent = new Intent(activity, BackgroundGeolocationService.class);
+        if (hasPermission(ACCESS_COARSE_LOCATION) && hasPermission(ACCESS_FINE_LOCATION)) {
+            setEnabled(true);
+        } else {
+            String[] permissions = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION};
+            requestPermissions(REQUEST_ACTION_START, permissions);
+        }
+
+    }
+    // TODO placehold for implementing Android M permissions request.  Just return true for now.
+    private Boolean hasPermission(String permission) {
+        return true;
+    }
+    // TODO placehold for implementing Android M permissions request.  Just return true for now.
+    private void requestPermissions(int requestCode, String[] action) {
+
     }
 
+    @ReactMethod
+    public void startSchedule(Callback success, Callback failure) {
+        if (Settings.values.containsKey("schedule")) {
+            Settings.setSchedulerEnabled(true);
+            EventBus eventBus = EventBus.getDefault();
+            synchronized(eventBus) {
+                if (!eventBus.isRegistered(this)) {
+                    eventBus.register(this);
+                }
+            }
+            startScheduleService();
+            success.invoke();
+        } else {
+            failure.invoke("No schedule defined");
+        }
+    }
+    @ReactMethod
+    public void stopSchedule(Callback success, Callback failure) {
+        Settings.setSchedulerEnabled(false);
+        stop();
+        stopScheduleService();
+        success.invoke();
+    }
     @ReactMethod
     public void stop() {
         setEnabled(false);
@@ -136,11 +200,13 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void configure(ReadableMap config, Callback callback) {
-        applyConfig(config);
+        mConfig = config;
+        applyConfig();
 
-        SharedPreferences settings = reactContext.getSharedPreferences("TSLocationManager", 0);
-        setEnabled(settings.getBoolean("enabled", isEnabled));
-
+        boolean willEnable = Settings.getEnabled() && !Settings.getSchedulerEnabled();
+        if (willEnable) {
+            start(null, null);
+        }
         callback.invoke(getState());
     }
     @ReactMethod
@@ -165,13 +231,36 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void setConfig(ReadableMap config) {
-        applyConfig(config);
+        JSONObject currentConfig = mapToJson(mConfig);
+        JSONObject newConfig = mapToJson(config);
+        try {
+            JSONObject merged = new JSONObject();
+            JSONObject[] objs = new JSONObject[] { currentConfig, newConfig };
+            for (JSONObject obj : objs) {
+                Iterator it = obj.keys();
+                while (it.hasNext()) {
+                    String key = (String)it.next();
+                    merged.put(key, obj.get(key));
+                }
+            }
+            mConfig = jsonToMap(merged);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        applyConfig();
+
+        // Need to take special care with some params are updated.  Here we need reload the ScheduleService
+        if (config.hasKey("schedule")) {
+            startScheduleService();
+        }
+
         Bundle event = new Bundle();
         event.putString("name", BackgroundGeolocationService.ACTION_SET_CONFIG);
         event.putBoolean("request", true);
         EventBus.getDefault().post(event);
     }
-
+    
     @ReactMethod
     public void getState(Callback success, Callback failure) {
 
@@ -552,6 +641,17 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
     }
 
     @Subscribe
+    public void onEventMainThread(ScheduleEvent event) {
+        if (!Settings.getSchedulerEnabled()) {
+            TSLog.i("Ignored a Schedule event because Scheduler is disabled: " + event);
+            return;
+        }
+        isEnabled = event.getEnabled();
+        sendEvent(EVENT_SCHEDULE, getState());
+    }
+
+
+    @Subscribe
     public void onEventMainThread(Location location) {
         Bundle meta = location.getExtras();
         if (meta != null) {
@@ -575,6 +675,20 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
     public void onEventMainThread(GeofencingEvent geofencingEvent) {
         Log.i(TAG, "- Rx GeofencingEvent: " + geofencingEvent);
         sendEvent(EVENT_GEOFENCE, geofencingEventToMap(geofencingEvent));
+    }
+
+    private void startScheduleService() {
+        Intent intent = new Intent(activity, ScheduleService.class);
+        stopScheduleService();
+        activity.startService(intent);
+    }
+
+    private void stopScheduleService() {
+        // First kill if it's already running.
+        if (ScheduleService.isInstanceCreated()) {
+            Intent intent = new Intent(activity, ScheduleService.class);
+            activity.stopService(intent);
+        }
     }
 
     /**
@@ -619,35 +733,20 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
         }
     }
 
-    private void applyConfig(ReadableMap config) {
-        SharedPreferences settings = reactContext.getSharedPreferences("TSLocationManager", 0);
+    private boolean applyConfig() {
+        if (mConfig.hasKey("stopOnTerminate")) {
+            stopOnTerminate = mConfig.getBoolean("stopOnTerminate");
+        }
+        SharedPreferences settings = activity.getSharedPreferences("TSLocationManager", 0);
         SharedPreferences.Editor editor = settings.edit();
 
-        try {
-            JSONObject destination = new JSONObject();
-            if (settings.contains("config")) {
-                destination = new JSONObject(settings.getString("config", "{}"));
-            }
-            // Merge new config (source) onto existing config (destination)
-            JSONObject source = mapToJson(config);
-            JSONObject merged = new JSONObject();
-            JSONObject[] objs = new JSONObject[] { destination, source };
-            for (JSONObject obj : objs) {
-                Iterator it = obj.keys();
-                while (it.hasNext()) {
-                    String key = (String) it.next();
-                    merged.put(key, obj.get(key));
-                }
-            }
-            if (config.hasKey("stopOnTerminate")) {
-                stopOnTerminate = config.getBoolean("stopOnTerminate");
-                editor.putBoolean("stopOnTerminate", stopOnTerminate);
-            }
-            editor.putString("config", merged.toString());
-            editor.commit();
-        } catch (JSONException e) {
-            e.printStackTrace();
+
+        if (mConfig.hasKey("isMoving")) {
+            editor.putBoolean("isMoving", mConfig.getBoolean("isMoving"));
         }
+        editor.putString("config", mapToJson(mConfig).toString());
+        editor.apply();
+        return true;
     }
 
     private void setEnabled(boolean value) {
@@ -712,11 +811,6 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
                 }
             }
         } else {
-            synchronized(eventBus) {
-                if (eventBus.isRegistered(this)) {
-                    eventBus.unregister(this);
-                }
-            }
             reactContext.stopService(backgroundServiceIntent);
         }
     }
@@ -891,14 +985,6 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
         isAcquiringCurrentPosition = false;
         backgroundServiceIntent.removeExtra("command");
         // When currentPosition is explicitly requested while plugin is stopped, shut Service down again and stop listening to EventBus
-        if (!isEnabled) {
-            EventBus eventBus = EventBus.getDefault();
-            synchronized(eventBus) {
-                if (eventBus.isRegistered(this)) {
-                    eventBus.unregister(this);
-                }
-            }
-        }
     }
 
     private Boolean isDebugging() {
@@ -1126,7 +1212,7 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
         return array;
     }
 
-    private JSONObject mapToJson(ReadableMap map) {
+    private static JSONObject mapToJson(ReadableMap map) {
         ReadableMapKeySetIterator iterator = map.keySetIterator();
         JSONObject json = new JSONObject();
 
@@ -1148,6 +1234,7 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
                         json.put(key, mapToJson(map.getMap(key)));
                         break;
                     case Array:
+                        json.put(key, arrayToJson(map.getArray(key)));
                         break;
 
                 }
@@ -1156,6 +1243,34 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
             e.printStackTrace();
         }
         return json;
+    }
+
+    private static JSONArray arrayToJson(ReadableArray readableArray) throws JSONException {
+        JSONArray jsonArray = new JSONArray();
+        for(int i=0; i < readableArray.size(); i++) {
+            ReadableType valueType = readableArray.getType(i);
+            switch (valueType){
+                case Null:
+                    jsonArray.put(JSONObject.NULL);
+                    break;
+                case Boolean:
+                    jsonArray.put(readableArray.getBoolean(i));
+                    break;
+                case Number:
+                    jsonArray.put(readableArray.getInt(i));
+                    break;
+                case String:
+                    jsonArray.put(readableArray.getString(i));
+                    break;
+                case Map:
+                    jsonArray.put(mapToJson(readableArray.getMap(i)));
+                    break;
+                case Array:
+                    jsonArray.put(arrayToJson(readableArray.getArray(i)));
+                    break;
+            }
+        }
+        return jsonArray;
     }
 
     @Override
@@ -1169,8 +1284,12 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
         }
         currentPositionCallbacks.clear();
 
-        if (isEnabled && stopOnTerminate) {
-            reactContext.stopService(backgroundServiceIntent);
+        if(stopOnTerminate) {
+            if (isEnabled) {
+                Intent intent = new Intent(activity, BackgroundGeolocationService.class);
+                reactContext.stopService(intent);
+            }
+            stopScheduleService();
         }
     }
 }
