@@ -1,10 +1,14 @@
-package com.transistorsoft.locationmanager;
+package com.transistorsoft.rnbackgroundgeolocation;
+
+import com.transistorsoft.locationmanager.*;
+import com.transistorsoft.locationmanager.scheduler.*;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.util.Log;
 import android.os.Bundle;
+
+import org.json.JSONArray;
 
 /**
  * This boot receiver is meant to handle the case where device is first booted after power up.  
@@ -12,9 +16,9 @@ import android.os.Bundle;
  * @author chris scott
  *
  */
-public class BootReceiver extends BroadcastReceiver {   
+public class BootReceiver extends BroadcastReceiver {
     private static final String TAG = "TSLocationManager";
-    
+
     @Override
     public void onReceive(Context context, Intent intent) {
         Settings.init(context.getSharedPreferences(TAG, 0));
@@ -22,6 +26,12 @@ public class BootReceiver extends BroadcastReceiver {
 
         boolean startOnBoot     = Settings.getStartOnBoot();
         boolean enabled         = Settings.getEnabled();
+
+        // Start scheduler service
+        JSONArray schedule = Settings.getSchedule();
+        if (schedule.length() > 0) {
+            context.startService(new Intent(context, ScheduleService.class));
+        }
 
         if (!startOnBoot || !enabled) {
             return;
@@ -36,5 +46,3 @@ public class BootReceiver extends BroadcastReceiver {
         context.startService(launchIntent);
     }
 }
-
-
