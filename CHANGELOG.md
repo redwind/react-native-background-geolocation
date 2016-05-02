@@ -1,6 +1,7 @@
 # Change Log
-
 ## [Unreleased]
+
+## [1.2.1] - 2016-05-02
 - [Fixed] Wrap `getCurrentPositionCallbacks` in `synchronized` block to prevent `ConcurrentModificationException` if `getCurrentPosition` is called in quick succession.
 
 ## [1.2.0] - 2016-05-01
