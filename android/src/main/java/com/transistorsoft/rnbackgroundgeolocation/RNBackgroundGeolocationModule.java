@@ -145,6 +145,25 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
+    public void configure(ReadableMap config, Callback callback) {
+        mConfig = config;
+        Settings.reset();
+        applyConfig();
+
+        Boolean willEnable = false;
+        if (Settings.values.containsKey("schedule")) {
+            willEnable = Settings.getEnabled() && Settings.getSchedulerEnabled();
+        } else {
+            Settings.setSchedulerEnabled(false);
+            willEnable = Settings.getEnabled();
+        }
+        if (willEnable) {
+            start(null, null);
+        }
+        callback.invoke(getState());
+    }
+
+    @ReactMethod
     public void start(Callback success, Callback failure) {
         if (success != null) {
             startCallback = new HashMap();
@@ -199,17 +218,6 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void configure(ReadableMap config, Callback callback) {
-        mConfig = config;
-        applyConfig();
-
-        boolean willEnable = Settings.getEnabled() && !Settings.getSchedulerEnabled();
-        if (willEnable) {
-            start(null, null);
-        }
-        callback.invoke(getState());
-    }
-    @ReactMethod
     public void changePace(Boolean moving, Callback success, Callback failure) {
         if (!isEnabled) {
             Log.w(TAG, "- Cannot change pace while disabled");
@@ -260,7 +268,7 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
         event.putBoolean("request", true);
         EventBus.getDefault().post(event);
     }
-    
+
     @ReactMethod
     public void getState(Callback success, Callback failure) {
 
@@ -746,6 +754,7 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
         }
         editor.putString("config", mapToJson(mConfig).toString());
         editor.apply();
+        Settings.load();
         return true;
     }
 
