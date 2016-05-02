@@ -480,7 +480,10 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
         HashMap<String, Callback> callback = new HashMap();
         callback.put("success", successCallback);
         callback.put("failure", failureCallback);
-        currentPositionCallbacks.add(callback);
+
+        synchronized(currentPositionCallbacks) {
+            currentPositionCallbacks.add(callback);
+        }
 
         if (isAcquiringCurrentPosition) {
             return;
@@ -673,7 +676,7 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
             }
         }
 
-        this.onLocationChange(locationToMap(location));
+        this.onLocationChange(location);
 
         // Fire "location" event on React EventBus
         sendEvent(EVENT_LOCATION, locationToMap(location));
@@ -771,7 +774,7 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
             if (launchIntent.hasExtra("location")) {
                 try {
                     JSONObject location = new JSONObject(launchIntent.getStringExtra("location"));
-                    onLocationChange(locationToMap(location));
+                    //onLocationChange(locationToMap(location));
                     sendEvent(EVENT_LOCATION, locationToMap(location));
                     launchIntent.removeExtra("location");
                 } catch (JSONException e) {
@@ -890,15 +893,17 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
         paceChangeCallback = null;
     }
 
-    private void onLocationChange(WritableMap data) {
+    private void onLocationChange(Location location) {
         if (isAcquiringCurrentPosition) {
             finishAcquiringCurrentPosition(true);
             // Execute callbacks.
-            for (HashMap<String, Callback> callback : currentPositionCallbacks) {
-                Callback success = callback.get("success");
-                success.invoke(data);
+            synchronized(currentPositionCallbacks) {
+                for (HashMap<String, Callback> callback : currentPositionCallbacks) {
+                    Callback success = callback.get("success");
+                    success.invoke(locationToMap(location));
+                }
+                currentPositionCallbacks.clear();
             }
-            currentPositionCallbacks.clear();
         }
     }
 
