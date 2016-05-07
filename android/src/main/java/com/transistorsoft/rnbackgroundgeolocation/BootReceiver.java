@@ -1,7 +1,9 @@
 package com.transistorsoft.rnbackgroundgeolocation;
 
 import com.transistorsoft.locationmanager.*;
+import com.transistorsoft.locationmanager.settings.*;
 import com.transistorsoft.locationmanager.scheduler.*;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
