@@ -1,6 +1,10 @@
 # Change Log
 ## [Unreleased]
 
+## [1.2.2] - 2016-05-07
+- [Changed] Refactor HTTP Layer to stop spamming server when it returns an error (used to keep iterating through the entire queue).  It will now stop syncing as soon as server returns an error (good for throttling servers).
+- [Fixed] bugs in Scheduler
+
 ## [1.2.1] - 2016-05-02
 - [Fixed] Wrap `getCurrentPositionCallbacks` in `synchronized` block to prevent `ConcurrentModificationException` if `getCurrentPosition` is called in quick succession.
 

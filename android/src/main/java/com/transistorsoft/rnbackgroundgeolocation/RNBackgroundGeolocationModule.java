@@ -38,10 +38,10 @@ import org.json.JSONObject;
 
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.location.DetectedActivity;
-import com.transistorsoft.locationmanager.Settings;
-import com.transistorsoft.locationmanager.TSLog;
-import com.transistorsoft.locationmanager.scheduler.ScheduleEvent;
-import com.transistorsoft.locationmanager.scheduler.ScheduleService;
+
+import com.transistorsoft.locationmanager.*;
+import com.transistorsoft.locationmanager.settings.*;
+import com.transistorsoft.locationmanager.scheduler.*;
 
 import java.io.BufferedReader;
 import java.io.File;
