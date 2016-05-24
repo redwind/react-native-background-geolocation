@@ -42,7 +42,6 @@ var BackgroundGeolocation = require('react-native-background-geolocation-android
 
 BackgroundGeolocation.configure({
   // License validations
-  orderId: '<your order ID>',
   license: '<your license key>',
   
   // Geolocation config
