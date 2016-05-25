@@ -165,6 +165,11 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void start(Callback success, Callback failure) {
+        if (startCallback != null) {
+            Callback callback = startCallback.get("failure");
+            failure.invoke("Waiting for a previous start action to complete");
+            return;
+        }
         if (success != null) {
             startCallback = new HashMap();
             startCallback.put("success", success);
@@ -828,11 +833,14 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
     }
 
     private void onStart(Bundle event) {
-        if (startCallback == null) {
-            return;
+        if (event.getBoolean("response") && !event.getBoolean("success")) {
+            Toast.makeText(activity, event.getString("message"), Toast.LENGTH_LONG).show();
+            if (startCallback != null) {
+                startCallback.get("failure").invoke(event.getString("message"));
+            }
+        } else if (startCallback != null) {
+            startCallback.get("success").invoke();
         }
-        Callback success = startCallback.get("success");
-        success.invoke();
         if (forceReload) {
             forceReload = false;
         }
