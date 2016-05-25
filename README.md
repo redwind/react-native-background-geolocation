@@ -17,9 +17,28 @@ $ npm install git+https://git@github.com:transistorsoft/react-native-background-
 
 [See Wiki](../..//wiki/Installation)
 
+
+## Configure your license
+
+1. Login to Customer Dashboard to generate an application key:
+[www.transistorsoft.com/shop/customers](http://www.transistorsoft.com/shop/customers)
+![](https://gallery.mailchimp.com/e932ea68a1cb31b9ce2608656/images/b2696718-a77e-4f50-96a8-0b61d8019bac.png)
+
+2. Add your license-key to the module's params when executing `#configure`
+```Javascript
+BackgroundGeolocation.configure({
+  license: <YOUR LICENSE KEY>,  // <-- Add your license key here
+  desiredAccuracy: 0,
+  distanceFilter: 50,
+  .
+  .
+  .
+});
+```
+
 ## Using the plugin ##
 
-```
+```Javascript
 var BackgroundGeolocation = require('react-native-background-geolocation-android');
 ```
 
@@ -36,7 +55,7 @@ var BackgroundGeolocation = require('react-native-background-geolocation-android
 
 ## Example
 
-```
+```Javascript
 
 var BackgroundGeolocation = require('react-native-background-geolocation-android');
 
