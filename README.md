@@ -39,7 +39,7 @@ BackgroundGeolocation.configure({
 ## Using the plugin ##
 
 ```Javascript
-var BackgroundGeolocation = require('react-native-background-geolocation-android');
+import BackgroundGeolocation from 'react-native-background-geolocation-android';
 ```
 
 ## Documentation
@@ -57,7 +57,7 @@ var BackgroundGeolocation = require('react-native-background-geolocation-android
 
 ```Javascript
 
-var BackgroundGeolocation = require('react-native-background-geolocation-android');
+import BackgroundGeolocation from 'react-native-background-geolocation-android';
 
 BackgroundGeolocation.configure({
   // License validations
