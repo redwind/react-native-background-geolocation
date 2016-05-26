@@ -167,7 +167,7 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
     public void start(Callback success, Callback failure) {
         if (startCallback != null) {
             Callback callback = startCallback.get("failure");
-            failure.invoke("Waiting for a previous start action to complete");
+            callback.invoke("Waiting for a previous start action to complete");
             return;
         }
         if (success != null) {
