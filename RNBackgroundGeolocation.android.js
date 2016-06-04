@@ -44,6 +44,11 @@ var API = {
     failure = failure || emptyFn;
     RNBackgroundGeolocation.stopSchedule(success, failure);
   },
+  startGeofences: function(success, failure) {
+    success = success || emptyFn;
+    failure = failure || emptyFn;
+    RNBackgroundGeolocation.startGeofences(success, failure);
+  },
   onHttp: function(callback) {
     return DeviceEventEmitter.addListener(TAG + ":http", callback);
   },
