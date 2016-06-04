@@ -49,13 +49,10 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
-import java.util.TimeZone;
 
 import de.greenrobot.event.EventBus;
 import de.greenrobot.event.Subscribe;
@@ -71,8 +68,9 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
     public static final String ACCESS_COARSE_LOCATION = Manifest.permission.ACCESS_COARSE_LOCATION;
     public static final String ACCESS_FINE_LOCATION = Manifest.permission.ACCESS_FINE_LOCATION;
 
-    public static final int REQUEST_ACTION_START = 1;
+    public static final int REQUEST_ACTION_START                = 1;
     public static final int REQUEST_ACTION_GET_CURRENT_POSITION = 2;
+    public static final int REQUEST_ACTION_START_GEOFENCES      = 3;
 
     private static final String EVENT_LOCATION = "location";
     private static final String EVENT_MOTIONCHANGE = "motionchange";
@@ -86,6 +84,7 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
 
     private ReadableMap mConfig;
     private Boolean isEnabled           = false;
+    private Boolean isStarting          = false;
     private Boolean stopOnTerminate     = true;
     private Boolean isMoving            = false;
     private Boolean isAcquiringCurrentPosition = false;
@@ -177,6 +176,13 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
         }
         //setEnabled(true);
         backgroundServiceIntent = new Intent(activity, BackgroundGeolocationService.class);
+
+        String command = BackgroundGeolocationService.ACTION_START;
+        if (success == null && Settings.getTrackingMode().equalsIgnoreCase(Settings.TRACKING_MODE_GEOFENCES)) {
+            command = BackgroundGeolocationService.ACTION_START_GEOFENCES;
+        }
+        backgroundServiceIntent.putExtra("command", command);
+
         if (hasPermission(ACCESS_COARSE_LOCATION) && hasPermission(ACCESS_FINE_LOCATION)) {
             setEnabled(true);
         } else {
@@ -218,7 +224,27 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
         success.invoke();
     }
     @ReactMethod
+    public void startGeofences(Callback success, Callback failure) {
+        isStarting = true;
+
+        startCallback = new HashMap();
+        startCallback.put("success", success);
+        startCallback.put("failure", failure);
+
+        backgroundServiceIntent = new Intent(activity, BackgroundGeolocationService.class);
+        backgroundServiceIntent.putExtra("command", BackgroundGeolocationService.ACTION_START_GEOFENCES);
+        if (hasPermission(ACCESS_COARSE_LOCATION) && hasPermission(ACCESS_FINE_LOCATION)) {
+            setEnabled(true);
+        } else {
+            String[] permissions = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION};
+            requestPermissions(REQUEST_ACTION_START_GEOFENCES, permissions);
+        }
+    }
+
+    @ReactMethod
     public void stop() {
+        startCallback = null;
+        isStarting = false;
         setEnabled(false);
     }
 
@@ -286,6 +312,14 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
     }
 
     private WritableMap getState() {
+        try {
+            return jsonToMap(Settings.getState());
+        } catch (JSONException e) {
+            TSLog.e("Failed to parse Settings#getState");
+            e.printStackTrace();
+            return null;
+        }
+        /*
         SharedPreferences settings = activity.getSharedPreferences("TSLocationManager", 0);
 
         try {
@@ -306,6 +340,7 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
             state.putString("error", e.getMessage());
             return state;
         }
+        */
     }
     @ReactMethod
     public void getLocations(Callback successCallback, Callback failureCallback) {
@@ -517,6 +552,12 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
                 if (options.hasKey("persist")) {
                     currentPositionOptions.put("persist", options.getBoolean("persist"));
                 }
+                if (options.hasKey("samples")) {
+                    currentPositionOptions.put("samples", options.getInt("samples"));
+                }
+                if (options.hasKey("desiredAccuracy")) {
+                    currentPositionOptions.put("desiredAccuracy", options.getInt("desiredAccuracy"));
+                }
                 if (options.hasKey("extras")) {
                     // TODO
                 }
@@ -720,6 +761,8 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
 
         if (BackgroundGeolocationService.ACTION_START.equalsIgnoreCase(name)) {
             onStart(event);
+        } else if (BackgroundGeolocationService.ACTION_START_GEOFENCES.equalsIgnoreCase(name)) {
+            onStart(event);
         } else if (BackgroundGeolocationService.ACTION_GET_LOCATIONS.equalsIgnoreCase(name)) {
             onGetLocations(event);
         } else if (BackgroundGeolocationService.ACTION_SYNC.equalsIgnoreCase(name)) {
@@ -768,6 +811,8 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
 
     private void setEnabled(boolean value) {
         Log.i(TAG, "- setEnabled:  " + value + ", current value: " + isEnabled);
+
+        boolean wasEnabled = isEnabled;
         isEnabled = value;
 
         Intent launchIntent = activity.getIntent();
@@ -816,8 +861,17 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
             if (!BackgroundGeolocationService.isInstanceCreated()) {
                 reactContext.startService(backgroundServiceIntent);
             } else {
+                String command = backgroundServiceIntent.getStringExtra("command");
                 Bundle event = new Bundle();
-                event.putString("name", BackgroundGeolocationService.ACTION_GET_CURRENT_POSITION);
+
+                // If not currently enabled or start() was called while currently in "geofences" trackingMode, change mode to regular "location" mode.
+                if (!wasEnabled || (command.equalsIgnoreCase(BackgroundGeolocationService.ACTION_START) && Settings.getTrackingMode().equalsIgnoreCase(Settings.TRACKING_MODE_GEOFENCES))) {
+                    event.putString("name", command);
+                } else {
+                    // Already started.  Just fetch the current-position.
+                    event.putString("name", BackgroundGeolocationService.ACTION_GET_CURRENT_POSITION);
+                }
+
                 event.putBoolean("request", true);
                 EventBus.getDefault().post(event);
 
@@ -902,7 +956,9 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
     }
 
     private void onLocationChange(Location location) {
-        if (isAcquiringCurrentPosition) {
+        Bundle meta = location.getExtras();
+        boolean isSample = (meta != null && meta.containsKey("sample"));
+        if (isAcquiringCurrentPosition && !isSample) {
             finishAcquiringCurrentPosition(true);
             // Execute callbacks.
             synchronized(currentPositionCallbacks) {
@@ -957,6 +1013,10 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
                 failure.invoke(code);
             }
             currentPositionCallbacks.clear();
+        }
+        if (paceChangeCallback != null) {
+            paceChangeCallback.get("failure").invoke(code);
+            paceChangeCallback = null;
         }
         WritableMap params = new WritableNativeMap();
         params.putInt("code", code);
@@ -1125,10 +1185,6 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
     private WritableMap locationToMap(Location location) {
         WritableMap data = Arguments.createMap();
 
-        TimeZone tz = TimeZone.getTimeZone("UTC");
-        SimpleDateFormat dateFormatter = new SimpleDateFormat(BackgroundGeolocationService.DATE_FORMAT, Locale.getDefault());
-        dateFormatter.setTimeZone(tz);
-
         WritableMap coordData = Arguments.createMap();
         WritableMap activityData = Arguments.createMap();
 
@@ -1179,7 +1235,7 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
         }
         data.putBoolean("is_moving", isMoving);
         data.putMap("coords", coordData);
-        data.putString("timestamp", dateFormatter.format(location.getTime()));
+        data.putString("timestamp", Settings.formatDate(location.getTime()));
 
         return data;
     }
