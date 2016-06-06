@@ -43,7 +43,7 @@ import BackgroundGeolocation from 'react-native-background-geolocation-android';
 ```
 
 ## Documentation
-- [API Documentation](docs/api.md)
+- [API Documentation](docs)
 - [Location Data Schema](../../wiki/Location-Data-Schema)
 - [Error Codes](../../wiki/Error-Codes)
 - [Debugging Sounds](../../wiki/Debug-Sounds)
