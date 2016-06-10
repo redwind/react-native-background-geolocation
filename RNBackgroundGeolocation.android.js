@@ -6,7 +6,7 @@ const TAG = "TSLocationManager";
 var emptyFn = function() {};
 
 var API = {
-  events: ['heartbeat', 'http', 'location', 'error', 'motionchange', 'geofence', 'schedule'],
+  events: ['heartbeat', 'http', 'location', 'error', 'motionchange', 'geofence', 'schedule', 'activitychange'],
 
   configure: function(config, callback) {
     callback = callback || emptyFn;

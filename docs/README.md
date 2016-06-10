@@ -29,11 +29,11 @@ bgGeo.setConfig({
 | Option | Type | Opt/Required | Default | Note |
 |---|---|---|---|---|
 | [`desiredAccuracy`](#param-integer-desiredaccuracy-0-10-100-1000-in-meters) | `Integer` | Required | 0 | Specify the desired-accuracy of the geolocation system with 1 of 4 values, `0`, `10`, `100`, `1000` where `0` means **HIGHEST POWER, HIGHEST ACCURACY** and `1000` means **LOWEST POWER, LOWEST ACCURACY** |
-| [`distanceFilter`](#param-integer-distancefilter) | `Integer` | Required | `30`| The minimum distance (measured in meters) a device must move horizontally before an update event is generated. @see Apple docs. However, #distanceFilter is elastically auto-calculated by the plugin: When speed increases, #distanceFilter increases; when speed decreases, so does distanceFilter (disabled with `disableElasticity: true`) |
+| [`distanceFilter`](#param-integer-distancefilter) | `Integer` | Required | `10`| The minimum distance (measured in meters) a device must move horizontally before an update event is generated. @see Apple docs. However, #distanceFilter is elastically auto-calculated by the plugin: When speed increases, #distanceFilter increases; when speed decreases, so does distanceFilter (disabled with `disableElasticity: true`) |
 | [`locationUpdateInterval`](#param-integer-millis-locationupdateinterval) | `Integer` | Required | `1000`| Set the desired interval for active location updates, in milliseconds.  The location client will actively try to obtain location updates for your application at this interval, so it has a direct influence on the amount of power used by your application. Choose your interval wisely.  This interval is inexact. You may not receive updates at all (if no location sources are available), or you may receive them slower than requested. You may also receive them faster than requested (if other applications are requesting location at a faster interval).  Applications with only the coarse location permission may have their interval silently throttled. |
 | [`fastestLocationUpdateInterval`](#param-integer-millis-fastestlocationupdateinterval) | `Integer` | Optional | `1000` | Explicitly set the fastest interval for location updates, in milliseconds.  This controls the fastest rate at which your application will receive location updates, which might be faster than #locationUpdateInterval in some situations (for example, if other applications are triggering location updates).  This allows your application to passively acquire locations at a rate faster than it actively acquires locations, saving power.  Unlike #locationUpdateInterval, this parameter is exact. Your application will never receive updates faster than this value.  If you don't call this method, a fastest interval will be set to 30000 (30s).  An interval of 0 is allowed, but not recommended, since location updates may be extremely fast on future implementations.  If #fastestLocationUpdateInterval is set slower than #locationUpdateInterval, then your effective fastest interval is #locationUpdateInterval. |
 | [`stopAfterElapsedMinutes`](#param-integer-stopafterelapsedminutes) | `Integer`  |  Optional | `0`  | Stop monitoring location after a set number of minutes have elasped since #start method was called. |
-| [`stationaryRadius`](#param-integer-stationaryradius-meters) | `Integer`  |  Required (**iOS**)| `20`  | When stopped, the minimum distance the device must move beyond the stationary location for aggressive background-tracking to engage. Note, since the plugin uses iOS significant-changes API, the plugin cannot detect the exact moment the device moves out of the stationary-radius. In normal conditions, it can take as much as 3 city-blocks to 1/2 km before staionary-region exit is detected. |
+| [`stationaryRadius`](#param-integer-stationaryradius-meters) | `Integer`  |  Required (**iOS**)| `25`  | When stopped, the minimum distance the device must move beyond the stationary location for aggressive background-tracking to engage. Note, since the plugin uses iOS significant-changes API, the plugin cannot detect the exact moment the device moves out of the stationary-radius. In normal conditions, it can take as much as 3 city-blocks to 1/2 km before staionary-region exit is detected. |
 | [`disableElasticity`](#param-boolean-disableelasticity-false) | `bool`  |  Optional (**iOS**)| `false`  | Set `true` disables automatic speed-based `#distanceFilter` elasticity. eg: When device is moving at highway speeds, locations are returned at ~ 1 / km. |
 | [`activityType`](#param-string-activitytype-automotivenavigation-othernavigation-fitness-other) | `String` | Required (**iOS**)| `Other` | Presumably, this affects iOS GPS algorithm. See [Apple docs](https://developer.apple.com/library/ios/documentation/CoreLocation/Reference/CLLocationManager_Class/CLLocationManager/CLLocationManager.html#//apple_ref/occ/instp/CLLocationManager/activityType) for more information | Set the desired interval for active location updates, in milliseconds. |
 | [`useSignificantChangesOnly`](#param-boolean-usesignificantchangesonly-false) | `Boolean` | Optional (**iOS**)| `false` | Set `true` in order to disable constant background-tracking and use only the iOS [Significant Changes API](https://developer.apple.com/library/ios/documentation/CoreLocation/Reference/CLLocationManager_Class/index.html#//apple_ref/occ/instm/CLLocationManager/startMonitoringSignificantLocationChanges). If Apple has denied your application due to background-tracking, this can be a solution. **NOTE** The Significant Changes API will report a location only when a significant change from the last location has occurred. Many of the configuration parameters **will be ignored**, such as `#distanceFilter`, `#stationaryRadius`, `#activityType`, etc. |
@@ -53,14 +53,14 @@ bgGeo.setConfig({
 
 | Option | Type | Opt/Required | Default | Note |
 |---|---|---|---|---|
-| [`url`](#param-string-url) | `String` | Optional | - | Your server url where you wish to HTTP POST recorded locations to. |
-| [`params`](#param-object-params) | `Object` | Optional | `{}` | Optional HTTP params sent along in HTTP request to above `#url`. |
-| [`headers`](#param-object-headers) | `Object` | Optional | `{}` | Optional HTTP headers sent along in HTTP request to above `#url` |
-| [`extras`](#param-object-extras) | `Object` | Optional | | Optional `{}` to attach to each recorded location |
+| [`url`](#param-string-url) | `String` | Optional | `null` | Your server url where you wish to HTTP POST recorded locations to. |
+| [`params`](#param-object-params) | `Object` | Optional | `null` | Optional HTTP params sent along in HTTP request to above `#url`. |
+| [`headers`](#param-object-headers) | `Object` | Optional | `null` | Optional HTTP headers sent along in HTTP request to above `#url` |
+| [`extras`](#param-object-extras) | `Object` | Optional | | Optional `null` to attach to each recorded location |
 | [`method`](#param-string-method-post) | `String` | Optional | `POST` | The HTTP method. Some servers require `PUT`.
 | [`autoSync`](#param-string-autosync-true) | `Boolean` | Optional | `true` | If you've enabled the HTTP feature by configuring an `#url`, the plugin will attempt to HTTP POST each location to your server **as it is recorded**. If you set `autoSync: false`, it's up to you to **manually** execute the `#sync` method to initate the HTTP POST (**NOTE** The plugin will continue to persist **every** recorded location in the SQLite database until you execute `#sync`). |
 | [`batchSync`](#param-string-batchsync-false) | `Boolean` | Optional | `false` | If you've enabled HTTP feature by configuring an `#url`, `batchSync: true` will POST all the locations currently stored in native SQLite datbase to your server in a single HTTP POST request. With `batchSync: false`, an HTTP POST request will be initiated for **each** location in database. |
-| [`maxBatchSize`](#param-integer-maxbatchsize-undefined) | `Integer` | Optional | `undefined` | If you've enabled HTTP feature by configuring an `#url` and `batchSync: true`, this parameter will limit the number of records attached to each batch.  If the current number of records exceeds the `maxBatchSize`, multiple HTTP requests will be generated until the location queue is empty. |
+| [`maxBatchSize`](#param-integer-maxbatchsize-undefined) | `Integer` | Optional | `-1` | If you've enabled HTTP feature by configuring an `#url` and `batchSync: true`, this parameter will limit the number of records attached to each batch.  If the current number of records exceeds the `maxBatchSize`, multiple HTTP requests will be generated until the location queue is empty. |
 | [`maxDaysToPersist`](#param-integer-maxdaystopersist) | `Integer` | Optional | `1` | Maximum number of days to store a geolocation in plugin's SQLite database when your server fails to respond with `HTTP 200 OK`. The plugin will continue attempting to sync with your server until `maxDaysToPersist` when it will give up and remove the location from the database. |
 
 ## Application Options
@@ -69,6 +69,7 @@ bgGeo.setConfig({
 |---|---|---|---|---|
 | [`debug`](#param-boolean-debug) | `Boolean` | Optional | `false` | When enabled, the plugin will emit sounds for life-cycle events of background-geolocation! **NOTE iOS**: In addition, you must manually enable the *Audio and Airplay* background mode in *Background Capabilities* to hear these debugging sounds. |
 | [`stopOnTerminate`](#param-boolean-stoponterminate) | `Boolean` | Optional | `true` | Enable this in order to force a stop() when the application terminated (e.g. on iOS, double-tap home button, swipe away the app). On Android, stopOnTerminate: false will cause the plugin to operate as a headless background-service (in this case, you should configure an #url in order for the background-service to send the location to your server) |
+| [`startOnBoot`](#param-boolean-startonboot-false) | `Boolean` | Optional | `false` | Set to `true` to enable background-tracking after the device reboots. |
 | [`heartbeatInterval`](#param-integer-heartbeatinterval-undefined) | `Integer(seconds)` | Optional | `undefined` | Causes a `heartbeat` event to fire each `heartbeatInterval` seconds.  **NOTE** The `heartbeat` event will only fire when the device is in the **STATIONARY** state -- it will not fire when the device is moving.|
 | [`foregroundService`](#param-boolean-foregroundservice-false) | `Boolean` | Optional **Android** | `false` | Make the Android service [run in the foreground](http://developer.android.com/intl/ru/reference/android/app/Service.html#startForeground(int, android.app.Notification)), supplying the ongoing notification to be shown to the user while in this state. By default services are background, meaning that if the system needs to kill them to reclaim more memory (such as to display a large page in a web browser).  @see `notificationTitle`, `notificationText` & `notificatinoColor`|
 | [`notificationTitle`](#param-string-notificationtitle-app-name) | `String` | Optional **Android** | App name | When running the service with `foregroundService: true`, Android requires a persistent notification in the Notification Bar.  Defaults to the application name|
@@ -90,6 +91,7 @@ bgGeo.on('location', function(location) {
 | [`location`](#location) | Fired whenever a new location is recorded. |
 | [`error`](#error) | Fired whenever an error occurs (eg: `location`, `geofence`) |
 | [`motionchange`](#motionchange) | Fired when the device changes stationary / moving state. |
+| [`activitychange`](#activitychange) | Fired when the activity-recognition system detects a *change* in detected-activity (`still, on_foot, in_vehicle, on_bicycle, running`) |
 | [`geofence`](#geofence) | Fired when a geofence crossing event occurs. |
 | [`http`](#http) | Fired after a successful HTTP response. `response` object is provided with `status` and `responseText`. |
 | [`heartbeat`](#heartbeat) | Fired each `heartbeatInterval` while the plugin is in the **stationary** state with.  Your callback will be provided with a `params {}` containing the parameters `shakes {Integer}` (#shakes not implemented for Android) as well as the last known `location {Object}` |
@@ -494,6 +496,17 @@ bgGeo.on('motionchange', function(isMoving, location) {
     }
 })
 
+```
+
+####`activitychange`
+Your `callbackFn` will be executed each time the activity-recognition system detects a *change* in detected-activity (`still, on_foot, in_vehicle, on_bicycle, running`).
+
+######@param {String still | on_foot | in_vehicle | on_bicycle | running | unknown} activityName 
+
+```Javascript
+bgGeo.on('activitychange', function(activityName) {
+    console.log('- Activity changed: ', activityName);
+});
 ```
 
 ####`geofence`
