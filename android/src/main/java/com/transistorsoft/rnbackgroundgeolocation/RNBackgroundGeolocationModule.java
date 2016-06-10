@@ -28,6 +28,7 @@ import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.WritableNativeArray;
 import com.facebook.react.bridge.WritableNativeMap;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
+import com.google.android.gms.location.ActivityRecognitionResult;
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingEvent;
 import com.transistorsoft.locationmanager.BackgroundGeolocationService;
@@ -74,6 +75,7 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
 
     private static final String EVENT_LOCATION = "location";
     private static final String EVENT_MOTIONCHANGE = "motionchange";
+    private static final String EVENT_ACTIVITY_CHANGE = "activitychange";
     private static final String EVENT_ERROR = "error";
     private static final String EVENT_GEOFENCE = "geofence";
     private static final String EVENT_HTTP = "http";
@@ -84,8 +86,7 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
 
     private ReadableMap mConfig;
     private Boolean isEnabled           = false;
-    private Boolean isStarting          = false;
-    private Boolean stopOnTerminate     = true;
+    private Boolean isStarting          = false;    
     private Boolean isMoving            = false;
     private Boolean isAcquiringCurrentPosition = false;
     private Boolean forceReload         = false;
@@ -707,6 +708,18 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
         sendEvent(EVENT_SCHEDULE, getState());
     }
 
+    /**
+     * EventBus listener for ARS
+     * @param {ActivityRecognitionResult} result
+     */
+    @Subscribe
+    public void onEventMainThread(ActivityRecognitionResult activityResult) {
+        DetectedActivity activity = activityResult.getMostProbableActivity();
+        if ((currentActivity == null) || (currentActivity.getType() != activity.getType())) {
+            sendEvent(EVENT_ACTIVITY_CHANGE, BackgroundGeolocationService.getActivityName(activity.getType()));
+        }
+        currentActivity = activity;
+    }
 
     @Subscribe
     public void onEventMainThread(Location location) {
@@ -793,9 +806,6 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
     }
 
     private boolean applyConfig() {
-        if (mConfig.hasKey("stopOnTerminate")) {
-            stopOnTerminate = mConfig.getBoolean("stopOnTerminate");
-        }
         SharedPreferences settings = activity.getSharedPreferences("TSLocationManager", 0);
         SharedPreferences.Editor editor = settings.edit();
 
@@ -999,6 +1009,7 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
 
         }
     }
+
     private void onLocationError(Bundle event) {
         Integer code = event.getInt("code");
         if (code == BackgroundGeolocationService.LOCATION_ERROR_DENIED) {
@@ -1127,6 +1138,9 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
 
     private void sendEvent(String eventName, WritableMap params) {
         reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit(TAG + ":" + eventName, params);
+    }
+    private void sendEvent(String eventName, String result) {
+        reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit(TAG + ":" + eventName, result);
     }
 
     private WritableMap locationToMap(JSONObject json) {
@@ -1362,7 +1376,7 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
         }
         currentPositionCallbacks.clear();
 
-        if(stopOnTerminate) {
+        if(Settings.getStopOnTerminate()) {
             if (isEnabled) {
                 Intent intent = new Intent(activity, BackgroundGeolocationService.class);
                 reactContext.stopService(intent);
