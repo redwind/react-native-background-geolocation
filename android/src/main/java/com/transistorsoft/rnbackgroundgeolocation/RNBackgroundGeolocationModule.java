@@ -110,33 +110,16 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
     private ReadableMap currentPositionOptions;
 
     private ToneGenerator toneGenerator;
-
-    ReactApplicationContext reactContext;
-    Activity activity;
-
-    public RNBackgroundGeolocationModule(ReactApplicationContext reactContext, Activity activity) {
+    
+    public RNBackgroundGeolocationModule(ReactApplicationContext reactContext) {
         super(reactContext);
-        this.reactContext   = reactContext;
-        this.activity       = activity;
-
+        
         EventBus eventBus = EventBus.getDefault();
         synchronized(eventBus) {
             if (!eventBus.isRegistered(this)) {
                 eventBus.register(this);
             }
         }
-
-        // Load settings.
-        SharedPreferences settings = activity.getSharedPreferences("TSLocationManager", 0);
-        Settings.init(settings);
-        Settings.load();
-
-        Intent launchIntent = activity.getIntent();
-        if (launchIntent.hasExtra("forceReload")) {
-            forceReload = true;
-        }
-        backgroundServiceIntent = new Intent(reactContext, BackgroundGeolocationService.class);
-        backgroundServiceIntent.putExtra("enabled", isEnabled);
     }
 
     @Override
@@ -146,6 +129,20 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void configure(ReadableMap config, Callback callback) {
+
+        Activity activity = getCurrentActivity();
+        // Load settings.
+        SharedPreferences settings = activity.getSharedPreferences("TSLocationManager", 0);
+        Settings.init(settings);
+        Settings.load();
+
+        Intent launchIntent = activity.getIntent();
+        if (launchIntent.hasExtra("forceReload")) {
+            forceReload = true;
+        }
+        backgroundServiceIntent = new Intent(getReactApplicationContext(), BackgroundGeolocationService.class);
+        backgroundServiceIntent.putExtra("enabled", isEnabled);
+
         mConfig = config;
         Settings.reset();
         applyConfig();
@@ -175,6 +172,7 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
             startCallback.put("success", success);
             startCallback.put("failure", failure);
         }
+        Activity activity = getCurrentActivity();
         //setEnabled(true);
         backgroundServiceIntent = new Intent(activity, BackgroundGeolocationService.class);
 
@@ -232,7 +230,7 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
         startCallback.put("success", success);
         startCallback.put("failure", failure);
 
-        backgroundServiceIntent = new Intent(activity, BackgroundGeolocationService.class);
+        backgroundServiceIntent = new Intent(getCurrentActivity(), BackgroundGeolocationService.class);
         backgroundServiceIntent.putExtra("command", BackgroundGeolocationService.ACTION_START_GEOFENCES);
         if (hasPermission(ACCESS_COARSE_LOCATION) && hasPermission(ACCESS_FINE_LOCATION)) {
             setEnabled(true);
@@ -459,7 +457,7 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
             Log.i(TAG, "FileNotFound");
             e.printStackTrace();
         }
-
+        Activity activity = getCurrentActivity();
         try {
             activity.startActivityForResult(Intent.createChooser(mailer, "Send log: " + email + "..."), 1);
             success.invoke();
@@ -501,10 +499,11 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
                 eventBus.register(this);
             }
         }
+        Activity activity = getCurrentActivity();
         if (!BackgroundGeolocationService.isInstanceCreated()) {
             Intent syncIntent = new Intent(activity, BackgroundGeolocationService.class);
             syncIntent.putExtra("command", BackgroundGeolocationService.ACTION_SYNC);
-            reactContext.startService(syncIntent);
+            getReactApplicationContext().startService(syncIntent);
         } else {
             Bundle event = new Bundle();
             event.putString("name", BackgroundGeolocationService.ACTION_SYNC);
@@ -539,7 +538,7 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
             }
             if (!BackgroundGeolocationService.isInstanceCreated()) {
                 backgroundServiceIntent.putExtra("command", BackgroundGeolocationService.ACTION_GET_CURRENT_POSITION);
-                reactContext.startService(backgroundServiceIntent);
+                getReactApplicationContext().startService(backgroundServiceIntent);
             }
         } else {
             JSONObject currentPositionOptions = new JSONObject();
@@ -574,13 +573,13 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
     }
     @ReactMethod
     public void getOdometer(Callback success, Callback failure) {
-        SharedPreferences settings = reactContext.getSharedPreferences("TSLocationManager", 0);
+        SharedPreferences settings = getReactApplicationContext().getSharedPreferences("TSLocationManager", 0);
         Float value = settings.getFloat("odometer", 0);
         success.invoke(value);
     }
     @ReactMethod
     public void resetOdometer(Callback success, Callback failure) {
-        SharedPreferences settings = reactContext.getSharedPreferences("TSLocationManager", 0);
+        SharedPreferences settings = getReactApplicationContext().getSharedPreferences("TSLocationManager", 0);
         SharedPreferences.Editor editor = settings.edit();
 
         editor.putFloat("odometer", 0);
@@ -665,7 +664,7 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
     public void getGeofences(Callback success, Callback failure) {
         WritableArray rs = new WritableNativeArray();
 
-        SharedPreferences settings = reactContext.getSharedPreferences(TAG, 0);
+        SharedPreferences settings = getReactApplicationContext().getSharedPreferences(TAG, 0);
         if (settings.contains("geofences")) {
             try {
                 JSONArray json = new JSONArray(settings.getString("geofences", "[]"));
@@ -748,6 +747,7 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
     }
 
     private void startScheduleService() {
+        Activity activity = getCurrentActivity();
         Intent intent = new Intent(activity, ScheduleService.class);
         stopScheduleService();
         activity.startService(intent);
@@ -755,6 +755,7 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
 
     private void stopScheduleService() {
         // First kill if it's already running.
+        Activity activity = getCurrentActivity();
         if (ScheduleService.isInstanceCreated()) {
             Intent intent = new Intent(activity, ScheduleService.class);
             activity.stopService(intent);
@@ -785,6 +786,7 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
         } else if (BackgroundGeolocationService.ACTION_CHANGE_PACE.equalsIgnoreCase(name)) {
             this.onChangePace(event);
         } else if (BackgroundGeolocationService.ACTION_GOOGLE_PLAY_SERVICES_CONNECT_ERROR.equalsIgnoreCase(name)) {
+            Activity activity = getCurrentActivity();
             GoogleApiAvailability.getInstance().getErrorDialog(activity, event.getInt("errorCode"), 1001).show();
         } else if (BackgroundGeolocationService.ACTION_LOCATION_ERROR.equalsIgnoreCase(name)) {
             this.onLocationError(event);
@@ -806,6 +808,7 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
     }
 
     private boolean applyConfig() {
+        Activity activity = getCurrentActivity();
         SharedPreferences settings = activity.getSharedPreferences("TSLocationManager", 0);
         SharedPreferences.Editor editor = settings.edit();
 
@@ -825,6 +828,7 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
         boolean wasEnabled = isEnabled;
         isEnabled = value;
 
+        Activity activity = getCurrentActivity();
         Intent launchIntent = activity.getIntent();
         if (forceReload) {
             Integer eventCode = launchIntent.getIntExtra("eventCode", -1);
@@ -856,7 +860,7 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
             activity.moveTaskToBack(true);
         }
 
-        SharedPreferences settings = reactContext.getSharedPreferences("TSLocationManager", 0);
+        SharedPreferences settings = getReactApplicationContext().getSharedPreferences("TSLocationManager", 0);
         SharedPreferences.Editor editor = settings.edit();
         editor.putBoolean("enabled", isEnabled);
         editor.commit();
@@ -869,7 +873,7 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
                 }
             }
             if (!BackgroundGeolocationService.isInstanceCreated()) {
-                reactContext.startService(backgroundServiceIntent);
+                getReactApplicationContext().startService(backgroundServiceIntent);
             } else {
                 String command = backgroundServiceIntent.getStringExtra("command");
                 Bundle event = new Bundle();
@@ -892,12 +896,13 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
                 }
             }
         } else {
-            reactContext.stopService(backgroundServiceIntent);
+            getReactApplicationContext().stopService(backgroundServiceIntent);
         }
     }
 
     private void onStart(Bundle event) {
         if (event.getBoolean("response") && !event.getBoolean("success")) {
+            Activity activity = getCurrentActivity();
             Toast.makeText(activity, event.getString("message"), Toast.LENGTH_LONG).show();
             if (startCallback != null) {
                 startCallback.get("failure").invoke(event.getString("message"));
@@ -1014,7 +1019,7 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
         Integer code = event.getInt("code");
         if (code == BackgroundGeolocationService.LOCATION_ERROR_DENIED) {
             if (isDebugging()) {
-                Toast.makeText(activity, "Location services disabled!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getCurrentActivity(), "Location services disabled!", Toast.LENGTH_SHORT).show();
             }
         }
         if (isAcquiringCurrentPosition) {
@@ -1081,6 +1086,7 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
     }
 
     private Boolean isDebugging() {
+        Activity activity = getCurrentActivity();
         SharedPreferences settings = activity.getSharedPreferences("TSLocationManager", 0);
         return settings.contains("debug") && settings.getBoolean("debug", false);
     }
@@ -1137,10 +1143,10 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
     }
 
     private void sendEvent(String eventName, WritableMap params) {
-        reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit(TAG + ":" + eventName, params);
+        getReactApplicationContext().getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit(TAG + ":" + eventName, params);
     }
     private void sendEvent(String eventName, String result) {
-        reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit(TAG + ":" + eventName, result);
+        getReactApplicationContext().getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit(TAG + ":" + eventName, result);
     }
 
     private WritableMap locationToMap(JSONObject json) {
@@ -1378,8 +1384,8 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule {
 
         if(Settings.getStopOnTerminate()) {
             if (isEnabled) {
-                Intent intent = new Intent(activity, BackgroundGeolocationService.class);
-                reactContext.stopService(intent);
+                Intent intent = new Intent(getCurrentActivity(), BackgroundGeolocationService.class);
+                getReactApplicationContext().stopService(intent);
             }
             stopScheduleService();
         }
