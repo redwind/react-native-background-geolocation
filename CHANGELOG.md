@@ -1,5 +1,6 @@
 # Change Log
 ## [Unreleased]
+- [Fixed] Breaking changes with react-native-0.29.0
 
 ## [1.3.0] - 2016-06-10
 - [Changed] `Scheduler` will use `Locale.US` in its Calendar operations, such that the days-of-week correspond to Sunday=1..Saturday=6.
