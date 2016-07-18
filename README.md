@@ -15,7 +15,7 @@ $ npm install git+https://git@github.com:transistorsoft/react-native-background-
 
 ```
 
-[See Wiki](../..//wiki/Installation)
+[See Installation Guide](docs/INSTALL.md)
 
 
 ## Configure your license
@@ -33,6 +33,9 @@ BackgroundGeolocation.configure({
   .
   .
   .
+}, function(state) {
+  console.log('- Configure success, state: ', state);
+  // Module is now ready to use.
 });
 ```
 
@@ -95,6 +98,11 @@ BackgroundGeolocation.configure({
   params: {
     "auth_token": "maybe_your_server_authenticates_via_token_YES?"
   }
+}, function(state) {
+  console.log('- BackgroundGeolocation is ready to use', state);
+  if (!state.enabled) {
+    BackgroundGeolocation.start();
+  }
 });
     
 var Foo = React.createClass({
@@ -125,19 +133,21 @@ var Foo = React.createClass({
       console.log('- [js]http: ', statusCode, responseText);
     });
     
-    BackgroundGeolocation.start(function() {
-      console.log('- [js] BackgroundGeolocation started successfully');
-      
-      // Fetch current position
-      BackgroundGeolocation.getCurrentPosition({timeout: 30}, function(location) {
-        console.log('- [js] BackgroundGeolocation received current position: ', JSON.stringify(location));
-      }, function(error) {
-        alert("Location error: " + error);
-      });
-    });
+    BackgroundGeolocation.configure({
+      desiredAccuracy: 0,
+      distanceFilter: 50,
+      locationUpdateInterval: 5000,
+      activityRecognitionInterval: 10000
+    } function(state) {
+      console.log('- [js] BackgroundGeolocation successfully configure', state);
 
-    // Call #stop to halt all tracking
-    // BackgroundGeolocation.stop();
+      if (!state.enabled) {
+        BackgroundGeolocation.start();
+      }
+      // Call #stop to halt all tracking
+      // BackgroundGeolocation.stop();
+    
+    });
   }
 });
 
