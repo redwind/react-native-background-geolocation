@@ -373,7 +373,7 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule im
         TSCallback callback = new TSCallback() {
             @Override
             public void success(Object o) {
-                success.invoke((String) o);
+                success.invoke((Boolean) o);
             }
             @Override
             public void error(Object o) {
