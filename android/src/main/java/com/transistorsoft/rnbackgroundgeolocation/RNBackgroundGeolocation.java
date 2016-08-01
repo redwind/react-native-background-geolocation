@@ -16,15 +16,9 @@ import com.facebook.react.bridge.JavaScriptModule;
  * Created by chris on 2015-10-30.
  */
 public class RNBackgroundGeolocation implements ReactPackage {
-    private Activity mActivity = null;
-
-    public RNBackgroundGeolocation(Activity activity) {
-        mActivity = activity;
-    }
-
     @Override public List<NativeModule> createNativeModules (ReactApplicationContext reactContext) {
         List<NativeModule> modules = new ArrayList<>();
-        modules.add(new RNBackgroundGeolocationModule(reactContext, mActivity));
+        modules.add(new RNBackgroundGeolocationModule(reactContext));
         return modules;
     }
 

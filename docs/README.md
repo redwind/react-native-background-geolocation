@@ -92,6 +92,7 @@ bgGeo.on('location', function(location) {
 | [`error`](#error) | Fired whenever an error occurs (eg: `location`, `geofence`) |
 | [`motionchange`](#motionchange) | Fired when the device changes stationary / moving state. |
 | [`activitychange`](#activitychange) | Fired when the activity-recognition system detects a *change* in detected-activity (`still, on_foot, in_vehicle, on_bicycle, running`) |
+| [`providerchange`](#providerchange)| Fired when a change in the state of the device's **Location Services** has been detected.  eg: "GPS ON", "Wifi only".|
 | [`geofence`](#geofence) | Fired when a geofence crossing event occurs. |
 | [`http`](#http) | Fired after a successful HTTP response. `response` object is provided with `status` and `responseText`. |
 | [`heartbeat`](#heartbeat) | Fired each `heartbeatInterval` while the plugin is in the **stationary** state with.  Your callback will be provided with a `params {}` containing the parameters `shakes {Integer}` (#shakes not implemented for Android) as well as the last known `location {Object}` |
@@ -107,9 +108,16 @@ bgGeo.on('location', function(location) {
 | [`stop`](#stop) | `callbackFn` | Disable location tracking. Supplied `callbackFn` will be executed when tracking is successfully engaged. |
 | [`startSchedule`](#stopschedulecallbackfn) | `callbackFn` | If a `schedule` was configured, this method will initiate that schedule.  The plugin will automatically be started or stopped according to the configured `schedule`.    Supplied `callbackFn` will be executed once the Scheduler has parsed and initiated your `schedule` |
 | [`stopSchedule`](#stopschedulecallbackfn) | `callbackFn` | This method will stop the Scheduler service.  It will also execute the `#stop` method and **cease all tracking**.  Your `callbackFn` will be executed after the Scheduler has stopped |
-| [`startGeofences`](#startgeofencescallbackfn) | `callbackFn` | Engages the geofences-only `trackingMode`.  In this mode, no active location-tracking will occur -- only geofences will be monitored|
+| [`addGeofence`](#addgeofenceobject) | `{config}` | Adds a geofence to be monitored by the native plugin. Monitoring of a geofence is halted after a crossing occurs. |
+| [`addGeofences`](#addgeofencesgeofences-callbackfn-failurefn) | `[geofences]` | Adds a list geofences to be monitored by the native plugin. Monitoring of a geofence is halted after a crossing occurs.|
+| [`removeGeofence`](#removegeofenceidentifier) | `identifier` | Removes a geofence identified by the provided `identifier`. |
+| [`removeGeofences`](#removegeofences-callbackfn-failurefn) |  | Removes all geofences |
+| [`getGeofences`](#getgeofencescallbackfn) | `callbackFn` | Fetch the list of monitored geofences. Your callbackFn will be provided with an Array of geofences. If there are no geofences being monitored, you'll receive an empty `Array []`.|
+| [`startGeofences`](#startgeofencescallbackfn) | `callbackFn` | **BETA** Engages the geofences-only `trackingMode`.  In this mode, no active location-tracking will occur -- only geofences will be monitored|
 | [`getState`](#getstatecallbackfn) | `callbackFn` | Fetch the current-state of the plugin, including `enabled`, `isMoving`, as well as all other config params. |
-| [`getCurrentPosition`](#getcurrentpositionoptions-successfn-failurefn) | `{options}, `successFn`, `failureFn` | Retrieves the current position. This method instructs the native code to fetch exactly one location using maximum power & accuracy. |
+| [`getCurrentPosition`](#getcurrentpositionoptions-successfn-failurefn) | `{options}`, `successFn`, `failureFn` | Retrieves the current position. This method instructs the native code to fetch exactly one location using maximum power & accuracy. |
+| [`watchPosition`](#watchpositionsuccessfn-failurefn-options) | `successFn`, `failureFn`, `{options}` | Start a stream of continuous location-updates.  The native code will persist the fetched location to its SQLite database just as any other location in addition to POSTing to your configured `#url` (if you've enabled the HTTP features).|
+| [`stopWatchPosition`](#stopwatchpositionsuccessfn-failurefn-options) | `successFn`, `failureFn` | Halt `watchPosition` updates. |
 | [`changePace`](#changepaceboolean) | `isMoving` | Initiate or cancel immediate background tracking. When set to true, the plugin will begin aggressively tracking the devices Geolocation, bypassing stationary monitoring. If you were making a "Jogging" application, this would be your [Start Workout] button to immediately begin GPS tracking. Send false to disable aggressive GPS monitoring and return to stationary-monitoring mode. |
 | [`getLocations`](#getlocationscallbackfn) | `callbackFn` | Fetch all the locations currently stored in native plugin's SQLite database. Your callbackFn`` will receive an `Array` of locations in the 1st parameter. |
 | [`getCount`](#getcountcallbackfn-failurefn) | `callbackFn` | Fetches count of SQLite locations table `SELECT count(*) from locations` |
@@ -118,11 +126,6 @@ bgGeo.on('location', function(location) {
 | [`getOdometer`](#getodometercallbackfn) | `callbackFn` | The plugin constantly tracks distance travelled. The supplied callback will be executed and provided with a `distance` as the 1st parameter. |
 | [`resetOdometer`](#resetodometercallbackfn) | `callbackFn` | Reset the **odometer** to `0`. The plugin never automatically resets the odometer -- this is **up to you**. |
 | [`playSound`](#playsoundsoundid) | `soundId` | Here's a fun one. The plugin can play a number of OS system sounds for each platform. For [IOS](http://iphonedevwiki.net/index.php/AudioServices) and [Android](http://developer.android.com/reference/android/media/ToneGenerator.html). I offer this API as-is, it's up to you to figure out how this works. |
-| [`addGeofence`](#addgeofenceobject) | `{config}` | Adds a geofence to be monitored by the native plugin. Monitoring of a geofence is halted after a crossing occurs. |
-| [`addGeofences`](#addgeofencesgeofences-callbackfn-failurefn) | `{geofences}` | Adds a list geofences to be monitored by the native plugin. Monitoring of a geofence is halted after a crossing occurs.|
-| [`removeGeofence`](#removegeofenceidentifier) | `identifier` | Removes a geofence identified by the provided `identifier`. |
-| [`removeGeofences`](#removegeofences-callbackfn-failurefn) |  | Removes all geofences |
-| [`getGeofences`](#getgeofencescallbackfn) | `callbackFn` | Fetch the list of monitored geofences. Your callbackFn will be provided with an Array of geofences. If there are no geofences being monitored, you'll receive an empty `Array []`.|
 | [`getLog`](#getlogcallbackfn) | `calbackFn` | Fetch the entire contents of the current circular log and return it as a String.|
 | [`emailLog`](#emaillogemail-callbackfn) | `email`, `callbackFn` | Fetch the entire contents of the current circular log and email it to a recipient using the device's native email client.|
 
@@ -509,6 +512,24 @@ bgGeo.on('activitychange', function(activityName) {
 });
 ```
 
+####`providerchange`
+Fired when a change in the state of the device's **Location Services** has been detected.  eg: "GPS ON", "Wifi only".  Your `callbackFn` will be provided with an `{Object} provider` containing the following properties.  The plugin will **automatically** fetch the current location where the `providerchange` occurred and persist that location to the database, appending the `#provider` information to the JSON object.  This will be synced to your configured `#url` just like any other recorded location.
+
+![](https://dl.dropboxusercontent.com/u/2319755/react-native-background-geolocation/images/Screenshot_20160718-223448.png)
+
+######@param {Boolean} enabled Whether location-services is enabled
+######@param {Boolean} gps Whether gps is enabled
+######@param {Boolean} wifi Whether wifi geolocation is enabled.
+
+```Javascript
+bgGeo.on('providerchange', function(provider) {
+    console.log('- Provider Change: ', provider);
+    console.log('  enabled: ', provider.enabled);
+    console.log('  gps: ', provider.gps);
+    console.log('  wifi: ', provider.wifi);
+});
+```
+
 ####`geofence`
 Adds a geofence event-listener. Your supplied callback will be called when any monitored geofence crossing occurs. The `callbackFn` will be provided the following parameters:
 
@@ -802,6 +823,35 @@ If a location failed to be retrieved, you `failureFn` will be executed with an e
 | kCLErrorDeferredDistanceFiltered | - | 14 |
 | kCLErrorDeferredCanceled | - | 15 |
 
+####`watchPosition(successFn, failureFn, options)`
+Start a stream of continuous location-updates.  The native code will persist the fetched location to its SQLite database just as any other location in addition to POSTing to your configured `#url` (if you've enabled the HTTP features).  
+
+#### Options
+######@param {Integer} locationUpdateInterval
+######@param {Integer} desiredAccuracy
+
+#### Callback
+
+######@param {Object} location The Location data
+
+```Javascript
+bgGeo.watchPosition(function(location) {
+    console.log(“- Watch position: “, location);
+}, function(errorCode) {
+    alert('An location error occurred: ' + errorCode);
+}, {
+    locationUpdateInterval: 5000    // <-- retrieve a location every 5s.
+});
+
+```
+
+####`stopWatchPosition(successFn, failureFn)`
+
+Halt `watchPosition` updates.
+
+```Javascript
+bgGeo.stopWatchPosition();  // <-- callbacks are optional
+```
 
 ####`changePace({Boolean})`
 Initiate or cancel immediate background tracking. When set to `true`, the plugin will begin aggressively tracking the devices Geolocation, bypassing stationary monitoring. If you were making a "Jogging" application, this would be your [Start Workout] button to immediately begin GPS tracking. Send `false` to disable aggressive GPS monitoring and return to stationary-monitoring mode.

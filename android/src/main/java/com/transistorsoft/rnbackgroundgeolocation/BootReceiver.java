@@ -1,15 +1,12 @@
 package com.transistorsoft.rnbackgroundgeolocation;
 
 import com.transistorsoft.locationmanager.*;
+import com.transistorsoft.locationmanager.adapter.BackgroundGeolocation;
 import com.transistorsoft.locationmanager.settings.*;
-import com.transistorsoft.locationmanager.scheduler.*;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
-import android.os.Bundle;
-
 import org.json.JSONArray;
 
 /**
@@ -23,28 +20,19 @@ public class BootReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        Settings.init(context.getSharedPreferences(TAG, 0));
-        Settings.load();
+        TSLog.box("BootReceiver");
 
-        boolean startOnBoot     = Settings.getStartOnBoot();
-        boolean enabled         = Settings.getEnabled();
+        BackgroundGeolocation adapter = BackgroundGeolocation.getInstance(context, intent);
 
-        // Start scheduler service
+        // Start scheduler service?
         JSONArray schedule = Settings.getSchedule();
         if (schedule.length() > 0) {
-            context.startService(new Intent(context, ScheduleService.class));
+            adapter.startSchedule();
         }
 
-        if (!startOnBoot || !enabled) {
-            return;
+        // startOnBoot?
+        if (Settings.getStartOnBoot() && Settings.getEnabled()) {
+            adapter.startOnBoot();
         }
-        Log.i(TAG, "- BootReceiver booting service");
-        // Start the service.
-
-        Intent launchIntent = new Intent(context, BackgroundGeolocationService.class);
-        Bundle event = new Bundle();
-        event.putString("command", BackgroundGeolocationService.ACTION_START_ON_BOOT);
-        launchIntent.putExtras(event);
-        context.startService(launchIntent);
     }
 }
