@@ -831,14 +831,14 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule im
             }
         }));
 
-        adapter.on(BackgroundGeolocation.EVENT_GEOFENCE, (new TSCallback() {
+        adapter.on(BackgroundGeolocation.EVENT_SCHEDULE, (new TSCallback() {
             @Override
             public void success(Object o) {
                 onSchedule((JSONObject) o);
             }
             @Override
             public void error(Object o) {
-                TSLog.e(BackgroundGeolocation.EVENT_GEOFENCE + " error: " + o);
+                TSLog.e(BackgroundGeolocation.EVENT_SCHEDULE + " error: " + o);
             }
         }));
 
