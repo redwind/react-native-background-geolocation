@@ -1,5 +1,6 @@
 # Change Log
 ## [Unreleased]
+- [Fixed] GoogleApiClient null pointer exeception
 
 ## [2.0.1] - 2016-08-08
 - [Fixed] Parse error in Scheduler.
