@@ -103,5 +103,15 @@ public class MainActivity extends ReactActivity {
     <!-- /background-geolocation -->
 </manifest>
 
+```
 
+* In your `proguard-rules.pro` (`android/app/proguard-rules.pro`)
+```
+# react-native-background-geolocation uses EventBus 3.0
+# ref http://greenrobot.org/eventbus/documentation/proguard/
+-keepattributes *Annotation*
+-keepclassmembers class ** {
+    @org.greenrobot.eventbus.Subscribe <methods>;
+}
+-keep enum org.greenrobot.eventbus.ThreadMode { *; }
 ```
