@@ -1,6 +1,7 @@
 # Change Log
 ## [Unreleased]
 - [Fixed] GoogleApiClient null pointer exeception
+- [Changed] Remove `android-compat-v7` from dependencies
 
 ## [2.0.1] - 2016-08-08
 - [Fixed] Parse error in Scheduler.
