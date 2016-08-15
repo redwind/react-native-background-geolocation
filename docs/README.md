@@ -32,6 +32,7 @@ bgGeo.setConfig({
 | [`distanceFilter`](#param-integer-distancefilter) | `Integer` | Required | `10`| The minimum distance (measured in meters) a device must move horizontally before an update event is generated. @see Apple docs. However, #distanceFilter is elastically auto-calculated by the plugin: When speed increases, #distanceFilter increases; when speed decreases, so does distanceFilter (disabled with `disableElasticity: true`) |
 | [`locationUpdateInterval`](#param-integer-millis-locationupdateinterval) | `Integer` | Required | `1000`| Set the desired interval for active location updates, in milliseconds.  The location client will actively try to obtain location updates for your application at this interval, so it has a direct influence on the amount of power used by your application. Choose your interval wisely.  This interval is inexact. You may not receive updates at all (if no location sources are available), or you may receive them slower than requested. You may also receive them faster than requested (if other applications are requesting location at a faster interval).  Applications with only the coarse location permission may have their interval silently throttled. |
 | [`fastestLocationUpdateInterval`](#param-integer-millis-fastestlocationupdateinterval) | `Integer` | Optional | `1000` | Explicitly set the fastest interval for location updates, in milliseconds.  This controls the fastest rate at which your application will receive location updates, which might be faster than #locationUpdateInterval in some situations (for example, if other applications are triggering location updates).  This allows your application to passively acquire locations at a rate faster than it actively acquires locations, saving power.  Unlike #locationUpdateInterval, this parameter is exact. Your application will never receive updates faster than this value.  If you don't call this method, a fastest interval will be set to 30000 (30s).  An interval of 0 is allowed, but not recommended, since location updates may be extremely fast on future implementations.  If #fastestLocationUpdateInterval is set slower than #locationUpdateInterval, then your effective fastest interval is #locationUpdateInterval. |
+| [`locationTimeout`](#param-integer-seconds-locationtimeout) | `Integer seconds`  |  Optional | `60`  | Timeout before giving up on retrieving a location |
 | [`stopAfterElapsedMinutes`](#param-integer-stopafterelapsedminutes) | `Integer`  |  Optional | `0`  | Stop monitoring location after a set number of minutes have elasped since #start method was called. |
 | [`stationaryRadius`](#param-integer-stationaryradius-meters) | `Integer`  |  Required (**iOS**)| `25`  | When stopped, the minimum distance the device must move beyond the stationary location for aggressive background-tracking to engage. Note, since the plugin uses iOS significant-changes API, the plugin cannot detect the exact moment the device moves out of the stationary-radius. In normal conditions, it can take as much as 3 city-blocks to 1/2 km before staionary-region exit is detected. |
 | [`disableElasticity`](#param-boolean-disableelasticity-false) | `bool`  |  Optional (**iOS**)| `false`  | Set `true` disables automatic speed-based `#distanceFilter` elasticity. eg: When device is moving at highway speeds, locations are returned at ~ 1 / km. |
@@ -110,7 +111,7 @@ bgGeo.on('location', function(location) {
 | [`stopSchedule`](#stopschedulecallbackfn) | `callbackFn` | This method will stop the Scheduler service.  It will also execute the `#stop` method and **cease all tracking**.  Your `callbackFn` will be executed after the Scheduler has stopped |
 | [`addGeofence`](#addgeofenceobject) | `{config}` | Adds a geofence to be monitored by the native plugin. Monitoring of a geofence is halted after a crossing occurs. |
 | [`addGeofences`](#addgeofencesgeofences-callbackfn-failurefn) | `[geofences]` | Adds a list geofences to be monitored by the native plugin. Monitoring of a geofence is halted after a crossing occurs.|
-| [`removeGeofence`](#removegeofenceidentifier) | `identifier` | Removes a geofence identified by the provided `identifier`. |
+| [`removeGeofence`](#removegeofenceidentifier-successfn-failurefn) | `identifier`, `successFn`, `failureFn` | Removes a geofence identified by the provided `identifier`. |
 | [`removeGeofences`](#removegeofences-callbackfn-failurefn) |  | Removes all geofences |
 | [`getGeofences`](#getgeofencescallbackfn) | `callbackFn` | Fetch the list of monitored geofences. Your callbackFn will be provided with an Array of geofences. If there are no geofences being monitored, you'll receive an empty `Array []`.|
 | [`startGeofences`](#startgeofencescallbackfn) | `callbackFn` | **BETA** Engages the geofences-only `trackingMode`.  In this mode, no active location-tracking will occur -- only geofences will be monitored|
@@ -226,8 +227,11 @@ An interval of 0 is allowed, but not recommended, since location updates may be 
 
 If `#fastestLocationUpdateInterval` is set slower than `#locationUpdateInterval`, then your effective fastest interval is `#locationUpdateInterval`.
 
-========
 An interval of 0 is allowed, but not recommended, since location updates may be extremely fast on future implementations.
+
+####`@param {Integer seconds} locationTimeout`
+
+Timeout in seconds before giving up on retrieving a location and firing `error` event and applicable `callbackFn`(s).
 
 ####`@param {Integer} deferTime`
 
@@ -919,15 +923,19 @@ bgGeo.addGeofences([{
 });
 ```
 
-####`removeGeofence(identifier)`
+####`removeGeofence(identifier, successFn, failureFn)`
 Removes a geofence having the given `{String} identifier`.
 
 ######@config {String} identifier The name of your geofence, eg: "Home", "Office"
-######@config {Function} callbackFn successfully removed geofence.
+######@config {Function} successFn successfully removed geofence.
 ######@config {Function} failureFn failed to remove geofence
 
 ```Javascript
-bgGeo.removeGeofence("Home");
+bgGeo.removeGeofence("Home", function() {
+    console.log('- remove geofence success');
+}, function(error) {
+    console.log('- remove geofence failure: ', error);
+});
 ```
 
 ####`removeGeofences(callbackFn, failureFn)`

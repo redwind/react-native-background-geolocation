@@ -120,7 +120,7 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule im
             failure.invoke("Waiting for a previous start action to complete");
             return;
         }
-        startCallback = new HashMap();
+        startCallback = new HashMap<>();
         startCallback.put("success", success);
         startCallback.put("failure", failure);
 
@@ -203,7 +203,7 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule im
     @ReactMethod
     public void getState(Callback success, Callback failure) {
         WritableMap state = getState();
-        if (!state.hasKey("error")) {
+        if (state != null && !state.hasKey("error")) {
             success.invoke(state);
         } else {
             failure.invoke(state);
@@ -804,7 +804,7 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule im
             }
             @Override
             public void error(Object o) {
-                TSLog.e(BackgroundGeolocation.EVENT_HTTP + " error: " + o);
+                onHttpResponse((JSONObject) o);
             }
         }));
 

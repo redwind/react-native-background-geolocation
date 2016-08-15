@@ -2,6 +2,8 @@
 ## [Unreleased]
 - [Fixed] GoogleApiClient null pointer exeception
 - [Changed] Remove `android-compat-v7` from dependencies
+- [Changed] Change error message when `#removeGeofence` fails.
+- [Fixed] Implement `http` error callback.
 
 ## [2.0.1] - 2016-08-08
 - [Fixed] Parse error in Scheduler.
