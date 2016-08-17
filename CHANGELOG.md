@@ -1,9 +1,12 @@
 # Change Log
-## [Unreleased]
+## [2.0.2]
 - [Fixed] GoogleApiClient null pointer exeception
 - [Changed] Remove `android-compat-v7` from dependencies
 - [Changed] Change error message when `#removeGeofence` fails.
 - [Fixed] Implement `http` error callback.
+- [Fixed] Android heartbeat location wasn't having its meta-data updated (ie: `event: 'heartbeat', battery:<current-data>, uuid: <new uuid>`)
+- [Changed] Reduce Android `minimumActivityRecognitionConfidence` default from `80` to `75`
+- [Changed] Android will catch `java.lang.SecurityException` when attempting to request location-updates without "Location Permission"
 
 ## [2.0.1] - 2016-08-08
 - [Fixed] Parse error in Scheduler.
