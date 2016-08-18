@@ -1,5 +1,6 @@
 # Change Log
-## [2.0.2]
+
+## [2.0.2] - 2016-08-17
 - [Fixed] GoogleApiClient null pointer exeception
 - [Changed] Remove `android-compat-v7` from dependencies
 - [Changed] Change error message when `#removeGeofence` fails.
