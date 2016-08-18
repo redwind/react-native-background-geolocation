@@ -1,4 +1,6 @@
 # Change Log
+## [Unreleased]
+- [Fixed] Issue where Android pukes when configured with an empty schedule `[]`.
 
 ## [2.0.2] - 2016-08-17
 - [Fixed] GoogleApiClient null pointer exeception
