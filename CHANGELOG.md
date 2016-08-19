@@ -1,6 +1,7 @@
 # Change Log
 ## [Unreleased]
-- [Fixed] Issue where Android pukes when configured with an empty schedule `[]`.
+- [Fixed] Issue where Android pukes when configured with an empty schedule `[]`- [Fixed] Android when configured with `batchSync: true, autoSync: true` was failing because the plugin automatically tweaked `autoSync: false` but failed to reset it to the configured value.  This behaviour was obsolete and has been removed.
+- [Added] Add new config `@param {Integer} autoSyncThreshold [0]`.  Allows you to specify a minimum number of persisted records to trigger an auto-sync action.
 
 ## [2.0.2] - 2016-08-17
 - [Fixed] GoogleApiClient null pointer exeception
