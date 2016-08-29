@@ -1,7 +1,9 @@
 # Change Log
-## [Unreleased]
+## [2.0.3] - 2016-08-29
 - [Fixed] Issue where Android pukes when configured with an empty schedule `[]`- [Fixed] Android when configured with `batchSync: true, autoSync: true` was failing because the plugin automatically tweaked `autoSync: false` but failed to reset it to the configured value.  This behaviour was obsolete and has been removed.
 - [Added] Add new config `@param {Integer} autoSyncThreshold [0]`.  Allows you to specify a minimum number of persisted records to trigger an auto-sync action.
+- [Fixed] `SimpleDateFormat` used to format timestamps was not being used in a thread-safe manner, resulting in corrupted timestamps for some
+- [Fixed] React module was setting up listeners on `BackgroundGeolocation` adapter before the app javascript code had a change to subscribe to events, resulting in lost events when MainActivity was launched due to a forceReload event
 
 ## [2.0.2] - 2016-08-17
 - [Fixed] GoogleApiClient null pointer exeception
