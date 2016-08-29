@@ -61,6 +61,7 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule im
     public static final int REQUEST_ACTION_START_GEOFENCES      = 3;
 
     private boolean initialized = false;
+    private boolean configured = false;
     private Intent launchIntent;
     private Context context;
 
@@ -102,6 +103,108 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule im
 
     @ReactMethod
     public void configure(ReadableMap config, final Callback success, final Callback failure) {
+        if (configured) { return; }
+
+        configured = true;
+
+        BackgroundGeolocation adapter = getAdapter();
+
+        adapter.on(BackgroundGeolocation.EVENT_LOCATION, (new TSCallback() {
+            @Override
+            public void success(Object o) {
+                onLocationChange((JSONObject) o);
+            }
+            @Override
+            public void error(Object o) {
+                onLocationError((Integer) o);
+            }
+        }));
+
+        adapter.on(BackgroundGeolocation.EVENT_MOTIONCHANGE, (new TSCallback() {
+            @Override
+            public void success(Object o) {
+                onMotionChange((JSONObject) o);
+            }
+            @Override
+            public void error(Object o) {
+                TSLog.e(BackgroundGeolocation.EVENT_LOCATION + " error: " + o);
+            }
+        }));
+
+        adapter.on(BackgroundGeolocation.EVENT_ACTIVITYCHANGE, (new TSCallback() {
+            @Override
+            public void success(Object o) {
+                onActivityChange((String) o);
+            }
+            @Override
+            public void error(Object o) {
+                TSLog.e(BackgroundGeolocation.EVENT_ACTIVITYCHANGE + " error: " + o);
+            }
+        }));
+
+        adapter.on(BackgroundGeolocation.EVENT_HTTP, (new TSCallback() {
+            @Override
+            public void success(Object o) {
+                onHttpResponse((JSONObject) o);
+            }
+            @Override
+            public void error(Object o) {
+                onHttpResponse((JSONObject) o);
+            }
+        }));
+
+        adapter.on(BackgroundGeolocation.EVENT_HEARTBEAT, (new TSCallback() {
+            @Override
+            public void success(Object o) {
+                onHeartbeat((JSONObject) o);
+            }
+            @Override
+            public void error(Object o) {
+                TSLog.e(BackgroundGeolocation.EVENT_HEARTBEAT + " error: " + o);
+            }
+        }));
+
+        adapter.on(BackgroundGeolocation.EVENT_GEOFENCE, (new TSCallback() {
+            @Override
+            public void success(Object o) {
+                onGeofence((JSONObject) o);
+            }
+
+            @Override
+            public void error(Object o) {
+                TSLog.e(BackgroundGeolocation.EVENT_GEOFENCE + " error: " + o);
+            }
+        }));
+
+        adapter.on(BackgroundGeolocation.EVENT_SCHEDULE, (new TSCallback() {
+            @Override
+            public void success(Object o) {
+                onSchedule((JSONObject) o);
+            }
+            @Override
+            public void error(Object o) {
+                TSLog.e(BackgroundGeolocation.EVENT_SCHEDULE + " error: " + o);
+            }
+        }));
+
+        adapter.on(BackgroundGeolocation.EVENT_PLAY_SERVICES_CONNECT_ERROR, (new TSCallback() {
+            @Override
+            public void success(Object o) {
+                onPlayServicesConnectError((Integer)o);
+            }
+            @Override
+            public void error(Object o) {
+
+            }
+        }));
+
+        adapter.on(BackgroundGeolocation.EVENT_PROVIDERCHANGE, (new TSCallback() {
+            @Override
+            public void success(Object provider) { onProviderChange((JSONObject) provider); }
+            @Override
+            public void error(Object o) {}
+        }));
+
         TSCallback callback = new TSCallback() {
             public void success(Object state) {
                 success.invoke(getState());
@@ -111,7 +214,7 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule im
                 failure.invoke("Unknown error");
             }
         };
-        getAdapter().configure(mapToJson(config), callback);
+        adapter.configure(mapToJson(config), callback);
     }
 
     @ReactMethod
@@ -762,103 +865,7 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule im
         if (launchIntent.hasExtra("forceReload")) {
             activity.moveTaskToBack(true);
         }
-        BackgroundGeolocation adapter = getAdapter();
-
-        adapter.on(BackgroundGeolocation.EVENT_LOCATION, (new TSCallback() {
-            @Override
-            public void success(Object o) {
-                onLocationChange((JSONObject) o);
-            }
-            @Override
-            public void error(Object o) {
-                onLocationError((Integer) o);
-            }
-        }));
-
-        adapter.on(BackgroundGeolocation.EVENT_MOTIONCHANGE, (new TSCallback() {
-            @Override
-            public void success(Object o) {
-                onMotionChange((JSONObject) o);
-            }
-            @Override
-            public void error(Object o) {
-                TSLog.e(BackgroundGeolocation.EVENT_LOCATION + " error: " + o);
-            }
-        }));
-
-        adapter.on(BackgroundGeolocation.EVENT_ACTIVITYCHANGE, (new TSCallback() {
-            @Override
-            public void success(Object o) {
-                onActivityChange((String) o);
-            }
-            @Override
-            public void error(Object o) {
-                TSLog.e(BackgroundGeolocation.EVENT_ACTIVITYCHANGE + " error: " + o);
-            }
-        }));
-
-        adapter.on(BackgroundGeolocation.EVENT_HTTP, (new TSCallback() {
-            @Override
-            public void success(Object o) {
-                onHttpResponse((JSONObject) o);
-            }
-            @Override
-            public void error(Object o) {
-                onHttpResponse((JSONObject) o);
-            }
-        }));
-
-        adapter.on(BackgroundGeolocation.EVENT_HEARTBEAT, (new TSCallback() {
-            @Override
-            public void success(Object o) {
-                onHeartbeat((JSONObject) o);
-            }
-            @Override
-            public void error(Object o) {
-                TSLog.e(BackgroundGeolocation.EVENT_HEARTBEAT + " error: " + o);
-            }
-        }));
-
-        adapter.on(BackgroundGeolocation.EVENT_GEOFENCE, (new TSCallback() {
-            @Override
-            public void success(Object o) {
-                onGeofence((JSONObject) o);
-            }
-
-            @Override
-            public void error(Object o) {
-                TSLog.e(BackgroundGeolocation.EVENT_GEOFENCE + " error: " + o);
-            }
-        }));
-
-        adapter.on(BackgroundGeolocation.EVENT_SCHEDULE, (new TSCallback() {
-            @Override
-            public void success(Object o) {
-                onSchedule((JSONObject) o);
-            }
-            @Override
-            public void error(Object o) {
-                TSLog.e(BackgroundGeolocation.EVENT_SCHEDULE + " error: " + o);
-            }
-        }));
-
-        adapter.on(BackgroundGeolocation.EVENT_PLAY_SERVICES_CONNECT_ERROR, (new TSCallback() {
-            @Override
-            public void success(Object o) {
-                onPlayServicesConnectError((Integer)o);
-            }
-            @Override
-            public void error(Object o) {
-
-            }
-        }));
-
-        adapter.on(BackgroundGeolocation.EVENT_PROVIDERCHANGE, (new TSCallback() {
-            @Override
-            public void success(Object provider) { onProviderChange((JSONObject) provider); }
-            @Override
-            public void error(Object o) {}
-        }));
+        getAdapter();
         initialized = true;
     }
 
