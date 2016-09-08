@@ -267,9 +267,10 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule im
     }
 
     @ReactMethod
-    public void stop() {
+    public void stop(Callback success, Callback failure) {
         startCallback = null;
         getAdapter().stop();
+        success.invoke();
     }
 
     @ReactMethod
@@ -537,7 +538,21 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule im
         //success.invoke(convertJsonToArray(getAdapter().getGeofences()));
         getAdapter().getGeofences(callback);
     }
+    /**
+    * Android doesn't support (or require) background-tasks.  This method is here for compatibility with iOS API
+    */
+    @ReactMethod
+    public void beginBackgroundTask(Callback success) {
+        Integer taskId = 0;
+        success.invoke(taskId);
+    }
+    /**
+    * Android doesn't support (or require) background-tasks.  This method is here for compatibility with iOS API
+    */
+    @ReactMethod
+    public void finish(Integer taskId) {
 
+    }
     @ReactMethod
     public void playSound( int soundId) {
         getAdapter().startTone(soundId);

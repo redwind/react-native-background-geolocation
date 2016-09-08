@@ -22,7 +22,7 @@ var API = {
     success = success || emptyFn;
     failure = failure || emptyFn;
     RNBackgroundGeolocation.getState(success, failure);
-  },
+  },  
   on: function(event, callback) {
     if (this.events.indexOf(event) < 0) {
       throw "RNBackgroundGeolocation: Unknown event '" + event + '"';
@@ -34,8 +34,10 @@ var API = {
     failure = failure || emptyFn;
     RNBackgroundGeolocation.start(success, failure);
   },
-  stop: function() {    
-    RNBackgroundGeolocation.stop();
+  stop: function(success, failure) {
+    success = success || emptyFn;
+    failure = failure || emptyFn;
+    RNBackgroundGeolocation.stop(success, failure);
   },
   startSchedule: function(success, failure) {
     success = success || emptyFn;
@@ -78,6 +80,12 @@ var API = {
     success = success || emptyFn;
     failure = failure || emptyFn;
     RNBackgroundGeolocation.changePace(value, success, failure);
+  },
+  beginBackgroundTask: function(success) {
+    if (typeof(success) !== 'function') {
+      throw "beginBackgroundTask must be provided with a callback";
+    }
+    RNBackgroundGeolocation.beginBackgroundTask(success);
   },
   finish: function(taskId) {
     RNBackgroundGeolocation.finish(taskId);
