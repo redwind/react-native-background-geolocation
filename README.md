@@ -15,8 +15,10 @@ $ npm install git+https://git@github.com:transistorsoft/react-native-background-
 
 ```
 
-[See Installation Guide](docs/INSTALL.md)
-
+## Setup Guides
+### Android
+* [RNPM Setup](docs/INSTALL-ANDROID-RNPM.md)
+* [Manual Setup](docs/INSTALL-ANDROID.md)
 
 ## Configure your license
 

@@ -1,69 +1,57 @@
-# Installation
-
-## Android
+# Android Manual Installation
 
 ```bash
 $ npm install git+https://git@github.com:transistorsoft/react-native-background-geolocation-android.git --save
 ```
 
+## Gradle Configuration
+
 * In `android/settings.gradle`
 
-```gradle
-...
-include ':react-native-background-geolocation'
-project(':react-native-background-geolocation').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-background-geolocation-android/android')
+```diff
++include ':react-native-background-geolocation'
++project(':react-native-background-geolocation').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-background-geolocation-android/android')
 ```
 
 * In `android/app/build.gradle`
 
-```gradle
-...
-repositories {
-    flatDir {
-        dirs "../../node_modules/react-native-background-geolocation-android/android/libs"
-    }
-}
-dependencies {
-  ...
-  compile project(':react-native-background-geolocation')
-  compile(name: 'tslocationmanager', ext: 'aar')
+```diff
++repositories {
++    flatDir {
++        dirs "../../node_modules/react-native-background-geolocation-android/android/libs"
++    }
++}
+dependencies {  
++  compile project(':react-native-background-geolocation')
++  compile(name: 'tslocationmanager', ext: 'aar')
 }
 ```
 
-* MainActivity.java (1 of 2):  Import the module.
+## MainApplication.java
 
-```java
-import com.transistorsoft.rnbackgroundgeolocation.*;
+* **`MainApplication.java`** (`android/app/main/java/com/.../MainApplication.java`)
+
+```diff
++import com.transistorsoft.rnbackgroundgeolocation.*;
+public class MainApplication extends ReactApplication {
+  @Override
+  protected List<ReactPackage> getPackages() {
+    return Arrays.<ReactPackage>asList(
++     new RNBackgroundGeolocation(),
+      new MainReactPackage()
+    );
+  }
+}
 ```
 
-* **react-native >= `0.17.0`**: MainActivity.java (2 of 2)  Register the module:
-
-```java
-public class MainActivity extends ReactActivity {
-    .
-    .
-    .
-    @Override
-    protected List<ReactPackage> getPackages() {
-        return Arrays.<ReactPackage>asList(
-            new RNBackgroundGeolocation(),      // <-- for background-geolocation
-            new MainReactPackage()
-        );
-    }
-```
-
+## AndroidManifest.xml
 
 * In your `AndroidManifest.xml` (`android/app/src/AndroidManifest.xml`)
 
 ```xml
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.transistorsoft.rnbackgroundgeolocationsample">
+<manifest>
 
-    <application
-      android:allowBackup="true"
-      android:label="@string/app_name"
-      android:icon="@mipmap/ic_launcher"
-      android:theme="@style/AppTheme">
+    <application>
       .
       .
       .
@@ -75,16 +63,16 @@ public class MainActivity extends ReactActivity {
       <service android:name="com.transistorsoft.locationmanager.scheduler.ScheduleService" />
       <service android:name="com.transistorsoft.locationmanager.scheduler.ScheduleAlarmService" />
       <receiver android:enabled="true" android:exported="false" android:name="com.transistorsoft.locationmanager.BootReceiver">
-            <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
-            </intent-filter>
-        </receiver>
+        <intent-filter>
+          <action android:name="android.intent.action.BOOT_COMPLETED" />
+        </intent-filter>
+      </receiver>
 
       <!-- /background-location -->
     </application>
 
     <!-- background-geolocation permissions (2 of 2) -->
-    
+    <uses-feature android:name="android.hardware.location.gps" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
@@ -105,8 +93,10 @@ public class MainActivity extends ReactActivity {
 
 ```
 
+## Proguard Config
 * In your `proguard-rules.pro` (`android/app/proguard-rules.pro`)
-```
+
+```proguard
 # react-native-background-geolocation uses EventBus 3.0
 # ref http://greenrobot.org/eventbus/documentation/proguard/
 -keepattributes *Annotation*
