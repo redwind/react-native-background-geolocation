@@ -1,4 +1,12 @@
 # Change Log
+## [2.0.4] - 2016-09-22
+- [Added] New required android permission `<uses-feature android:name="android.hardware.location.gps" />`.  See Setup docs.
+- [Changed] Changed API of `watchPosition` to match iOS.  See docs.
+- [Changed] Refactor setup guides.  Implement `Cocoapod` and `RNPM` guides.
+- [Changed] Render `-1`if location has no speed, bearing or altitude
+- [Fixed] Fix Android crash when resetOdometer called before `#configure`. 
+- [Fixed] found bug where `TSLocationManager` doesn't initialize its odometer from Settings when first instantiated.
+
 ## [2.0.3] - 2016-08-29
 - [Fixed] Issue where Android pukes when configured with an empty schedule `[]`- [Fixed] Android when configured with `batchSync: true, autoSync: true` was failing because the plugin automatically tweaked `autoSync: false` but failed to reset it to the configured value.  This behaviour was obsolete and has been removed.
 - [Added] Add new config `@param {Integer} autoSyncThreshold [0]`.  Allows you to specify a minimum number of persisted records to trigger an auto-sync action.
