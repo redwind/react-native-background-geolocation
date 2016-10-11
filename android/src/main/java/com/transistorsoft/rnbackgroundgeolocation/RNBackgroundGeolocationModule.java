@@ -164,6 +164,18 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule im
             }
         }));
 
+        adapter.on(BackgroundGeolocation.EVENT_GEOFENCESCHANGE, (new TSCallback() {
+            @Override
+            public void success(Object o) {
+                onGeofencesChange((JSONObject) o);
+            }
+
+            @Override
+            public void error(Object o) {
+                TSLog.e(BackgroundGeolocation.EVENT_GEOFENCESCHANGE + " error: " + o);
+            }
+        }));
+
         adapter.on(BackgroundGeolocation.EVENT_GEOFENCE, (new TSCallback() {
             @Override
             public void success(Object o) {
@@ -367,8 +379,14 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule im
         getAdapter().insertLocation(mapToJson(params), callback);
     }
 
+    // @deprecated -> #destroyLocations
     @ReactMethod
-    public void clearDatabase(final Callback success, final Callback failure) {
+    public void clearDatabase(Callback success, Callback failure) {
+        destroyLocations(success, failure);
+    }
+
+    @ReactMethod
+    public void destroyLocations(final Callback success, final Callback failure) {
         TSCallback callback = new TSCallback() {
             public void success(Object result) {
                 success.invoke((Boolean) result);
@@ -378,6 +396,12 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule im
             }
         };
         getAdapter().clearDatabase(callback);
+    }
+
+    @ReactMethod
+    public void destroyLog(Callback success, Callback failure) {
+        Log.w(TAG, "#destroyLog is not yet implemented for Android");
+        failure.invoke("#destroyLog is not yet implemented for Android");
     }
 
     @ReactMethod
@@ -504,6 +528,7 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule im
 
     @ReactMethod
     public void removeGeofences(final Callback success, final Callback failure) {
+        // TODO allow JS api to delete a list-of-geofences.
         TSCallback callback = new TSCallback() {
             @Override
             public void success(Object o) {
@@ -515,7 +540,14 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule im
                 failure.invoke((String) o);
             }
         };
-        getAdapter().removeGeofences(callback);
+        try {
+            // TODO accept WritableArray geofences from Client js API, allowing to remove a set of geofences
+            WritableArray geofences = new WritableNativeArray();
+            getAdapter().removeGeofences(arrayToJson(geofences),callback);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        
     }
 
     @ReactMethod
@@ -687,6 +719,14 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule im
         }
     }
 
+    private void onGeofencesChange(JSONObject params) {
+        try {
+            sendEvent(BackgroundGeolocation.EVENT_GEOFENCESCHANGE, jsonToMap(params));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+    
     private void onSchedule(JSONObject params) {
         try {
             sendEvent(BackgroundGeolocation.EVENT_SCHEDULE, jsonToMap(params));
