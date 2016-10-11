@@ -32,6 +32,7 @@ bgGeo.setConfig({
 | [`distanceFilter`](#param-integer-distancefilter) | `Integer` | Required | `10`| The minimum distance (measured in meters) a device must move horizontally before an update event is generated. @see Apple docs. However, #distanceFilter is elastically auto-calculated by the plugin: When speed increases, #distanceFilter increases; when speed decreases, so does distanceFilter (disabled with `disableElasticity: true`) |
 | [`locationUpdateInterval`](#param-integer-millis-locationupdateinterval) | `Integer` | Required | `1000`| Set the desired interval for active location updates, in milliseconds.  The location client will actively try to obtain location updates for your application at this interval, so it has a direct influence on the amount of power used by your application. Choose your interval wisely.  This interval is inexact. You may not receive updates at all (if no location sources are available), or you may receive them slower than requested. You may also receive them faster than requested (if other applications are requesting location at a faster interval).  Applications with only the coarse location permission may have their interval silently throttled. |
 | [`fastestLocationUpdateInterval`](#param-integer-millis-fastestlocationupdateinterval) | `Integer` | Optional | `1000` | Explicitly set the fastest interval for location updates, in milliseconds.  This controls the fastest rate at which your application will receive location updates, which might be faster than #locationUpdateInterval in some situations (for example, if other applications are triggering location updates).  This allows your application to passively acquire locations at a rate faster than it actively acquires locations, saving power.  Unlike #locationUpdateInterval, this parameter is exact. Your application will never receive updates faster than this value.  If you don't call this method, a fastest interval will be set to 30000 (30s).  An interval of 0 is allowed, but not recommended, since location updates may be extremely fast on future implementations.  If #fastestLocationUpdateInterval is set slower than #locationUpdateInterval, then your effective fastest interval is #locationUpdateInterval. |
+| [`geofenceProximityRadius`](#param-integer-geofenceproximityradius-meters) | `Integer`  |  Optional | `1000`  | When using Geofences, the plugin activates only thoses in proximity (the maximim geofences allowed to be simultaneously monitored is limited by the platform, where **iOS** allows only 20 and **Android**.  However, the plugin allows you to create as many geofences as you wish (thousands even).  It stores these in its database and uses spatial queries to determine which **20** or **100** geofences to activate. |
 | [`locationTimeout`](#param-integer-seconds-locationtimeout) | `Integer seconds`  |  Optional | `60`  | Timeout before giving up on retrieving a location |
 | [`stopAfterElapsedMinutes`](#param-integer-stopafterelapsedminutes) | `Integer`  |  Optional | `0`  | Stop monitoring location after a set number of minutes have elasped since #start method was called. |
 | [`stationaryRadius`](#param-integer-stationaryradius-meters) | `Integer`  |  Required (**iOS**)| `25`  | When stopped, the minimum distance the device must move beyond the stationary location for aggressive background-tracking to engage. Note, since the plugin uses iOS significant-changes API, the plugin cannot detect the exact moment the device moves out of the stationary-radius. In normal conditions, it can take as much as 3 city-blocks to 1/2 km before staionary-region exit is detected. |
@@ -96,6 +97,7 @@ bgGeo.on('location', function(location) {
 | [`activitychange`](#activitychange) | Fired when the activity-recognition system detects a *change* in detected-activity (`still, on_foot, in_vehicle, on_bicycle, running`) |
 | [`providerchange`](#providerchange)| Fired when a change in the state of the device's **Location Services** has been detected.  eg: "GPS ON", "Wifi only".|
 | [`geofence`](#geofence) | Fired when a geofence crossing event occurs. |
+| [`geofenceschange`](#geofenceschange) | Fired when the lists of monitored geofences changed.|
 | [`http`](#http) | Fired after a successful HTTP response. `response` object is provided with `status` and `responseText`. |
 | [`heartbeat`](#heartbeat) | Fired each `heartbeatInterval` while the plugin is in the **stationary** state with.  Your callback will be provided with a `params {}` containing the parameters `shakes {Integer}` (#shakes not implemented for Android) as well as the last known `location {Object}` |
 | [`schedule`](#schedule) | Fired when a schedule event occurs.  Your `callbackFn` will be provided with the current `state` Object. | 
@@ -123,7 +125,8 @@ bgGeo.on('location', function(location) {
 | [`changePace`](#changepaceboolean) | `isMoving` | Initiate or cancel immediate background tracking. When set to true, the plugin will begin aggressively tracking the devices Geolocation, bypassing stationary monitoring. If you were making a "Jogging" application, this would be your [Start Workout] button to immediately begin GPS tracking. Send false to disable aggressive GPS monitoring and return to stationary-monitoring mode. |
 | [`getLocations`](#getlocationscallbackfn) | `callbackFn` | Fetch all the locations currently stored in native plugin's SQLite database. Your callbackFn`` will receive an `Array` of locations in the 1st parameter. |
 | [`getCount`](#getcountcallbackfn-failurefn) | `callbackFn` | Fetches count of SQLite locations table `SELECT count(*) from locations` |
-| [`clearDatabase`](#cleardatabasecallbackfn-failurefn) | `callbackFn` | Delete all records in plugin's SQLite database |
+| [`clearDatabase`](#destroylocationscallbackfn-failurefn) | `callbackFn` | @deprecated.  Use [`destroyLocations`](#destroylocationscallbackfn-failurefn) |
+| [`destroyLocations`](#cleardatabasecallbackfn-failurefn) | `callbackFn` | Delete all records in plugin's SQLite database |
 | [`sync`](#synccallbackfn) | - | If the plugin is configured for HTTP with an `#url` and `#autoSync: false`, this method will initiate POSTing the locations currently stored in the native SQLite database to your configured `#url`. |
 | [`getOdometer`](#getodometercallbackfn) | `callbackFn` | The plugin constantly tracks distance travelled. The supplied callback will be executed and provided with a `distance` as the 1st parameter. |
 | [`resetOdometer`](#resetodometercallbackfn) | `callbackFn` | Reset the **odometer** to `0`. The plugin never automatically resets the odometer -- this is **up to you**. |
@@ -229,6 +232,10 @@ An interval of 0 is allowed, but not recommended, since location updates may be 
 If `#fastestLocationUpdateInterval` is set slower than `#locationUpdateInterval`, then your effective fastest interval is `#locationUpdateInterval`.
 
 An interval of 0 is allowed, but not recommended, since location updates may be extremely fast on future implementations.
+
+####`@param {Integer} geofenceProximityRadius (meters)`
+
+Also see [geofenceschange](#geofenceschange).  When using Geofences, the plugin activates only thoses in proximity (the maximim geofences allowed to be simultaneously monitored is limited by the platform, where **iOS** allows only 20 and **Android**.  However, the plugin allows you to create as many geofences as you wish (thousands even).  It stores these in its database and uses spatial queries to determine which **20** or **100** geofences to activate.
 
 ####`@param {Integer seconds} locationTimeout`
 
@@ -557,6 +564,62 @@ bgGeo.on('geofence', function(params) {
         console.error('An error occurred in my application code', e);
     }
 });
+```
+
+####`geofenceschange`
+
+Your `callbackFn` will be provided a single `{Object} event` parameter:
+
+######@param {Array} on. This list of new geofences which just became monitored
+######@param {Array} off. This list of geofences which stop being monitored.
+
+Fired when the list of monitored-geofences changed.  For more information, see [Geofencing](./geofencing.md).  The Background Geolocation plugin contains powerful geofencing features that allow you to monitor any number of circular geofences you wish (thousands even), in spite of limits imposed by the native platform APIs (**20 for iOS; 100 for Android**).
+
+The plugin achieves this by storing your geofences in its database, using a [geospatial query](https://en.wikipedia.org/wiki/Spatial_query) to determine those geofences in proximity (@see config [geofenceProximityRadius](#param-integer-geofenceproximityradius-meters)), activating only those geofences closest to the device's current location (according to limit imposed by the corresponding platform).
+
+When the device is determined to be moving, the plugin periodically queries for geofences in proximity (eg. every minute) using the latest recorded location.  This geospatial query is **very fast**, even with tens-of-thousands geofences in the database.
+
+It's when this list of monitored geofences *changes*, the plugin will fire the `geofenceschange` event.
+
+```Javascript
+bgGeo.on('geofenceschange', function(event) {
+  var on = event.on;   //<-- new geofences activiated.
+  var off = event.off; //<-- geofences that were de-activated.
+
+  // Create map circles
+  for (var n=0,len=on.length;n<len;n++) {
+    var geofence = on[n];
+    createGeofenceMarker(geofence)
+  }
+
+  // Remove map circles
+  for (var n=0,len=off.length;n<len;n++) {
+    var identifier = off[n];
+    removeGeofenceMarker(identifier);
+  }
+});
+```
+
+This `event` object provides only the *changed* geofences, those which just activated or de-activated.
+
+When **all** geofences have been removed, the event object will provide an empty-array `[]` for both `#on` and `#off` keys, ie:
+```Javascript
+{
+    on: [{}, {}, ...],  // <-- Entire geofence objects {}
+    off: ['identifier_foo', 'identifier_bar']  <-- just the identifiers
+}
+```
+
+```Javascript
+bgGeo.on('geofenceschange', function(event) {
+  console.log("geofenceschange fired! ", event);
+});
+
+// calling remove geofences will cause the `geofenceschange` event to fire
+bgGeo.removeGeofences();
+
+=> geofenceschange fired! {on: [], off: []}
+
 ```
 
 ####`http`
@@ -1033,11 +1096,16 @@ Manually insert a location into the native plugin's SQLite database.  Your `call
 ```
 
 ####`clearDatabase(callbackFn, failureFn)`
-Remove all records in plugin's SQLite database.
+
+@deprecated.  Use [`destroyLocations`](#destroylocationscallbackfn-failurefn)
+
+####`destroyLocations(callbackFn, failureFn)`
+
+Destroy all `Location` records from plugin's SQLite database.
 
 ```Javascript
-    bgGeo.clearDatabase(function() {
-      console.log('- cleared database'); 
+    bgGeo.destroyLocations(function() {
+      console.log('- Destroyed all locations'); 
     });
 ```
 

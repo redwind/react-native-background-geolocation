@@ -6,7 +6,31 @@ const TAG = "TSLocationManager";
 var emptyFn = function() {};
 
 var API = {
-  events: ['heartbeat', 'http', 'location', 'error', 'motionchange', 'geofence', 'schedule', 'activitychange', 'providerchange', 'watchposition'],
+  events: [
+    'heartbeat',
+    'http',
+    'location',
+    'error',
+    'motionchange',
+    'geofence',
+    'schedule',
+    'activitychange',
+    'providerchange',
+    'geofenceschange',
+    'watchposition'
+  ],
+
+  LOG_LEVEL_OFF: 0,
+  LOG_LEVEL_ERROR: 1,
+  LOG_LEVEL_WARNING: 2,
+  LOG_LEVEL_INFO: 3,
+  LOG_LEVEL_DEBUG: 4,
+  LOG_LEVEL_VERBOSE: 5,
+
+  DESIRED_ACCURACY_HIGH: 0,
+  DESIRED_ACCURACY_MEDIUM: 10,
+  DESIRED_ACCURACY_LOW: 100,
+  DESIRED_ACCURACY_VERY_LOW: 1000,
 
   configure: function(config, success, failure) {
     success = success || emptyFn;
@@ -22,7 +46,7 @@ var API = {
     success = success || emptyFn;
     failure = failure || emptyFn;
     RNBackgroundGeolocation.getState(success, failure);
-  },  
+  },
   on: function(event, callback) {
     if (this.events.indexOf(event) < 0) {
       throw "RNBackgroundGeolocation: Unknown event '" + event + '"';
@@ -67,7 +91,7 @@ var API = {
     return DeviceEventEmitter.addListener(TAG + ":geofence", callback);
   },
   onHeartbeat: function(callback) {
-    return DeviceEventEmitter.addListener(TAG + ":heartbeat", callback);    
+    return DeviceEventEmitter.addListener(TAG + ":heartbeat", callback);
   },
   onError: function(callback) {
     return DeviceEventEmitter.addListener(TAG + ":error", callback);
@@ -130,9 +154,12 @@ var API = {
     RNBackgroundGeolocation.insertLocation(params, success, failure);
   },
   clearDatabase: function(success, failure) {
+    this.destroyLocations(success, failure);
+  },
+  destroyLocations: function(success, failure) {
     success = success || emptyFn;
     failure = failure || emptyFn;
-    RNBackgroundGeolocation.clearDatabase(success, failure);
+    RNBackgroundGeolocation.destroyLocations(success, failure);
   },
   getOdometer: function(success, failure) {
     failure = failure || emptyFn;
@@ -170,6 +197,10 @@ var API = {
   getLog: function(success, failure) {
     failure = failure || emptyFn;
     RNBackgroundGeolocation.getLog(success, failure);
+  },
+  destroyLog: function(success, failure) {
+    failure = failure || emptyFn;
+    RNBackgroundGeolocation.destroyLog(success, failure);
   },
   emailLog: function(email, success, failure) {
     success = success || emptyFn;
