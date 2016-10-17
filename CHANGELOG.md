@@ -1,6 +1,8 @@
 # Change Log
-## [2.1.0] - 2016-10-10
+## [2.1.1] - 2016-10-17
+- [Changed] Android will filter-out received locations detected to be same-as-last by comparing `latitude`, `longitude`, `speed` & `bearing`.
 
+## [2.1.0] - 2016-10-10
 - [Changed] Refactored Geolocation system.  The plugin is no longer bound by native platform limits on number of geofences which can be monitored (iOS: 20; Android: 100).  You may now monitor infinite geofences.  The plugin now stores geofences in its SQLite db and performs a geospatial query, activating only those geofences in proximity of the device (@config #geofenceProximityRadius, @event `geofenceschange`).  See the new [Geofencing Guide](./docs/geofencing.md)
 
 ## [2.0.4] - 2016-09-22
