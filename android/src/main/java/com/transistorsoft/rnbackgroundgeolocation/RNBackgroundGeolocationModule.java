@@ -83,7 +83,6 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule im
     }
     @Override
     public void onHostResume() {
-        TSLog.d("- RNBackgroundGeolocation#onHostResume");
         if (!initialized) {
             initializeLocationManager();
         }
@@ -98,7 +97,7 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule im
     }
     @Override
     public void onActivityResult(final int requestCode, final int resultCode, final Intent intent) {
-        TSLog.i("- onActivityResult: " + requestCode + ", " + resultCode + ", intent: " + intent);
+
     }
 
     @ReactMethod
@@ -127,7 +126,7 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule im
             }
             @Override
             public void error(Object o) {
-                TSLog.e(BackgroundGeolocation.EVENT_LOCATION + " error: " + o);
+
             }
         }));
 
@@ -138,7 +137,7 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule im
             }
             @Override
             public void error(Object o) {
-                TSLog.e(BackgroundGeolocation.EVENT_ACTIVITYCHANGE + " error: " + o);
+
             }
         }));
 
@@ -160,7 +159,7 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule im
             }
             @Override
             public void error(Object o) {
-                TSLog.e(BackgroundGeolocation.EVENT_HEARTBEAT + " error: " + o);
+
             }
         }));
 
@@ -172,7 +171,6 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule im
 
             @Override
             public void error(Object o) {
-                TSLog.e(BackgroundGeolocation.EVENT_GEOFENCESCHANGE + " error: " + o);
             }
         }));
 
@@ -184,7 +182,7 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule im
 
             @Override
             public void error(Object o) {
-                TSLog.e(BackgroundGeolocation.EVENT_GEOFENCE + " error: " + o);
+
             }
         }));
 
@@ -195,7 +193,7 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule im
             }
             @Override
             public void error(Object o) {
-                TSLog.e(BackgroundGeolocation.EVENT_SCHEDULE + " error: " + o);
+
             }
         }));
 
@@ -222,7 +220,6 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule im
                 success.invoke(getState());
             }
             public void error(Object error) {
-                TSLog.e("RNBackgroundGeolocation#configure failed");
                 failure.invoke("Unknown error");
             }
         };
@@ -303,13 +300,11 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule im
         TSCallback callback = new TSCallback() {
             @Override
             public void success(Object o) {
-                TSLog.d("#setConfig success");
                 success.invoke(getState());
             }
 
             @Override
             public void error(Object o) {
-                TSLog.e("#setConfig failed");
                 failure.invoke("Unknown error");
             }
         };
@@ -330,7 +325,6 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule im
         try {
             return jsonToMap(Settings.getState());
         } catch (JSONException e) {
-            TSLog.e("Failed to parse Settings#getState");
             e.printStackTrace();
             return null;
         }
@@ -395,15 +389,38 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule im
                 failure.invoke((String)error);
             }
         };
-        getAdapter().clearDatabase(callback);
+        getAdapter().destroyLocations(callback);
     }
 
     @ReactMethod
-    public void destroyLog(Callback success, Callback failure) {
-        Log.w(TAG, "#destroyLog is not yet implemented for Android");
-        failure.invoke("#destroyLog is not yet implemented for Android");
+    public void destroyLog(final Callback success, final Callback failure) {
+        TSCallback callback = new TSCallback() {
+            public void success(Object log) {
+                success.invoke((String) log);
+            }
+            public void error(Object error) {
+                failure.invoke((String)error);
+            }
+        };
+        getAdapter().destroyLog(callback);
     }
+    private class DestroyLogCallback implements TSCallback {
+        private Callback mSuccess;
+        private Callback mFailure;
 
+        public DestroyLogCallback(Callback success, Callback failure) {
+            mSuccess = success;
+            mFailure = failure;
+        }
+        @Override
+        public void success(Object result) {
+            mSuccess.invoke((String) result);
+        }
+        @Override
+        public void error(Object error) {
+            mFailure.invoke((String) error);
+        }
+    }
     @ReactMethod
     public void sync(final Callback success, final Callback failure) {
         TSCallback callback = new TSCallback() {
@@ -438,11 +455,10 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule im
         getAdapter().getCurrentPosition(mapToJson(options), callback);
     }
     @ReactMethod
-    public void watchPosition(ReadableMap options, final Callback success, final Callback failure) {        
+    public void watchPosition(ReadableMap options, final Callback success, final Callback failure) {
         TSCallback callback = new TSCallback() {
             public void success(Object location) {
                 try {
-                    TSLog.d("************ watchPosition Rx: " + location);
                     sendEvent(EVENT_WATCHPOSITION, jsonToMap((JSONObject)location));
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -547,7 +563,7 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule im
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        
+
     }
 
     @ReactMethod
@@ -591,66 +607,80 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule im
     }
 
     @ReactMethod
-    public void getLog(Callback successCallback, Callback failureCallback) {
-
-        String log = readLog();
-        if (log == null) {
-            failureCallback.invoke("Could not read log");
-            return;
-        }
-        successCallback.invoke(log);
+    public void getLog(final Callback success, final Callback failure) {
+        TSCallback callback = new TSCallback() {
+            public void success(Object log) {
+                success.invoke((String) log);
+            }
+            public void error(Object error) {
+                failure.invoke((String) error);
+            }
+        };
+        getAdapter().getLog(callback);
     }
 
     @ReactMethod
     public void emailLog(String email, Callback success, Callback error) {
-        String log = readLog();
-        if (log == null) {
-            error.invoke(500);
-            return;
+        this.getAdapter().getLog(new EmailLogCallback(email, success, error));
+    }
+    private class EmailLogCallback implements TSCallback {
+        private String mEmail;
+        private Callback mSuccess;
+        private Callback mError;
+
+        public EmailLogCallback(String email, Callback success, Callback error) {
+            mEmail = email;
+            mSuccess = success;
+            mError = error;
         }
+        @Override
+        public void success(Object result) {
+            String log = (String) result;
+            Intent mailer = new Intent(Intent.ACTION_SEND);
+            mailer.setType("message/rfc822");
+            mailer.putExtra(Intent.EXTRA_EMAIL, new String[]{mEmail});
+            mailer.putExtra(Intent.EXTRA_SUBJECT, "BackgroundGeolocation log");
 
-        Intent mailer = new Intent(Intent.ACTION_SEND);
-        mailer.setType("message/rfc822");
-        mailer.putExtra(Intent.EXTRA_EMAIL, new String[]{email});
-        mailer.putExtra(Intent.EXTRA_SUBJECT, "BackgroundGeolocation log");
-
-        try {
-            JSONObject state = mapToJson(getState());
-
-            if (state.has("license")) {
-                state.put("license", "<SECRET>");
-            }
-            if (state.has("orderId")) {
-                state.put("orderId", "<SECRET>");
-            }
-
-            mailer.putExtra(Intent.EXTRA_TEXT, state.toString(2));
-        } catch (JSONException e) {
-            Log.w(TAG, "- Failed to write state to email body");
-            e.printStackTrace();
-        }
-        File file = new File(Environment.getExternalStorageDirectory(), "background-geolocation.log");
-        try {
-            FileOutputStream stream = new FileOutputStream(file);
             try {
-                stream.write(log.getBytes());
-                stream.close();
-                mailer.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(file));
-                file.deleteOnExit();
-            } catch (IOException e) {
+                JSONObject state = mapToJson(getState());
+
+                if (state.has("license")) {
+                    state.put("license", "<SECRET>");
+                }
+                if (state.has("orderId")) {
+                    state.put("orderId", "<SECRET>");
+                }
+                mailer.putExtra(Intent.EXTRA_TEXT, state.toString(2));
+            } catch (JSONException e) {
                 e.printStackTrace();
             }
-        } catch (FileNotFoundException e) {
-            Log.i(TAG, "FileNotFound");
-            e.printStackTrace();
+            File file = new File(Environment.getExternalStorageDirectory(), "background-geolocation.log");
+            try {
+                FileOutputStream stream = new FileOutputStream(file);
+                try {
+                    stream.write(log.getBytes());
+                    stream.close();
+                    mailer.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(file));
+                    file.deleteOnExit();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            } catch (FileNotFoundException e) {
+                Log.i(TAG, "FileNotFound");
+                e.printStackTrace();
+            }
+            Activity activity = getCurrentActivity();
+            try {
+                activity.startActivityForResult(Intent.createChooser(mailer, "Send log: " + mEmail + "..."), 1);
+                mSuccess.invoke();
+            } catch (android.content.ActivityNotFoundException ex) {
+                Toast.makeText(activity, "There are no email clients installed.", Toast.LENGTH_SHORT).show();
+                mError.invoke("There are no email clients installed");
+            }
         }
-        Activity activity = getCurrentActivity();
-        try {
-            activity.startActivityForResult(Intent.createChooser(mailer, "Send log: " + email + "..."), 1);
-            success.invoke();
-        } catch (android.content.ActivityNotFoundException ex) {
-            Toast.makeText(activity, "There are no email clients installed.", Toast.LENGTH_SHORT).show();
-            error.invoke("There are no email clients installed");
+        @Override
+        public void error(Object error) {
+            mError.invoke((String) error);
         }
     }
 
@@ -668,7 +698,6 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule im
                     }
                 }
                 public void error(Object error) {
-                    TSLog.d("BackgroundGeolocation#start FAILED");
                     startCallback = null;
                 }
             };
@@ -726,7 +755,7 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule im
             e.printStackTrace();
         }
     }
-    
+
     private void onSchedule(JSONObject params) {
         try {
             sendEvent(BackgroundGeolocation.EVENT_SCHEDULE, jsonToMap(params));
@@ -757,28 +786,9 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule im
     private void onPlayServicesConnectError(Integer errorCode) {
         Activity activity = getCurrentActivity();
         if (activity == null) {
-            TSLog.e("onPlayServicesConnectError could not find current Activity");
             return;
         }
         GoogleApiAvailability.getInstance().getErrorDialog(getCurrentActivity(), errorCode, 1001).show();
-    }
-
-    private String readLog() {
-        try {
-            Process process = Runtime.getRuntime().exec("logcat -d");
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-
-            StringBuilder log = new StringBuilder();
-            String line = "";
-            while ((line = bufferedReader.readLine()) != null) {
-                log.append(line + "\n");
-            }
-            return log.toString();
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
     }
 
     private void sendEvent(String eventName, WritableMap params) {
@@ -911,7 +921,6 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule im
     private void initializeLocationManager() {
         Activity activity = getCurrentActivity();
         if (activity == null) {
-            TSLog.e("RNBackgroundGeolocationModule failed to create BackgroundGeolocation adapter!");
             return;
         }
         launchIntent    = activity.getIntent();
@@ -930,7 +939,6 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule im
 
     @Override
     public void onCatalystInstanceDestroy() {
-        TSLog.box("RNBackgroundGeolocationModule#destroy");
         initialized = false;
         getAdapter().onActivityDestroy();
         context = null;
