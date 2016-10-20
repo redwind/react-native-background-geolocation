@@ -21,7 +21,7 @@ $ npm install git+https://git@github.com:transistorsoft/react-native-background-
 +        dirs "../../node_modules/react-native-background-geolocation-android/android/libs"
 +    }
 +}
-dependencies {  
+dependencies {
 +  compile project(':react-native-background-geolocation')
 +  compile(name: 'tslocationmanager', ext: 'aar')
 }

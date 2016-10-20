@@ -1,4 +1,4 @@
-const { React, DeviceEventEmitter} = require('react-native');
+const {DeviceEventEmitter} = require('react-native');
 const { RNBackgroundGeolocation } = require('react-native').NativeModules;
 
 const TAG = "TSLocationManager";
@@ -199,6 +199,7 @@ var API = {
     RNBackgroundGeolocation.getLog(success, failure);
   },
   destroyLog: function(success, failure) {
+    success = success || emptyFn;
     failure = failure || emptyFn;
     RNBackgroundGeolocation.destroyLog(success, failure);
   },

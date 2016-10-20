@@ -1,4 +1,24 @@
 # Change Log
+## [2.1.2] - 2016-10-19
+- [Changed] Introduce database-logging for Android.  Like iOS, the Android module's logs are now stored in the database!  By default, logs are stored for 3 days, but is configurable with `logMaxDays`.  Logs can now be filtered by logLevel:
+| logLevel | Label |
+|---|---|
+|`0`|`LOG_LEVEL_OFF`|
+|`1`|`LOG_LEVEL_ERROR`|
+|`2`|`LOG_LEVEL_WARNING`|
+|`3`|`LOG_LEVEL_INFO`|
+|`4`|`LOG_LEVEL_DEBUG`|
+|`5`|`LOG_LEVEL_VERBOSE`|
+
+These constants are available on the `BackgroundGeolocation` module:
+```Javascript
+import {BackgroundGeolocation} from "react-native-background-geolocation-android";
+
+console.log(BackgroundGeolocation.LOG_LEVEL_ERROR);
+```
+
+fetch logs with `#getLog` or `#emailLog` methods.  Destroy logs with `#destroyLog`.
+
 ## [2.1.1] - 2016-10-17
 - [Changed] Android will filter-out received locations detected to be same-as-last by comparing `latitude`, `longitude`, `speed` & `bearing`.
 
