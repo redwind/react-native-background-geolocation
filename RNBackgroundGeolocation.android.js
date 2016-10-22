@@ -47,11 +47,23 @@ var API = {
     failure = failure || emptyFn;
     RNBackgroundGeolocation.getState(success, failure);
   },
-  on: function(event, callback) {
+  addListener: function(event, callback) {
     if (this.events.indexOf(event) < 0) {
       throw "RNBackgroundGeolocation: Unknown event '" + event + '"';
     }
     return DeviceEventEmitter.addListener(TAG + ':' + event, callback);
+  },
+  on: function(event, callback) {
+    this.addListener(event, callback);
+  },
+  removeListener: function(event, callback) {
+    if (this.events.indexOf(event) < 0) {
+      throw "RNBackgroundGeolocation: Unknown event '" + event + '"';
+    }
+    return DeviceEventEmitter.removeListener(TAG + ':' + event, callback);
+  },
+  un: function(event, callback) {
+    this.removeListener(event, callback);
   },
   start: function(success, failure) {
     success = success || emptyFn;

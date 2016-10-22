@@ -1,4 +1,5 @@
 # Change Log
+
 ## [2.1.2] - 2016-10-19
 - [Changed] Introduce database-logging for Android.  Like iOS, the Android module's logs are now stored in the database!  By default, logs are stored for 3 days, but is configurable with `logMaxDays`.  Logs can now be filtered by logLevel:
 | logLevel | Label |
@@ -18,6 +19,23 @@ console.log(BackgroundGeolocation.LOG_LEVEL_ERROR);
 ```
 
 fetch logs with `#getLog` or `#emailLog` methods.  Destroy logs with `#destroyLog`.
+- [Fixed] Implement `onHostDestroy` to signal to `BackgroundGeolocation` when `MainActivity` is terminated (was using only `onCatalystInstanceDestroy` previously)
+- [Fixed] Issues with Scheduler.
+- [Fixed] Issues with `startOnBoot`
+- [Added] Added `#removeListener` (@alias `#un`) method to Javascript API.  This is particularly important when using `stopOnTerminate: false`.  You should remove listeners on `BackgroundGeolocation` in `componentWillUnmount`:
+```Javascript
+  componentWillUnmount: function() {
+    // Unregister BackgroundGeolocation event-listeners!
+    BackgroundGeolocation.un("location", this.onLocation);
+    BackgroundGeolocation.un("http", this.onHttp);
+    BackgroundGeolocation.un("geofence", this.onGeofence);
+    BackgroundGeolocation.un("heartbeat", this.onHeartbeat);
+    BackgroundGeolocation.un("error", this.onError);
+    BackgroundGeolocation.un("motionchange", this.onMotionChange);
+    BackgroundGeolocation.un("schedule", this.onSchedule);
+    BackgroundGeolocation.un("geofenceschange", this.onGeofencesChange);
+  }
+```
 
 ## [2.1.1] - 2016-10-17
 - [Changed] Android will filter-out received locations detected to be same-as-last by comparing `latitude`, `longitude`, `speed` & `bearing`.

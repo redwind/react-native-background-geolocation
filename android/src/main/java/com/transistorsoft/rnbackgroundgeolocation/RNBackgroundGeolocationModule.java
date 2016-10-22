@@ -93,7 +93,10 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule im
     }
     @Override
     public void onHostDestroy() {
-
+        initialized = false;
+        configured = false;
+        getAdapter().onActivityDestroy();
+        context = null;
     }
     @Override
     public void onActivityResult(final int requestCode, final int resultCode, final Intent intent) {
