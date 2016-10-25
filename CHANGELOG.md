@@ -16,6 +16,7 @@
 
 ## [2.1.2] - 2016-10-19
 - [Changed] Introduce database-logging for Android.  Like iOS, the Android module's logs are now stored in the database!  By default, logs are stored for 3 days, but is configurable with `logMaxDays`.  Logs can now be filtered by logLevel:
+
 | logLevel | Label |
 |---|---|
 |`0`|`LOG_LEVEL_OFF`|
