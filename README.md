@@ -116,6 +116,7 @@ var Foo = React.createClass({
     // This event fires when the user toggles location-services
     BackgroundGeolocation.on('providerchange', this.onProviderChange);
   }
+  // You must remove listeners when your component unmounts
   componentWillUnmount() {
     // Remove BackgroundGeolocation listeners
     BackgroundGeolocation.un('location', this.onLocation);

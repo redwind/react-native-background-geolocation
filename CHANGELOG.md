@@ -1,5 +1,19 @@
 # Change Log
 
+## [Unreleased]
+- [Changed] Implement a mechanism for removing listeners `removeListener` (@alias `un`).  This is particularly important for Android when using `stopOnTerminate: false`.  Listeners on `BackgroundGeolocation` should be removed in `componentDidUnmount`:
+```Javascript
+  componentDidMount() {
+    BackgroundGeolocation.on('location', this.onLocation);
+  }
+  onLocation(location) {
+    console.log('- Location: ', location);
+  }
+  componentDidUnmount() {
+    BackgroundGeolocation.un('location', this.onLocation);
+  }
+```
+
 ## [2.1.2] - 2016-10-19
 - [Changed] Introduce database-logging for Android.  Like iOS, the Android module's logs are now stored in the database!  By default, logs are stored for 3 days, but is configurable with `logMaxDays`.  Logs can now be filtered by logLevel:
 | logLevel | Label |
