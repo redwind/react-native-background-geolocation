@@ -1,7 +1,6 @@
 # Change Log
 
-## [2.1.3] - 2016-10-26
-- [Added] Add new `@config {Boolean} geofenceInitialTriggerEntry [true]`, allowing you to control the behaviour of initially triggering a geofence when the device is already within the newly added geofence, defaults to `true`.
+## [Unreleased]
 
 ## [2.1.2] - 2016-10-19
 - [Changed] Introduce database-logging for Android.  Like iOS, the Android module's logs are now stored in the database!  By default, logs are stored for 3 days, but is configurable with `logMaxDays`.  Logs can now be filtered by logLevel:
