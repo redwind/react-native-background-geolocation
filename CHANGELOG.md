@@ -1,4 +1,6 @@
 # Change Log
+## [Unreleased]
+- [Changed] The plugin will ignore `autoSyncThreshold` when a `motionchange` event occurs.
 
 ## [2.1.3] - 2016-10-26
 - [Added] Add new `@config {Boolean} geofenceInitialTriggerEntry [true]`, allowing you to control the behaviour of initially triggering a geofence when the device is already within the newly added geofence, defaults to `true`.
