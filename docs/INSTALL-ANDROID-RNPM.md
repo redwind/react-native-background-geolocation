@@ -52,7 +52,6 @@ dependencies {
       <service android:name="com.transistorsoft.locationmanager.LocationService" />
       <service android:name="com.transistorsoft.locationmanager.ActivityRecognitionService" />
       <service android:name="com.transistorsoft.locationmanager.geofence.GeofenceService" />
-      <service android:name="com.transistorsoft.locationmanager.scheduler.ScheduleService" />
       <service android:name="com.transistorsoft.locationmanager.scheduler.ScheduleAlarmService" />
       <receiver android:enabled="true" android:exported="false" android:name="com.transistorsoft.locationmanager.BootReceiver">
         <intent-filter>
