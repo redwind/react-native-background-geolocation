@@ -250,7 +250,7 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule im
     @ReactMethod
     public void startSchedule(Callback success, Callback failure) {
         if (getAdapter().startSchedule()) {
-            success.invoke();
+            success.invoke(getState());
         } else {
             failure.invoke("Failed to start schedule.  Did you configure a #schedule?");
         }
@@ -258,31 +258,43 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule im
     @ReactMethod
     public void stopSchedule(Callback success, Callback failure) {
         getAdapter().stopSchedule();
-        success.invoke();
+        success.invoke(getState());
     }
+
     @ReactMethod
     public void startGeofences(Callback success, Callback failure) {
-        /*
-        startCallback = new HashMap();
-        startCallback.put("success", success);
-        startCallback.put("failure", failure);
-
-        backgroundServiceIntent = new Intent(getCurrentActivity(), BackgroundGeolocationService.class);
-        backgroundServiceIntent.putExtra("command", BackgroundGeolocation.ACTION__START_GEOFENCES);
         if (hasPermission(ACCESS_COARSE_LOCATION) && hasPermission(ACCESS_FINE_LOCATION)) {
-            setEnabled(true);
+            getAdapter().startGeofences(new StartGeofencesCallback(success, failure));
         } else {
+            startCallback = new HashMap<>();
+            startCallback.put("success", success);
+            startCallback.put("failure", failure);
             String[] permissions = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION};
             requestPermissions(REQUEST_ACTION_START_GEOFENCES, permissions);
         }
-        */
+    }
+    private class StartGeofencesCallback implements TSCallback {
+        private Callback mSuccess;
+        private Callback mFailure;
+        public StartGeofencesCallback(Callback success, Callback failure) {
+            mSuccess = success;
+            mFailure = failure;
+        }
+        @Override
+        public void success(Object state) {
+            mSuccess.invoke(getState());
+        }
+        @Override
+        public void error(Object error) {
+            mFailure.invoke((String) error);
+        }
     }
 
     @ReactMethod
     public void stop(Callback success, Callback failure) {
         startCallback = null;
         getAdapter().stop();
-        success.invoke();
+        success.invoke(getState());
     }
 
     @ReactMethod
