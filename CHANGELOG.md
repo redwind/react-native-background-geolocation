@@ -1,5 +1,5 @@
 # Change Log
-## [2.2.0] - 2016-11-18
+## [2.2.0] - 2016-11-21
 - [Changed] The plugin will ignore `autoSyncThreshold` when a `motionchange` event occurs.
 - [Fixed] Bug with Android geofences not posting `event: geofence` and the actual `geofence` data was missing (The data sent to Javascript callback was ok, just the data sent to HTTP.
 - [Added] Geofences-only mode.  Start geofences-only mode with method `#startGeofences`.
