@@ -103,4 +103,8 @@ public class MainApplication extends ReactApplication {
     @org.greenrobot.eventbus.Subscribe <methods>;
 }
 -keep enum org.greenrobot.eventbus.ThreadMode { *; }
+
+# logback-android
+-keep class ch.qos.** { *; }
+-keep class org.slf4j.** { *; }
 ```
