@@ -49,7 +49,7 @@ bgGeo.setConfig({
 | [`stopTimeout`](#param-integer-minutes-stoptimeout) | `Integer` | Required | `5 minutes` | The number of miutes to wait before turning off the GPS after the ActivityRecognition System (ARS) detects the device is `STILL` (**Android:** defaults to 0, no timeout, **iOS:** defaults to 5min). If you don't set a value, the plugin is eager to turn off the GPS ASAP. An example use-case for this configuration is to delay GPS OFF while in a car waiting at a traffic light. |
 | [`minimumActivityRecognitionConfidence`](#param-integer-millis-minimumactivityrecognitionconfidence) | `Integer` | Optional (**Android**)| `80` | Each activity-recognition-result returned by the API is tagged with a "confidence" level expressed as a %. You can set your desired confidence to trigger a state-change.|
 | [`stopDetectionDelay`](#param-integer-minutes-stopdetectiondelay-0) | `Integer` | Optional (**iOS**)| 0 | Allows the stop-detection system to be delayed from activating. When the stop-detection system is engaged, the GPS is off and only the accelerometer is monitored. Stop-detection will only engage if this timer expires. The timer is cancelled if any movement is detected before expiration |
-| [`disableMotionActivityUpdates`](#param-boolean-disablemotionactivityupdates-false) | `Boolean` | Optional (**iOS**)| 0 | Disable iOS motion-activity updates (eg: "walking", "in_vehicle").  This feature requires a device having the **M7** co-processor (ie: iPhone 5s and up).  **NOTE** This feature will ask the user for "Health updates".  If you do not wish to ask the user for the "Health updates", set this option to `false`; However, you will no longer recieve activity data in the recorded locations. | 
+| [`disableMotionActivityUpdates`](#param-boolean-disablemotionactivityupdates-false) | `Boolean` | Optional (**iOS**)| 0 | Set `true` to disable iOS [`CMMotionActivity`](https://developer.apple.com/reference/coremotion/cmmotionactivitymanager) updates (eg: "walking", "in_vehicle").  This feature requires a device having the **M7** co-processor (ie: iPhone 5s and up).  **NOTE** This feature will ask the user for "Health updates".  :warning: The plugin is **HIGHLY** optimized for motion-activity-updates.
 
 ## Geofencing Options
 | Option | Type | Opt/Required | Default | Note |
@@ -139,7 +139,8 @@ bgGeo.on('location', function(location) {
 | [`destroyLocations`](#cleardatabasecallbackfn-failurefn) | `callbackFn` | Delete all records in plugin's SQLite database |
 | [`sync`](#synccallbackfn) | - | If the plugin is configured for HTTP with an `#url` and `#autoSync: false`, this method will initiate POSTing the locations currently stored in the native SQLite database to your configured `#url`. |
 | [`getOdometer`](#getodometercallbackfn) | `callbackFn` | The plugin constantly tracks distance travelled. The supplied callback will be executed and provided with a `distance` as the 1st parameter. |
-| [`resetOdometer`](#resetodometercallbackfn) | `callbackFn` | Reset the **odometer** to `0`. The plugin never automatically resets the odometer -- this is **up to you**. |
+| [`setOdometer`](#setodometervalue-callbackfn-failurefn) | `callbackFn` | Set the `odometer` to *any* arbitrary value.  **NOTE** `setOdometer` will perform a `getCurrentPosition` in order to record to exact location where odometer was set; as a result, the `callback` signatures are identical to those of `getCurrentPosition`.|
+| [`resetOdometer`](#resetodometercallbackfn-failurefn) | `callbackFn` | Reset the **odometer** to `0`.  Alias for [`setOdometer(0)`](#setodometervalue-callbackfn-failurefn) |
 | [`playSound`](#playsoundsoundid) | `soundId` | Here's a fun one. The plugin can play a number of OS system sounds for each platform. For [IOS](http://iphonedevwiki.net/index.php/AudioServices) and [Android](http://developer.android.com/reference/android/media/ToneGenerator.html). I offer this API as-is, it's up to you to figure out how this works. |
 | [`getLog`](#getlogcallbackfn) | `calbackFn` | Fetch the entire contents of the current circular log and return it as a String.|
 | [`destroyLog`](#destroylogcallbackfnfailurefn) | `calbackFn`,`failureFn` | Destroy the contents of the Log database. |
@@ -160,27 +161,28 @@ Specify the desired-accuracy of the geolocation system with 1 of 4 values, `0, 1
 
 The minimum distance (measured in meters) a device must move horizontally before an update event is generated. @see [Apple docs](https://developer.apple.com/library/ios/documentation/CoreLocation/Reference/CLLocationManager_Class/CLLocationManager/CLLocationManager.html#//apple_ref/occ/instp/CLLocationManager/distanceFilter). However, #distanceFilter is elastically auto-calculated by the plugin:  When speed increases, #distanceFilter increases;  when speed decreases, so does distanceFilter.
 
-distanceFilter is calculated as the square of speed-rounded-to-nearest-5 and adding configured #distanceFilter.
+`distanceFilter` is auto calculated by rounding speed to the nearest `5 m/s` and adding `distanceFilter` meters for each `5 m/s` increment.
 
-  `(round(speed, 5))^2 + distanceFilter`
+For example, at biking speed of 7.7 m/s with a configured `distanceFilter: 30`:
+```
+  rounded_speed = round(7.7, 5)
+  => 10
+  multiplier = rounded_speed / 5
+  => 10 / 5 = 2
+  adjusted_distance_filter = multiplier * distanceFilter
+  => 2 * 30 = 60 meters
+```
 
-For example, at biking speed of 7.7 m/s with a configured distanceFilter of 30m:
+At highway speed of `27 m/s` with a configured `distanceFilter: 50`:
 
-  `=> round(7.7, 5)^2 + 30`
-  `=> (10)^2 + 30`
-  `=> 100 + 30`
-  `=> 130`
-
-A gps location will be recorded each time the device moves 130m.
-
-At highway speed of 30 m/s with distanceFilter: 30,
-
-  `=> round(30, 5)^2 + 30`
-  `=> (30)^2 + 30`
-  `=> 900 + 30`
-  `=> 930`
-
-A gps location will be recorded every 930m
+```
+  rounded_speed = round(27, 5)
+  => 30
+  multiplier = rounded_speed / 5
+  => 30 / 5 = 6
+  adjusted_distance_filter = multiplier * distanceFilter
+  => 6 * 50 = 300 meters
+```
 
 Note the following real example of background-geolocation on highway 101 towards San Francisco as the driver slows down as he runs into slower traffic (geolocations become compressed as distanceFilter decreases).
 
@@ -207,10 +209,6 @@ When stopped, the minimum distance the device must move beyond the stationary lo
 ####`@param {Boolean} disableElasticity [false]`
 
 Defaults to `false`. Set `true` to disable automatic speed-based `#distanceFilter` elasticity. eg: When device is moving at highway speeds, locations are returned at ~ 1 / km.
-
-####`@param {String} activityType [AutomotiveNavigation, OtherNavigation, Fitness, Other]`
-
-Presumably, this affects ios GPS algorithm. See [Apple docs](https://developer.apple.com/library/ios/documentation/CoreLocation/Reference/CLLocationManager_Class/CLLocationManager/CLLocationManager.html#//apple_ref/occ/instp/CLLocationManager/activityType) for more information
 
 ####`@param {Boolean} useSignificantChangesOnly [false]`
 
@@ -283,9 +281,16 @@ The number of miutes to wait before turning off the GPS after the ActivityRecogn
 
 Allows the stop-detection system to be delayed from activating. When the stop-detection system is engaged, the GPS is off and only the accelerometer is monitored. Stop-detection will only engage if this timer expires. The timer is cancelled if any movement is detected before expiration. If a value of `0` is specified, the stop-detection system will engage as soon as the device is detected to be stationary.
 
+####`@param {String} activityType [AutomotiveNavigation, OtherNavigation, Fitness, Other]`
+
+Presumably, this affects ios GPS algorithm. See [Apple docs](https://developer.apple.com/library/ios/documentation/CoreLocation/Reference/CLLocationManager_Class/CLLocationManager/CLLocationManager.html#//apple_ref/occ/instp/CLLocationManager/activityType) for more information
+
 ####`@param {Boolean} disableMotionActivityUpdates [false]`
 
-Set `true` to isable iOS `CMMotionActivity` updates (eg: "walking", "in_vehicle").  This feature requires a device having the **M7** co-processor (ie: iPhone 5s and up).  **NOTE** This feature will ask the user for "Health updates".  If you do not wish to ask the user for the "Health updates", set this option to `false`; However, you will no longer recieve activity data in the recorded locations.
+Set `true` to disable iOS [`CMMotionActivity`](https://developer.apple.com/reference/coremotion/cmmotionactivitymanager) updates (eg: "walking", "in_vehicle").  This feature requires a device having the **M7** co-processor (ie: iPhone 5s and up).  **NOTE** This feature will ask the user for "Health updates".  :warning: The plugin is **HIGHLY** optimized for motion-activity-updates.  If you **do** disable this, the plugin *will* drain more battery power.  You are **STRONGLY** advised against disabling this.  You should explain to your users with the `NSMotionUsageDescription` in the iOS `.plist`, for example:
+> "Accelerometer use increases battery efficiency by intelligently toggling location-tracking"
+
+If you do not wish to ask the user for the "Health updates", set this option to `true`; However, you will no longer receive accurate activity data in the recorded locations.
 
 # Geofencing Options
 
@@ -488,6 +493,8 @@ bgGeo.on('location', function(location) {
 
 ####`location`
 Your `callbackFn` will be executed each time the plugin records a new location. The `callbackFn` will be provided with the following parameters:
+
+:exclamation: When performing a `motionchange` or `getCurrentPosition`, the plugin requests **multiple** location *samples* in order to record the most accurate location possible.  These *samples* are **not** persisted to the database but they will be provided to your `location` listener, for your convenience, since it can take some seconds for the best possible location to arrive.  For example, you might use these samples to progressively update the user's position on a map.  You can detect these *samples* in your `callbackFn` via `location.sample === true`.  If you're manually `POST`ing location to your server, you should ignore these locations.
 
 ######@param {Object} location (see Wiki [Location Data Schema](../../..//wiki/Location-Data-Schema))
 
@@ -1188,9 +1195,23 @@ The plugin constantly tracks distance travelled. To fetch the current **odometer
     });
 ```
 
-####`resetOdometer(callbackFn)`
+####`setOdometer(value, callbackFn, failureFn)`
 
-Reset the **odometer** to zero. The plugin never automatically resets the odometer so it's up to you to reset it as desired.
+Set the `odometer` to *any* arbitrary value.  **NOTE** `setOdometer` will perform a [`getCurrentPosition`](#getcurrentpositionoptions-successfn-failurefn) in order to record to exact location where odometer was set; as a result, the `callback` signatures are identical to those of [`getCurrentPosition`](#getcurrentpositionoptions-successfn-failurefn).
+
+```Javascript
+    bgGeo.setOdometer(1234.56, function(location) {
+        // Callback is called with the location where odometer was set at.
+        console.log('- setOdometer success: ', location);
+    }, function(errorCode) {
+        // If the plugin failed to fetch a location, it will still have set your odometer to your desired value.
+        console.log('- Error: ', errorCode);
+    });
+```
+
+####`resetOdometer(callbackFn, failureFn)`
+
+Reset the **odometer** to `0`.  Alias for [`setOdometer(0)`](#setodometervalue-callbackfn-failurefn)
 
 ####`getLog(callbackFn)`
 

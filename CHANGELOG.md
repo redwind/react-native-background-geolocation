@@ -2,6 +2,7 @@
 - [Fixed] Use more precise Alarm mechanism for `stopTimeout`.  Was using `AlarmManager#set`.  Changed `AlaramManager#setExact` (only works for API >= `19`).  Some were reporting that `stopTimeout` could run several minutes beyond what was configured.
 - [Fixed] Improve odometer accuracy.  Introduce `desiredOdometerAccuracy` for setting a threshold of location accuracy for calculating odometer.  Any location having `accuracy > desiredOdometerAccuracy` will not be used for odometer calculation.
 - [Fixed] When configured with a schedule, the Schedule parser wasn't ordering the schedule entries by start-time.  Since the scheduler seeks the first matching schedule-entry, it could fail to pick the latest entry.
+- [Changed] Add ability to set odometer to any arbitrary value.  Before, odometer could only be reset to `0` via `resetOdometer`.  The plugin now uses `setOdometer(Float, successFn, failureFn`.  `resetOdometer` is now just an alias for `setOdometer(0)`.  `setOdometer` will now internally perform a `#getCurrentPosition`, so it can know the exact location where the odometer was set at.  As a result, using `#setOdometer` is exactly like performing a `#getCurrentPosition` and the `success` / `failure` callbacks use the same method-signature, where the `success` callback is provided the `location`.
 
 ## [2.2.0] - 2016-11-21
 - [Changed] The plugin will ignore `autoSyncThreshold` when a `motionchange` event occurs.

@@ -291,10 +291,25 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule im
     }
 
     @ReactMethod
-    public void stop(Callback success, Callback failure) {
+    public void stop(final Callback success, final Callback failure) {
         startCallback = null;
-        getAdapter().stop();
-        success.invoke(getState());
+
+        TSCallback callback = new TSCallback() {
+            @Override
+            public void success(Object state) {
+                try {
+                    success.invoke(jsonToMap((JSONObject)state));
+                } catch (JSONException e) {
+                    success.invoke(getState());
+                }
+            }
+
+            @Override
+            public void error(Object error) {
+                failure.invoke((String) error);
+            }
+        };
+        getAdapter().stop(callback);
     }
 
     @ReactMethod
@@ -503,9 +518,20 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule im
         success.invoke(getAdapter().getOdometer());
     }
     @ReactMethod
-    public void resetOdometer(Callback success, Callback failure) {
-        getAdapter().resetOdometer();
-        success.invoke();
+    public void setOdometer(Float value, final Callback success, final Callback failure) {
+        TSCallback callback = new TSCallback() {
+            public void success(Object location) {
+                try {
+                    success.invoke(jsonToMap((JSONObject) location));
+                } catch (JSONException e) {
+                    failure.invoke(e.getMessage());
+                }
+            }
+            public void error(Object errorCode) {
+                failure.invoke((Integer) errorCode);
+            }
+        };
+        getAdapter().setOdometer(value, callback);
     }
     @ReactMethod
     public void addGeofence(ReadableMap options, final Callback success, final Callback failure) {
@@ -598,7 +624,6 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule im
 
             }
         };
-        //success.invoke(convertJsonToArray(getAdapter().getGeofences()));
         getAdapter().getGeofences(callback);
     }
     /**
@@ -717,8 +742,6 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule im
                 }
             };
             adapter.start(callback);
-        } else {
-            adapter.stop();
         }
     }
 
