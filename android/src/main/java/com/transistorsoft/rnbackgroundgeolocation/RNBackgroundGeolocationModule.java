@@ -15,7 +15,6 @@ import com.facebook.react.bridge.LifecycleEventListener;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
-
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.ReadableMapKeySetIterator;
@@ -24,7 +23,7 @@ import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.WritableNativeArray;
 import com.facebook.react.bridge.WritableNativeMap;
-import com.facebook.react.modules.core.DeviceEventManagerModule;
+import com.facebook.react.modules.core.RCTNativeAppEventEmitter;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -32,18 +31,14 @@ import org.json.JSONObject;
 
 import com.google.android.gms.common.GoogleApiAvailability;
 
-import com.transistorsoft.locationmanager.*;
 import com.transistorsoft.locationmanager.adapter.BackgroundGeolocation;
 import com.transistorsoft.locationmanager.adapter.TSCallback;
 import com.transistorsoft.locationmanager.settings.*;
-import com.transistorsoft.locationmanager.scheduler.*;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -830,10 +825,10 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule im
     }
 
     private void sendEvent(String eventName, WritableMap params) {
-        getReactApplicationContext().getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit(TAG + ":" + eventName, params);
+        getReactApplicationContext().getJSModule(RCTNativeAppEventEmitter.class).emit(eventName, params);
     }
     private void sendEvent(String eventName, String result) {
-        getReactApplicationContext().getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit(TAG + ":" + eventName, result);
+        getReactApplicationContext().getJSModule(RCTNativeAppEventEmitter.class).emit(eventName, result);
     }
 
     private static WritableMap jsonToMap(JSONObject jsonObject) throws JSONException {
