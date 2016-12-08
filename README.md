@@ -1,4 +1,4 @@
-Background Geolocation for React Native (Android)
+Background Geolocation for React Native (Premium Version)
 ==============================
 
 Cross-platform background geolocation module for React Native with battery-saving **"circular stationary-region monitoring"** and **"stop detection"**.
@@ -16,6 +16,12 @@ $ npm install git+https://git@github.com:transistorsoft/react-native-background-
 ```
 
 ## Setup Guides
+
+### iOS
+- [Cocoapods](docs/INSTALL-IOS-COCOAPODS.md)
+- [rnpm link](docs/INSTALL-IOS-RNPM.md)
+- [Manual Installation](docs/INSTALL-IOS.md)
+
 ### Android
 * [RNPM Setup](docs/INSTALL-ANDROID-RNPM.md)
 * [Manual Setup](docs/INSTALL-ANDROID.md)
@@ -48,7 +54,7 @@ import BackgroundGeolocation from 'react-native-background-geolocation-android';
 ```
 
 ## Documentation
-- [API Documentation](docs)
+- [API Documentation](docs/README.md)
 - [Advanced Geofencing](docs/geofencing.md)
 - [Location Data Schema](../../wiki/Location-Data-Schema)
 - [Error Codes](../../wiki/Error-Codes)
@@ -67,14 +73,31 @@ import BackgroundGeolocation from "react-native-background-geolocation";
 
 var Foo = React.createClass({
   componentWillMount() {
+    // 1.  Wire up event-listeners
 
+    // This handler fires whenever bgGeo receives a location update.
+    BackgroundGeolocation.on('location', this.onLocation);
+
+    // This handler fires whenever bgGeo receives an error
+    BackgroundGeolocation.on('error', this.onError);
+
+    // This handler fires when movement states changes (stationary->moving; moving->stationary)
+    BackgroundGeolocation.on('motionchange', this.onMotionChange);
+
+    // This event fires when a chnage in motion activity is detected
+    BackgroundGeolocation.on('activitychange', this.onActivityChange);
+
+    // This event fires when the user toggles location-services
+    BackgroundGeolocation.on('providerchange', this.onProviderChange);
+
+    // 2.  #configure the plugin (just once for life-time of app)
     BackgroundGeolocation.configure({
       // Geolocation Config
       desiredAccuracy: 0,
       stationaryRadius: 25,
       distanceFilter: 10,
       // Activity Recognition
-      stopTimeout: 1,       
+      stopTimeout: 1,
       // Application config
       debug: true, // <-- enable this hear sounds for background-geolocation 
       life-cycle.
@@ -82,7 +105,7 @@ var Foo = React.createClass({
       stopOnTerminate: false,   // <-- Allow the background-service to continue tracking when user closes the app.
       startOnBoot: true,        // <-- Auto start tracking when device is powered-up.
       // HTTP / SQLite config
-      url: 'http://posttestserver.com/post.php?dir=cordova-background-geolocation',
+      url: 'http://yourserver.com/locations',
       batchSync: false,       // <-- [Default: false] Set true to sync locations to server in a single HTTP request.
       autoSync: true,         // <-- [Default: true] Set true to sync each location to server as it arrives.
       headers: {              // <-- Optional HTTP headers
@@ -100,22 +123,8 @@ var Foo = React.createClass({
         });
       }
     });
-
-    // This handler fires whenever bgGeo receives a location update.
-    BackgroundGeolocation.on('location', this.onLocation);
-
-    // This handler fires whenever bgGeo receives an error
-    BackgroundGeolocation.on('error', this.onError);
-
-    // This handler fires when movement states changes (stationary->moving; moving->stationary)
-    BackgroundGeolocation.on('motionchange', this.onMotionChange);
-
-    // This event fires when a chnage in motion activity is detected
-    BackgroundGeolocation.on('activitychange', this.onActivityChange);
-
-    // This event fires when the user toggles location-services
-    BackgroundGeolocation.on('providerchange', this.onProviderChange);
   }
+
   // You must remove listeners when your component unmounts
   componentWillUnmount() {
     // Remove BackgroundGeolocation listeners
