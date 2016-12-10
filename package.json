@@ -2,7 +2,7 @@
   "name": "react-native-background-geolocation-android",
   "version": "2.2.0",
   "description": "Sophisticated background location-tracking with battery-conscious motion-detection",
-  "main": "RNBackgroundGeolocation.android.js",
+  "main": "RNBackgroundGeolocation.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -27,6 +27,10 @@
   "dependencies": {},
   "peerDependencies": {
     "react-native": ">=0.28.0"
+  },
+  "dependencies": {
+    "react-native-background-fetch":"^1.0.0",
+    "cocoa-lumberjack":"^3.0.3"
   },
   "devDependencies": {}
 }
