@@ -69,7 +69,7 @@ import BackgroundGeolocation from 'react-native-background-geolocation-android';
 
 ```Javascript
 
-import BackgroundGeolocation from "react-native-background-geolocation";
+import BackgroundGeolocation from "react-native-background-geolocation-android";
 
 var Foo = React.createClass({
   componentWillMount() {
