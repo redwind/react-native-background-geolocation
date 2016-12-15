@@ -18,7 +18,7 @@ $ npm install git+https://git@github.com:transistorsoft/react-native-background-
 ## Setup Guides
 
 ### iOS
-:exclamation If you're upgrading from the public `react-native-background-geolocation` version for iOS, you need to **completely remove that version now**.  This repo contains *both* iOS and Android.  Follow the iOS installation steps from scratch.
+:exclamation: If you're upgrading from the public `react-native-background-geolocation` version for iOS, you need to **completely remove that version now**.  This repo contains *both* iOS and Android.  Follow the iOS installation steps from scratch.
 
 - [Cocoapods](docs/INSTALL-IOS-COCOAPODS.md)
 - [rnpm link](docs/INSTALL-IOS-RNPM.md)
