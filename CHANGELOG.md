@@ -1,4 +1,6 @@
 # Change Log
+- [Changed] permission `android.hardware.location.gps" **android:required="false"**` 
+- [Added] Implement `IntentFilter` to capture `MY_PACKAGE_REPLACED`, broadcast when user upgrades the app.  If you've configured `startOnBoot: true, stopOnTerminate: false` and optionally `foreceRelaodOnBoot: true`, the plugin will automatically restart when user upgrades the app.
 - [Changed] When adding a geofence (either `#addGeofence` or `#addGeofences`), if a geofence already exists with the provided `identifier`, the plugin will first destroy the existing one before creating the new one.
 - [Changed] Merge iOS platform.  You no longer have to install both projects.
 - [Fixed] Use more precise Alarm mechanism for `stopTimeout`.  Was using `AlarmManager#set`.  Changed `AlaramManager#setExact` (only works for API >= `19`).  Some were reporting that `stopTimeout` could run several minutes beyond what was configured.
