@@ -17,7 +17,7 @@ platform :ios, '8.0'
 
 #use_frameworks!  # <-- comment this out!
 pod 'React', :path => '../node_modules/react-native'
-pod 'RNBackgroundGeolocation', :path => '../node_modules/react-native-background-geolocation'
+pod 'RNBackgroundGeolocation', :path => '../node_modules/react-native-background-geolocation-android'
 pod 'RNBackgroundFetch', :path => '../node_modules/react-native-background-fetch'
 ```
 
