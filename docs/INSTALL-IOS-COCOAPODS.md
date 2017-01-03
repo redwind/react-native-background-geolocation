@@ -1,7 +1,7 @@
 # iOS Installation with CocoaPods
 
 ```shell
-$ npm install --save react-native-background-geolocation
+$ npm install git+https://git@github.com:transistorsoft/react-native-background-geolocation-android.git --save
 ```
 
 If you use already [CocoaPods](https://cocoapods.org/) in your react-native
