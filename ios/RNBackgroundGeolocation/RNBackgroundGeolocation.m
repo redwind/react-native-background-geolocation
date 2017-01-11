@@ -9,7 +9,7 @@
 #import <Foundation/Foundation.h>
 #import <CoreLocation/CoreLocation.h>
 #import <UIKit/UIKit.h>
-#import "RCTEventDispatcher.h"
+#import <React/RCTEventDispatcher.h>
 
 static NSString *const TS_LOCATION_MANAGER_TAG = @"TSLocationManager";
 
