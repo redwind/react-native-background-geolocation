@@ -1,4 +1,9 @@
 # Change Log
+
+## [2.4.0] - 2017-01-11
+- [Fixed] Support for `react-native-0.40.0`
+
+## [2.3.0] - 2017-01-09
 - [Fixed] Locale issue when formatting Floats.  Some locale use "," as decimal separator.  Force Locale -> US when performing rounding.  Proper locale will be applied during the JSON encoding.
 - [Added] Add `mock` attribute to Location data; present when the location comes from a mock provider (ie: when location is being simulated).
 - [Added] Ability to provide optional arbitrary meta-data `extras` on geofences.
