@@ -1,5 +1,6 @@
 # Change Log
 ## [Unreleased]
+- [Fixed] Fix issue with Location Authorization alert popup up when not desired.  Fixes Issue #190
 
 ## [2.4.1] - 2017-01-12
 - [Fixed] Rounded location attribute Floats rendered as string (eg: `speed`, `odometer`, `heading`).  Fixes issue #162
