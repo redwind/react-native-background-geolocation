@@ -1,4 +1,8 @@
 # Change Log
+## [Unreleased]
+
+## [2.4.1] - 2017-01-12
+- [Fixed] Rounded location attribute Floats rendered as string (eg: `speed`, `odometer`, `heading`).  Fixes issue #162
 
 ## [2.4.0] - 2017-01-11
 - [Fixed] Support for `react-native-0.40.0`
