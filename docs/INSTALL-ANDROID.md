@@ -27,6 +27,14 @@ dependencies {
 }
 ```
 
+If you have a different play serivces than the one included in this library, use the following instead (switch 9.8.0 for the desired version):
+```
+compile(project(':react-native-background-geolocation')) {
+  exclude group: 'com.google.android.gms', module: 'play-services-location'
+}
+compile 'com.google.android.gms:play-services-location:9.8.0'
+```
+
 ## MainApplication.java
 
 * **`MainApplication.java`** (`android/app/main/java/com/.../MainApplication.java`)
