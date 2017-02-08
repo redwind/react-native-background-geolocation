@@ -32,7 +32,7 @@ All the following steps will eventually be handled by by `react-native link` but
 
 - BackgroundGeolocation includes a couple of custom iOS frameworks.  These need to manually added, unfortunately.
     - Click **`[Add Other...]`**.
-    - Navigate: **`node_modules/react-native-background-geolocation/ios/RNBackgroundGeolocation`**.
+    - Navigate: **`node_modules/react-native-background-geolocation-android/ios/RNBackgroundGeolocation`**.
     - Add **`TSLocationManager.framework`**.
 
 ![](https://dl.dropboxusercontent.com/u/2319755/react-native-background-geolocation/images/Manual%20Installation/TSLocationManager.framework.png)
