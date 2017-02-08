@@ -7,7 +7,7 @@ $ npm install git+https://git@github.com:transistorsoft/react-native-background-
 #### With React Native 0.27+
 
 ```shell
-react-native link react-native-background-geolocation
+react-native link react-native-background-geolocation-android
 react-native link react-native-background-fetch
 react-native link cocoa-lumberjack
 ```
@@ -17,7 +17,7 @@ react-native link cocoa-lumberjack
 You need [`rnpm`](https://github.com/rnpm/rnpm) (`npm install -g rnpm`)
 
 ```shell
-rnpm link react-native-background-geolocation
+rnpm link react-native-background-geolocation-android
 rnpm link react-native-background-fetch
 rnpm link cocoa-lumberjack
 ```
@@ -51,7 +51,7 @@ All the following steps will eventually be handled by by `react-native link` but
     - Add the following paths (select **recursive [v]**):
 
 ```
-    $(PROJECT_DIR)/../node_modules/react-native-background-geolocation/ios
+    $(PROJECT_DIR)/../node_modules/react-native-background-geolocation-android/ios
     $(PROJECT_DIR)/../node_modules/react-native-background-fetch/ios
 ```
 

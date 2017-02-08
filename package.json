@@ -23,6 +23,13 @@
   "bugs": {
     "url": "https://github.com/transistorsoft/react-native-background-geolocation-android/issues"
   },
+  "rnpm": {
+    "ios": {
+      "sharedLibraries": [
+        "libsqlite3"
+      ]
+    }
+  },
   "homepage": "https://transistorsoft.github.io/react-native-background-geolocation-android",
   "dependencies": {},
   "peerDependencies": {
