@@ -1,5 +1,29 @@
 # Change Log
-## [Unreleased]
+## [2.5.0] - 2017-02-08
+- [Changed] **BREAKING** License key is no longer provided to `BackgroundGeolocation#configure` -- You will now add your license key to `AndroidManifest`:
+
+```xml
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.transistorsoft.backgroundgeolocation.react">
+
+    <application
+      android:name=".MainApplication"
+      android:allowBackup="true"
+      android:label="@string/app_name"
+      android:icon="@mipmap/ic_launcher"
+      android:theme="@style/AppTheme">
+
+      <!-- react-native-background-geolocation licence -->
+      <meta-data android:name="com.transistorsoft.locationmanager.license" android:value="YOUR_LICENSE_KEY" />
+      .
+      .
+      .
+    </application>
+</manifest>
+```
+
+## [2.4.2] - 2017-02-07
+- [Changed] Make iOS plugin work for both pre and post `0.40.0`.
 - [Fixed] Fix issue with Location Authorization alert popup up when not desired.  Fixes Issue #190
 
 ## [2.4.1] - 2017-01-12
