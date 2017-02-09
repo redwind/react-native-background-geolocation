@@ -2,7 +2,6 @@ package com.transistorsoft.rnbackgroundgeolocation;
 
 import android.Manifest;
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Environment;
@@ -58,7 +57,6 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule im
     private boolean initialized = false;
     private boolean configured = false;
     private Intent launchIntent;
-    private Context context;
 
     private static final String EVENT_WATCHPOSITION = "watchposition";
 
@@ -91,7 +89,6 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule im
         initialized = false;
         configured = false;
         getAdapter().onActivityDestroy();
-        context = null;
     }
     @Override
     public void onActivityResult(final int requestCode, final int resultCode, final Intent intent) {
@@ -888,7 +885,6 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule im
         try {
             while (iterator.hasNextKey()) {
                 String key = iterator.nextKey();
-                ReadableType type = map.getType(key);
                 switch (map.getType(key)) {
                     case String:
                         json.put(key, map.getString(key));
@@ -957,7 +953,6 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule im
             return;
         }
         launchIntent    = activity.getIntent();
-        context         = activity.getApplicationContext();
 
         if (launchIntent.hasExtra("forceReload")) {
             activity.moveTaskToBack(true);
@@ -967,13 +962,12 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule im
     }
 
     private BackgroundGeolocation getAdapter() {
-        return BackgroundGeolocation.getInstance(context, launchIntent);
+        return BackgroundGeolocation.getInstance(getReactApplicationContext(), launchIntent);
     }
 
     @Override
     public void onCatalystInstanceDestroy() {
         initialized = false;
         getAdapter().onActivityDestroy();
-        context = null;
     }
 }
