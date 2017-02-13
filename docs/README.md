@@ -987,11 +987,14 @@ If a location failed to be retrieved, you `failureFn` will be executed with an e
 | kCLErrorDeferredCanceled | - | 15 |
 
 ####`watchPosition(successFn, failureFn, options)`
-Start a stream of continuous location-updates.  The native code will persist the fetched location to its SQLite database just as any other location in addition to POSTing to your configured `#url` (if you've enabled the HTTP features).  
+Start a stream of continuous location-updates.  The native code will persist the fetched location to its SQLite database just as any other location in addition to POSTing to your configured `#url` (if you've enabled the HTTP features).
 
 #### Options
-######@param {Integer} locationUpdateInterval
-######@param {Integer} desiredAccuracy
+
+######@param {Integer millis} interval [1000] Location update interval
+######@param {Integer} desiredAccuracy [0]
+######@param {Boolean} persist [true] Whether to persist location to database
+######@param {Object} extras [undefined] Optional extras to append to each location
 
 #### Callback
 
@@ -1003,7 +1006,7 @@ bgGeo.watchPosition(function(location) {
 }, function(errorCode) {
     alert('An location error occurred: ' + errorCode);
 }, {
-    locationUpdateInterval: 5000    // <-- retrieve a location every 5s.
+    interval: 5000    // <-- retrieve a location every 5s.
 });
 
 ```
