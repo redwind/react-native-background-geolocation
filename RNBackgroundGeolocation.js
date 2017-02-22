@@ -137,6 +137,10 @@ var API = {
     this.beginBackgroundTask(success);
   },
   finish: function(taskId) {
+    if (!taskId) {
+      // No taskId?  Ignore it.
+      return;
+    }
     RNBackgroundGeolocation.finish(taskId);
   },
   getCurrentPosition: function(options, success, failure) {
@@ -147,6 +151,28 @@ var API = {
     options = options || {};
     failure = failure || emptyFn;
     RNBackgroundGeolocation.getCurrentPosition(options, success, failure);
+  },
+  // new
+  getCurrentPosition: function(success, failure, options) {
+    var _success = emptyFn
+       _failure = emptyFn,
+       _options = {};
+
+    // Detect old API: getCurrentPosition(options, success, failure)
+    if (typeof(success) === 'object') {
+      _options = success;
+      if (typeof(options) === 'function') {
+        _failure = options;
+      }
+      if (typeof(failure) === 'function') {
+        _success = failure;
+      }
+    } else {  // New API getCurrentPosition(success, failure, options);
+      _success = success || emptyFn;
+      _failure = failure || emptyFn;
+      _options = options || {};
+    }
+    RNBackgroundGeolocation.getCurrentPosition(_options, _success, _failure);
   },
   watchPosition: function(success, failure, options) {
     if (typeof(failure) === 'object') {
