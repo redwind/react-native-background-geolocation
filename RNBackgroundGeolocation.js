@@ -137,6 +137,10 @@ var API = {
     this.beginBackgroundTask(success);
   },
   finish: function(taskId) {
+    if (!taskId) {
+      // No taskId?  Ignore it.
+      return;
+    }
     RNBackgroundGeolocation.finish(taskId);
   },
   getCurrentPosition: function(options, success, failure) {
