@@ -413,14 +413,9 @@ RCT_EXPORT_METHOD(playSound:(int)soundId)
     };
 }
 
--(void (^)(NSString *identifier, NSString *action, NSDictionary *locationData)) createGeofenceHandler {
-    return ^(NSString *identifier, NSString *action, NSDictionary *locationData) {
-        NSDictionary *params = @{
-            @"identifier": identifier,
-            @"action": action,
-            @"location": locationData
-        };
-        [self sendEvent:EVENT_GEOFENCE body:params];
+-(void (^)(NSDictionary *geofenceData)) createGeofenceHandler {
+    return ^(NSDictionary *geofenceData) {
+        [self sendEvent:EVENT_GEOFENCE body:geofenceData];
     };
 }
 

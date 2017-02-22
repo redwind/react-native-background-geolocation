@@ -1,6 +1,7 @@
 # Change Log
 
 ## [2.6.0] - 2017-02-22
+- [Fixed] Issue #186: `geofence` event not passing Geofence `#extras`.
 - [Fixed] iOS geofence identifiers containing ":" character were split and only the last chunk returned.  The plugin itself prefixes all geofences it creates with the string `TSGeofenceManager:` and the string-splitter was too naive.  Uses a `RegExp` replace to clear the plugin's internal prefix. 
 - [Changed] Refactored API Documentation
 - [Added] HTTP JSON template features.  See [HTTP Features](./docs/http.md).  You can now template your entire JSON request data sent to the server by the plugin's HTTP layer.
