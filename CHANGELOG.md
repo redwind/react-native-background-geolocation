@@ -1,5 +1,9 @@
 # Change Log
 
+## [2.6.1] - 2017-03-01
+- [Changed] Refactor Settings Management for both iOS and Android.
+- [Fixed] Android database migration issue when upgrading from very old version to latest.  Was missing "geofences" table migration.
+
 ## [2.6.0] - 2017-02-22
 - [Fixed] Issue #186: `geofence` event not passing Geofence `#extras`.
 - [Fixed] iOS geofence identifiers containing ":" character were split and only the last chunk returned.  The plugin itself prefixes all geofences it creates with the string `TSGeofenceManager:` and the string-splitter was too naive.  Uses a `RegExp` replace to clear the plugin's internal prefix. 
