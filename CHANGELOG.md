@@ -1,4 +1,5 @@
 # Change Log
+- [Fixed] iOS issue with HTTP 401 handling
 
 ## [2.6.1] - 2017-03-01
 - [Changed] Refactor Settings Management for both iOS and Android.
