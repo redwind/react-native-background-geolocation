@@ -143,15 +143,6 @@ var API = {
     }
     RNBackgroundGeolocation.finish(taskId);
   },
-  getCurrentPosition: function(options, success, failure) {
-    if (typeof(options) === 'function') {
-      success = options;
-      options = {};
-    }
-    options = options || {};
-    failure = failure || emptyFn;
-    RNBackgroundGeolocation.getCurrentPosition(options, success, failure);
-  },
   // new
   getCurrentPosition: function(success, failure, options) {
     var _success = emptyFn
