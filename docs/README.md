@@ -271,7 +271,7 @@ BackgroundGeolocation.on("location", successFn, failureFn);
 
 ## :wrench: [Geolocation] Common Options
 
-####`@config {Integer} desiredAccuracy [0, 10, 100, 1000] in meters`
+#### `@config {Integer} desiredAccuracy [0, 10, 100, 1000] in meters`
 
 Specify the desired-accuracy of the geolocation system with 1 of 4 values, `0`, `10`, `100`, `1000` where `0` means **HIGHEST POWER, HIGHEST ACCURACY** and `1000` means **LOWEST POWER, LOWEST ACCURACY**
 
