@@ -36,9 +36,6 @@ import static com.facebook.react.common.ApplicationHolder.getApplication;
  * To enable this service, add the following block to your AndroidManifest within the <application></application> element:
  *
  <application>
-    .
-    .
-    .
     <receiver android:name="com.transistorsoft.rnbackgroundgeolocation.RNBackgroundGeolocationEventReceiver">
         <intent-filter>
             <!-- You may choose to listen to any, all or none of the following events.  If you don't wish to listen to a particular event, remove it from your AndroidManifest -->
@@ -55,10 +52,22 @@ import static com.facebook.react.common.ApplicationHolder.getApplication;
             <action android:name="com.transistorsoft.locationmanager.event.GEOFENCESCHANGE" />
         </intent-filter>
      </receiver>
-     .
-     .
-     .
  </application>
+ *
+ * You can register a Headless JS service in your index.android.js as follows:
+
+ import BackgroundGeolocationHeadlessService from "./BackgroundGeolocationHeadlessService"
+ .
+ .
+ .
+ AppRegistry.registerHeadlessTask('BackgroundGeolocation', () => BackgroundGeolocationHeadlessService);
+
+ * It's up to you to create your own BackgroundGeolocationHeadlessService.js.  The event object contains a #name and #params.  It could like something like this:
+
+ module.exports = async (event) => {
+   console.log('[js] BackgroundGeolocationHeadlessService: ', event.name, event.params);
+ }
+
  *
  *
  * @author chris scott, Transistor Software www.transistorsoft.com
