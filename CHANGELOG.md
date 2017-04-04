@@ -1,4 +1,8 @@
 # Change Log
+## [Unreleased]
+- [Added] New config option `locationsOrderDirection [ASC|DESC]` for controlling the order that locations are selected from the database (and synced to your server).  Defaults to `ASC`.
+- [Added] Support for React Native "Headless JS"
+- [Added] Support for iOS geofence `DWELL` transitions.
 
 ## [2.7.0] - 2017-03-09
 - [Changed] Updated **proguard config** to ignore `com.transistorsoft.**` -- `tslocationmanager.aar` is *already* pro-guarded.
