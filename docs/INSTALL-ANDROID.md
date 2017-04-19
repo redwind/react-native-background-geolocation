@@ -90,9 +90,6 @@ public class MainApplication extends ReactApplication {
 -dontwarn com.android.volley.toolbox.**
 
 # BackgroundGeolocation (EventBus)
--keepclassmembers class * extends org.greenrobot.eventbus.util.ThrowableFailureEvent {
-    <init>(java.lang.Throwable);
-}
 -keepattributes *Annotation*
 -keepclassmembers class ** {
     @org.greenrobot.eventbus.Subscribe <methods>;
