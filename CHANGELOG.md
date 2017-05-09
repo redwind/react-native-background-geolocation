@@ -1,6 +1,7 @@
 # Change Log
 
 ## [2.8.0] - 2017-05-08
+- [Added] When iOS detects a network connection with `autoSync: true`, an HTTP flush will be initiated.
 - [Fixed] Improve switching between tracking-mode location and geofence.  It's not necessary to call `#stop` before executing `#start` / `#startGeofences`.
 - Fixed] iOS `maximumAge` with `getCurrentPosition` wasn't clearing the callbacks when current-location-age was `<= maximumAge`
 - [Fixed] iOS when `#stop` is executed, nullify the odometer reference location.
