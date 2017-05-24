@@ -216,7 +216,7 @@ BackgroundGeolocation.on("location", successFn, failureFn);
 
 | Method Name      | Arguments       | Notes                                |
 |------------------|-----------------|--------------------------------------|
-| [`configure`](#configureconfig-success-failure) | `{config}`, `successFn`, `failureFn` | Initializes the plugin and configures the its config options The **`success`** callback will be executed after the plugin has successfully configured and provided with the current **`state`** `Object`. |
+| [`configure`](#configureconfig-successfn-failurefn) | `{config}`, `successFn`, `failureFn` | Initializes the plugin and configures the its config options The **`success`** callback will be executed after the plugin has successfully configured and provided with the current **`state`** `Object`. |
 | [`setConfig`](#setconfigconfig-successfn-failurefn) | `{config}`, `successFn`, `failureFn` | Re-configure the plugin with new config options. |
 | [`start`](#startsuccessfn-failurefn) | `callbackFn`| Enable location tracking.  Supplied **`callbackFn`** will be executed when tracking is successfully engaged.  This is the plugin's power **ON** button. |
 | [`stop`](#stopsuccessfn-failurefn) | `callbackFn` | Disable location tracking.  Supplied **`callbackFn`** will be executed when tracking is successfully halted.  This is the plugin's power **OFF** button. |
@@ -239,10 +239,10 @@ BackgroundGeolocation.on("location", successFn, failureFn);
 
 | Method Name      | Arguments       | Notes                                |
 |------------------|-----------------|--------------------------------------|
-| [`getLocations`](#getlocationscallbackfn-failurefn) | `callbackFn` | Fetch all the locations currently stored in native plugin's SQLite database. Your **`callbackFn`** will receive an **`Array`** of locations in the 1st parameter |
-| [`getCount`](#getcountcallbackfn-failurefn) | `callbackFn` | Fetches count of SQLite locations table **`SELECT count(*) from locations`** |
-| [`destroyLocations`](#destroylocationscallbackfn-failurefn) | `callbackFn` | Delete all records in plugin's SQLite database |
-| [`sync`](#synccallbackfn-failurefn) | `successFn`, `failureFn` | If the plugin is configured for HTTP with an [`#url`](#config-string-url-undefined) and [`#autoSync: false`](#config-string-autosync-true), this method will initiate POSTing the locations currently stored in the native SQLite database to your configured [`#url`](#config-string-url-undefined)|
+| [`getLocations`](#getlocationssuccessfn-failurefn) | `callbackFn` | Fetch all the locations currently stored in native plugin's SQLite database. Your **`callbackFn`** will receive an **`Array`** of locations in the 1st parameter |
+| [`getCount`](#getcountsuccessfn-failurefn) | `callbackFn` | Fetches count of SQLite locations table **`SELECT count(*) from locations`** |
+| [`destroyLocations`](#destroylocationssuccessfn-failurefn) | `callbackFn` | Delete all records in plugin's SQLite database |
+| [`sync`](#syncsuccessfn-failurefn) | `successFn`, `failureFn` | If the plugin is configured for HTTP with an [`#url`](#config-string-url-undefined) and [`#autoSync: false`](#config-string-autosync-true), this method will initiate POSTing the locations currently stored in the native SQLite database to your configured [`#url`](#config-string-url-undefined)|
 
 
 ### :small_blue_diamond: Geofencing Methods
@@ -250,20 +250,20 @@ BackgroundGeolocation.on("location", successFn, failureFn);
 | Method Name      | Arguments       | Notes                                |
 |------------------|-----------------|--------------------------------------|
 | [`startGeofences`](#startgeofencescallbackfn) | `callbackFn` | Engages the geofences-only **`trackingMode`**.  In this mode, no active location-tracking will occur -- only geofences will be monitored|
-| [`addGeofence`](#addgeofenceconfig-callbackfn-failurefn) | `{config}`, `successFn`, `failureFn` | Adds a geofence to be monitored by the native plugin.|
-| [`addGeofences`](#addgeofencesgeofences-callbackfn-failurefn) | `[geofences]`, `sucessFn`, `failureFn` | Adds a list geofences to be monitored by the native plugin. |
-| [`removeGeofence`](#removegeofenceidentifier-callbackfn-failurefn) | `identifier`, `successFn`, `failureFn` | Removes a geofence identified by the provided `identifier` |
+| [`addGeofence`](#addgeofenceconfig-successfn-failurefn) | `{config}`, `successFn`, `failureFn` | Adds a geofence to be monitored by the native plugin.|
+| [`addGeofences`](#addgeofencesgeofences-successfn-failurefn) | `[geofences]`, `sucessFn`, `failureFn` | Adds a list geofences to be monitored by the native plugin. |
+| [`removeGeofence`](#removegeofenceidentifier-successfn-failurefn) | `identifier`, `successFn`, `failureFn` | Removes a geofence identified by the provided `identifier` |
 | [`removeGeofences`](#removegeofencescallbackfn-failurefn) | `successFn`, `failureFn` | Removes all geofences |
-| [`getGeofences`](#getgeofencescallbackfn-failurefn) | `callbackFn` | Fetch the list of monitored geofences. |
+| [`getGeofences`](#getgeofencessuccessfn-failurefn) | `callbackFn` | Fetch the list of monitored geofences. |
 
 
 ### :small_blue_diamond: Logging Methods
 
 | Method Name      | Arguments       | Notes                                |
 |------------------|-----------------|--------------------------------------|
-| [`setLogLevel`](#setloglevelcallbackfn) | `Integer`, `callbackFn` | Set the Log filter:  `LOG_LEVEL_OFF`, `LOG_LEVEL_ERROR`, `LOG_LEVEL_WARNING`, `LOG_LEVEL_INFO`, `LOG_LEVEL_DEBUG`, `LOG_LEVEL_VERBOSE`|
+| [`setLogLevel`](#setloglevelloglevel-callbackfn) | `Integer`, `callbackFn` | Set the Log filter:  `LOG_LEVEL_OFF`, `LOG_LEVEL_ERROR`, `LOG_LEVEL_WARNING`, `LOG_LEVEL_INFO`, `LOG_LEVEL_DEBUG`, `LOG_LEVEL_VERBOSE`|
 | [`getLog`](#getlogcallbackfn) | `callbackFn` | Fetch the entire contents of the current log database as a `String`.|
-| [`destroyLog`](#destroylogcallbackfn-failurefn) | `callbackFn`, `failureFn` | Destroy the contents of the Log database. |
+| [`destroyLog`](#destroylogsuccessfn-failurefn) | `callbackFn`, `failureFn` | Destroy the contents of the Log database. |
 | [`emailLog`](#emaillogemail-callbackfn) | `email`, `callbackFn` | Fetch the entire contents of Log database and email it to a recipient using the device's native email client.|
 | [`playSound`](#playsoundsoundid) | `Integer` | Here's a fun one.  The plugin can play a number of OS system sounds for each platform.  For [IOS](http://iphonedevwiki.net/index.php/AudioServices) and [Android](http://developer.android.com/reference/android/media/ToneGenerator.html).  I offer this API as-is, it's up to you to figure out how this works. |
 
@@ -306,7 +306,7 @@ The minimum distance (measured in meters) a device must move horizontally before
 
 However, by default, **`distanceFilter`** is elastically auto-calculated by the plugin:  When speed increases, **`distanceFilter`** increases;  when speed decreases, so too does **`distanceFilter`**.  
 
-:information_source: To disable this behaviour, configure [`disableElasticity: true`](https://github.com/transistorsoft/cordova-background-geolocation/tree/docs/docs#config-boolean-disableelasticity-false)
+:information_source: To disable this behaviour, configure [`disableElasticity: true`](#config-boolean-disableelasticity-false)
 
 **`distanceFilter`** is auto calculated by rounding speed to the nearest `5 m/s` and adding **`distanceFilter`** meters for each `5 m/s` increment.
 
