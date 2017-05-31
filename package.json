@@ -24,6 +24,10 @@
     "url": "https://github.com/transistorsoft/react-native-background-geolocation-android/issues"
   },
   "rnpm": {
+    "commands": {
+      "postlink": "node_modules/react-native-background-geolocation-android/scripts/postlink.js",
+      "postunlink": "node_modules/react-native-background-geolocation-android/scripts/postunlink.js"
+    },
     "ios": {
       "sharedLibraries": [
         "libsqlite3"
@@ -33,7 +37,7 @@
   "homepage": "https://transistorsoft.github.io/react-native-background-geolocation-android",
   "dependencies": {},
   "dependencies": {
-    "react-native-background-fetch":"^2.0.5",
+    "react-native-background-fetch":"^2.0.6",
     "cocoa-lumberjack":"^3.0.3"
   },
   "peerDependencies": {

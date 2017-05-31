@@ -120,6 +120,14 @@ public class RNBackgroundGeolocationEventReceiver extends BroadcastReceiver impl
     public void onReceive(Context context, Intent intent) {
         String eventName = getEventName(intent.getAction());
 
+        // Ensure we can reference ReactApplication.  If not, the ReactApplication has not yet been booted so cannot possibly have registered a HeadlessTask.
+        try {
+            ReactApplication reactApplication = ((ReactApplication) getApplication());
+        } catch (AssertionError e) {
+            TSLog.logger.warn(TSLog.warn("Failed to fetch ReactApplication.  Task ignored."));
+            return;  // <-- Do nothing.  Just return
+        }
+        
         BackgroundGeolocation adapter = BackgroundGeolocation.getInstance(context, intent);
         if (!adapter.isMainActivityActive()) {
             Bundle extras = intent.getExtras();
