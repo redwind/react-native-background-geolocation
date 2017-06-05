@@ -115,6 +115,7 @@ BackgroundGeolocation.setConfig({
 | Option      | Type      | Default   | Note                              |
 |-------------|-----------|-----------|-----------------------------------|
 | [`url`](#config-string-url-undefined) | `String` | `null` | Your server url where you wish to HTTP POST locations to |
+| [`httpTimeout`](#config-integer-httptimeout-60000) | `Integer` | `60000` | HTTP request timeout in milliseconds. |
 | [`params`](#config-object-params) | `Object` | `null` | Optional HTTP params sent along in HTTP request to above [`#url`](#config-string-url-undefined) |
 | [`extras`](#config-object-extras) | `Object` | `null` | Optional meta-data to attach to *each* recorded location |
 | [`headers`](#config-object-headers) | `Object` | `null` | Optional HTTP headers sent along in HTTP request to above [`#url`](#config-string-url-undefined) |
@@ -621,6 +622,25 @@ BackgroundGeolocation.configure({
 
 ------------------------------------------------------------------------------
 
+#### `@config {Integer} httpTimeout [60000]`
+
+HTTP request timeout in **milliseconds**.  The `http` **`failureFn`** will execute when an HTTP timeout occurs.  Defaults to `60000 ms` (1 minute).
+
+```javascript
+BackgroundGeolocation.on('http', function(request) {
+  console.log('HTTP SUCCESS: ', response);
+}, function(request) {
+  console.log('HTTP FAILURE', response);
+});
+
+BackgroundGeolocation.configure({
+  url: 'http://my-server.com/locations',
+  httpTimeout: 3000
+});
+```
+
+------------------------------------------------------------------------------
+
 #### `@config {String} method [POST]`
 
 The HTTP method to use when creating an HTTP request to your configured [`#url`](#config-string-url-undefined).  Defaults to `POST`.  Valid values are `POST`, `PUT` and `OPTIONS`.
@@ -973,6 +993,7 @@ Provides an automated schedule for the plugin to start/stop tracking at pre-defi
 
 The `START_TIME`, `END_TIME` are in **24h format**.  The `DAY` param corresponds to the `Locale.US`, such that **Sunday=1**; **Saturday=7**).  You may configure a single day (eg: `1`), a comma-separated list-of-days (eg: `2,4,6`) or a range (eg: `2-6`), eg:
 
+
 ```javascript
 BackgroundGeolocation.configure({
   .
@@ -1019,6 +1040,38 @@ BackgroundGeolocation.setConfig({
   ]
 });
 ```
+
+##### Literal Dates
+
+The schedule can also be configured with a literal start date of the form:
+
+```
+  "yyyy-mm-dd HH:mm-HH:mm"
+```
+
+eg:
+
+```javascript
+BackgroundGeolocation.configure({
+  schedule: [
+    "2018-01-01 09:00-17:00"
+  ]
+
+})
+```
+
+Or **two** literal dates to specify both a start **and** stop date (note the format here is a bit ugly):
+
+```
+  "yyyy-mm-dd-HH:mm yyyy-mm-dd-HH:mm"
+```
+
+```javascript
+schedule: [
+    "2018-01-01-09:00 2019-01-01-17:00"  // <-- track for 1 year
+  ]
+```
+
 
 **iOS**
 
@@ -2343,38 +2396,11 @@ Fetches the entire contents of the current circular-log and return it as a Strin
 
 ```javascript
 BackgroundGeolocation.getLog(function(log) {
-  console.log(log);
-  // or convert to an Array
-  var lines = log.split("\n");
-  console.log(lines);
+  console.log(log);  // <-- send log to console.  copy/paste result into your own text file.
 });
 ```
 
 ------------------------------------------------------------------------------
-
-
-### `destroyLog(successFn, failureFn)`
-
-Destory the entire contents of Log database.
-
-```javascript
-BackgroundGeolocation.destroyLog(function() {
-  console.log('- Destroyed log');
-}, function() {
-  console.log('- Destroy log failure');
-});
-```
-
-#### `successFn` Parameters
-
-None
-
-#### `failureFn` Parameters
-
-None
-
-------------------------------------------------------------------------------
-
 
 ### `emailLog(email, callbackFn)`
 
@@ -2411,6 +2437,26 @@ BackgroundGeolocation.emailLog("foo@bar.com");
 2. Grant "Storage" permission `Settings->Apps->[Your App]->Permissions: (o) Storage`
 
 ![](https://dl.dropboxusercontent.com/u/2319755/cordova-background-geolocaiton/Screenshot_20160218-183345.png)
+
+### `destroyLog(successFn, failureFn)`
+
+Destory the entire contents of Log database.
+
+```javascript
+BackgroundGeolocation.destroyLog(function() {
+  console.log('- Destroyed log');
+}, function() {
+  console.log('- Destroy log failure');
+});
+```
+
+#### `successFn` Parameters
+
+None
+
+#### `failureFn` Parameters
+
+None
 
 ------------------------------------------------------------------------------
 
