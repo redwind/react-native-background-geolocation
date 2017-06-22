@@ -478,6 +478,15 @@ RCT_EXPORT_METHOD(playSound:(int)soundId)
     };
 }
 
+- (void)invalidate
+{
+    [locationManager stop];
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [locationManager stopWatchPosition];
+    });
+}
+
 - (void)dealloc
 {
     locationManager = nil;
