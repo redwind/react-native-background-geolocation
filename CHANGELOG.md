@@ -1,7 +1,7 @@
 # CHANGELOG
 
-## [Unreleased]
-[Fixed] Android & iOS will ensure old location samples are ignored with `getCurrentPosition`
+## [2.8.4] -  2017-07-10
+- [Fixed] Android & iOS will ensure old location samples are ignored with `getCurrentPosition`
 - [Fixed] Android `providerchange` event would continue to persist a providerchange location even when plugin was disabled for the case where location-services is disabled by user.
 - [Fixed] Don't mutate iOS `url` to lowercase.  Just lowercase the comparison when checking for `301` redirects. 
 - [Changed] Android will attempt up to 5 `motionchange` samples instead of 3.  Cheaper devices can take longer to lock onto GPS.
