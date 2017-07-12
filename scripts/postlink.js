@@ -113,6 +113,11 @@ if (!plist.NSLocationAlwaysUsageDescription) {
     plist.NSLocationAlwaysUsageDescription = "CHANGEME: Location Always Usage Description";
 }
 
+// Add NSLocationAlwaysAndWhenInUseUsageDescription
+if (!plist.NSLocationAlwaysAndWhenInUseUsageDescription) {
+    plist.NSLocationAlwaysAndWhenInUseUsageDescription = "CHANGEME: Location Always And When In Use Usage Description";
+}
+
 // Add NSMotionUsageDescription
 if (!plist.NSMotionUsageDescription) {
     plist.NSMotionUsageDescription = "CHANGEME: Motion updates increase battery efficiency by intelligently toggling location-services when device is detected to be moving";
