@@ -1,6 +1,7 @@
 # CHANGELOG
 
 ## Unreleased
+- [Fixed] Android was creating a foreground notification even when `foregroundService: false`
 - [Fixed] iOS 11 fix:  Added new location-authorization string `NSLocationAlwaysAndWhenInUseUsageDescription`.  iOS 11 now requires location-authorization popup to allow user to select either `Always` or `WhenInUse`.
 
 ## [2.8.4] -  2017-07-10
