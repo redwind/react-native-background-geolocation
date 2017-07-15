@@ -1,6 +1,9 @@
 # CHANGELOG
 
 ## Unreleased
+- [Added] Implement new Android config `notificationPriority` for controlling the behaviour of the `foregroundService` notification and notification-bar icon.
+- [Changed] Tweak iOS Location Authorization to not show locationAuthorizationAlert if user initially denies location permission.
+- [Fixed] Android:  Remove isMoving condition from geofence proximity evaluator.
 - [Fixed] Android was creating a foreground notification even when `foregroundService: false`
 - [Fixed] iOS 11 fix:  Added new location-authorization string `NSLocationAlwaysAndWhenInUseUsageDescription`.  iOS 11 now requires location-authorization popup to allow user to select either `Always` or `WhenInUse`.
 
