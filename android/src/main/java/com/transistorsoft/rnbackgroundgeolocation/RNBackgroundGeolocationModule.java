@@ -342,13 +342,24 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule im
     }
 
     @ReactMethod
-    public void getState(Callback success, Callback failure) {
-        WritableMap state = getState();
-        if (state != null && !state.hasKey("error")) {
-            success.invoke(state);
-        } else {
-            failure.invoke(state);
-        }
+    public void getState(final Callback success, final Callback failure) {
+        TSCallback callback = new TSCallback() {
+            @Override
+            public void success(Object state) {
+                try {
+                    success.invoke(jsonToMap((JSONObject) state));
+                } catch (JSONException e) {
+                    failure.invoke(e.getMessage());
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void error(Object o) {
+                failure.invoke(o.toString());
+            }
+        };
+        getAdapter().getState(callback);
     }
 
     private WritableMap getState() {
