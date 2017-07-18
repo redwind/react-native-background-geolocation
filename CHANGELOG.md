@@ -1,6 +1,7 @@
 # CHANGELOG
 
 ## Unreleased
+- [Changed] iOS `emailLog` will gzip the attached log file.
 - [Added] Implement new Android config `notificationPriority` for controlling the behaviour of the `foregroundService` notification and notification-bar icon.
 - [Changed] Tweak iOS Location Authorization to not show locationAuthorizationAlert if user initially denies location permission.
 - [Fixed] Android:  Remove isMoving condition from geofence proximity evaluator.
