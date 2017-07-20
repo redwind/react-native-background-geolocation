@@ -30,6 +30,7 @@ $ npm install git+https://git@github.com:transistorsoft/react-native-background-
 
 - Add the following Cocoa framework dependency to your target's `Link Binary With Libraries` build phase:
     - **`libsqlite3.tbd`**
+    - **`libz.tbd`**
     - ![](https://www.dropbox.com/s/ael6c66br8m4kzt/Screenshot%202016-09-22%2010.03.56.png?dl=1)
 
 - BackgroundGeolocation includes a couple of custom iOS frameworks.  These need to manually added, unfortunately.

@@ -30,7 +30,8 @@
     },
     "ios": {
       "sharedLibraries": [
-        "libsqlite3"
+        "libsqlite3",
+        "libz"
       ]
     }
   },
