@@ -264,6 +264,11 @@ var API = {
     failure = failure || emptyFn;
     RNBackgroundGeolocation.emailLog(email, success, failure);
   },
+  getSensors: function(success, failure) {
+    success = success || emptyFn;
+    failure = failure || emptyFn;
+    RNBackgroundGeolocation.getSensors(success, failure);
+  },
   playSound: function(soundId) {
     RNBackgroundGeolocation.playSound(soundId);
   }
