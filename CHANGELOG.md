@@ -1,6 +1,8 @@
 # CHANGELOG
 
 ## Unreleased
+- [Changed] Refactor iOS / Android core library event-subscription API.
+- [Added] Removing single event-listeners with `#removeListener` (alias `#un`) is snow fully supported!  There will no longer be warnings "No listeners for event X", since the plugin completely removes event-listeners from the core library.  You will no longer have to create `noop` event-listeners on events you're not using simply to suppress these warnings.
 
 ## [2.8.5] - 2017-07-27
 - [Changed] Improve iOS/Android acquisition of `motionchange` location to ensure a recent location is fetched.
