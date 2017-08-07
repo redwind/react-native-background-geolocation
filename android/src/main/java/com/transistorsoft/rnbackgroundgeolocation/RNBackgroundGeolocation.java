@@ -20,12 +20,7 @@ public class RNBackgroundGeolocation implements ReactPackage {
         List<NativeModule> modules = new ArrayList<>();
         modules.add(new RNBackgroundGeolocationModule(reactContext));
         return modules;
-    }
-
-    @Override
-    public List<Class<? extends JavaScriptModule>> createJSModules() {
-        return Collections.emptyList();
-    }
+    }    
 
     @Override
     public List<ViewManager> createViewManagers(ReactApplicationContext reactContext) {
