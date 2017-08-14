@@ -134,9 +134,10 @@ public class RNBackgroundGeolocationEventReceiver extends BroadcastReceiver impl
                 } else if (extras.containsKey("provider")) {
                     JSONObject provider = new JSONObject(extras.getString("provider"));
                     params.putMap("provider", RNBackgroundGeolocationModule.jsonToMap(provider));
-                } else if (eventName.equalsIgnoreCase(BackgroundGeolocation.EVENT_GEOFENCES_CHANGE)) {
-                    params.putArray("on", RNBackgroundGeolocationModule.convertJsonToArray(new JSONArray(extras.getString("on"))));
-                    params.putArray("off", RNBackgroundGeolocationModule.convertJsonToArray(new JSONArray(extras.getString("off"))));
+                } else if (eventName.equalsIgnoreCase(BackgroundGeolocation.EVENT_GEOFENCESCHANGE)) {
+                    JSONObject event = new JSONObject(extras.getString(BackgroundGeolocation.EVENT_GEOFENCESCHANGE));
+                    params.putArray("on", RNBackgroundGeolocationModule.convertJsonToArray(event.getJSONArray("on")));
+                    params.putArray("off", RNBackgroundGeolocationModule.convertJsonToArray(event.getJSONArray("off")));
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
