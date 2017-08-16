@@ -5,8 +5,8 @@ The *most* sophisticated background **location-tracking & geofencing** module wi
 
 Also available for [Cordova](https://github.com/transistorsoft/cordova-background-geolocation-lt), [NativeScript](https://github.com/transistorsoft/nativescript-background-geolocation-lt) and pure native apps.
 
-![Home](https://www.dropbox.com/s/4cggjacj68cnvpj/screenshot-iphone5-geofences-framed.png?dl=1)
-![Settings](https://www.dropbox.com/s/mmbwgtmipdqcfff/screenshot-iphone5-settings-framed.png?dl=1)
+![Home](https://dl.dropboxusercontent.com/s/4cggjacj68cnvpj/screenshot-iphone5-geofences-framed.png?dl=1)
+![Settings](https://dl.dropboxusercontent.com/s/mmbwgtmipdqcfff/screenshot-iphone5-settings-framed.png?dl=1)
 
 Follows the [React Native Modules spec](https://facebook.github.io/react-native/docs/native-modules-ios.html#content).
 
@@ -185,8 +185,8 @@ export default class Foo extends Component {
 
 A fully-featured [Demo App](https://github.com/transistorsoft/rn-background-geolocation-demo) is available in its own public repo.  After first cloning that repo, follow the installation instructions in the **README** there.  This demo-app includes a settings-screen allowing you to quickly experiment with all the different settings available for each platform.
 
-![Home](https://www.dropbox.com/s/4cggjacj68cnvpj/screenshot-iphone5-geofences-framed.png?dl=1)
-![Settings](https://www.dropbox.com/s/mmbwgtmipdqcfff/screenshot-iphone5-settings-framed.png?dl=1)
+![Home](https://dl.dropboxusercontent.com/s/4cggjacj68cnvpj/screenshot-iphone5-geofences-framed.png?dl=1)
+![Settings](https://dl.dropboxusercontent.com/s/mmbwgtmipdqcfff/screenshot-iphone5-settings-framed.png?dl=1)
 
 
 
