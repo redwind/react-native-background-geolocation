@@ -1,6 +1,6 @@
 {
   "name": "react-native-background-geolocation-android",
-  "version": "2.9.0",
+  "version": "2.9.1",
   "description": "The most sophisticated background location tracking & geofencing module with battery-conscious motion-detection",
   "main": "RNBackgroundGeolocation.js",
   "scripts": {
@@ -38,7 +38,7 @@
   "homepage": "https://transistorsoft.github.io/react-native-background-geolocation-android",
   "dependencies": {},
   "dependencies": {
-    "react-native-background-fetch":"^2.0.6",
+    "react-native-background-fetch":"~2.1.0",
     "cocoa-lumberjack":"^3.0.3"
   },
   "peerDependencies": {
