@@ -1,6 +1,7 @@
 # CHANGELOG
 
-## Unreleased
+## [2.9.1] - 2017-08-21
+- [Changed] Update `react-native-background-fetch` to `~2.1.0`
 - [Added] Javascript API to plugin's logging system.
 - [Fixed] Minor issue with iOS flush where multiple threads might create multiple background-tasks, leaving some unfinished.
 
