@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## Unreleased
+- [Fixed] Android `stopOnTerminate` was not setting the `enabled` value to `false` when terminated.  This caused the plugin to automatically `#start` the first time the app was booted (it would work correctly every boot thereafter).
+- [Changed] Change Android HTTP layer to use more modern library `OkHttp3` instead of `Volley`.  Some users reported weird issues with some devices on some servers.  `OkHttp` seems to have solved it for them.  `OkHttp` is a much simpler library to use than `Volley`
+
 ## [2.9.1] - 2017-08-21
 - [Changed] Update `react-native-background-fetch` to `~2.1.0`
 - [Added] Javascript API to plugin's logging system.
