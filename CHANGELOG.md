@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## Unreleased
+## [2.9.3] - 2017-09-14
 
 - [Changed] Refactor Android `onDestroy` mechanism attempting to solve nagging and un-reproducible null pointer exceptions.
 - [Added] Implement Android location permissions handling using `PermissionsAndroid` API.  You no longer need to use 3rd-party permissions module to obtain Android location permission.
