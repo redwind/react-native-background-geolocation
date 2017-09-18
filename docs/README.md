@@ -1054,7 +1054,7 @@ BackgroundGeolocation.configure({
     '1 17:30-21:00',   // Sunday: 5:30pm-9:00pm
     '2-6 9:00-17:00',  // Mon-Fri: 9:00am to 5:00pm
     '2,4,6 20:00-00:00',// Mon, Web, Fri: 8pm to midnight (next day)
-    '7 10:00-19:00'    // Sun: 10am-7pm
+    '7 10:00-19:00'    // Sat: 10am-7pm
   ]
 }, function(state) {
   // Start the Scheduler
