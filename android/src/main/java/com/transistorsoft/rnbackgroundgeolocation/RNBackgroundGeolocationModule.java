@@ -267,6 +267,7 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule im
     public void onHostDestroy() {
         initialized = false;
         configured = false;
+        removeAllListeners();
         getAdapter().onActivityDestroy();
     }
 
@@ -993,6 +994,6 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule im
     @Override
     public void onCatalystInstanceDestroy() {
         initialized = false;
-        getAdapter().onActivityDestroy();
+        removeAllListeners();
     }
 }
