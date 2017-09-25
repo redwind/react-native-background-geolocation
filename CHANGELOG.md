@@ -1,6 +1,7 @@
 # CHANGELOG
 
-## Unreleased
+## [2.9.4] - 2017-09-25
+- [Added] Re-build for iOS 11, XCode 9
 - [Added] Implement new `powersavechange` event in addition to `isPowerSaveMode` method for determining if OS "Power saving" mode is enabled.
 - [Added] New config `elasticityMultiplier` for controlling the scale of `distanceFilter` elasticity calculation.
 - [Fixed] Android bug not firing `schedule` Javascript listeners

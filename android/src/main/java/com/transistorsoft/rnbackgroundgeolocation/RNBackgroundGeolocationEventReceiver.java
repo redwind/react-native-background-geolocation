@@ -194,12 +194,21 @@ public class RNBackgroundGeolocationEventReceiver extends BroadcastReceiver impl
         }
     }
 
-    private void invokeStartTask(ReactContext reactContext, HeadlessJsTaskConfig taskConfig) {
-        HeadlessJsTaskContext headlessJsTaskContext = HeadlessJsTaskContext.getInstance(reactContext);
+    private void invokeStartTask(ReactContext reactContext, final HeadlessJsTaskConfig taskConfig) {
+        final HeadlessJsTaskContext headlessJsTaskContext = HeadlessJsTaskContext.getInstance(reactContext);
         headlessJsTaskContext.addTaskEventListener(this);
-        int taskId = headlessJsTaskContext.startTask(taskConfig);
 
         mActiveTaskContext = headlessJsTaskContext;
+
+        UiThreadUtil.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                int taskId = headlessJsTaskContext.startTask(taskConfig);
+            }
+        });
+
+
+
     }
 }
 
