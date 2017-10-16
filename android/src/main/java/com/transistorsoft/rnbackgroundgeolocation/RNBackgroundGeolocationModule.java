@@ -727,7 +727,9 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule im
                         data.putBoolean("notifyOnExit", geofence.notifyOnExit);
                         data.putBoolean("notifyOnDwell", geofence.notifyOnDwell);
                         data.putInt("loiteringDelay", geofence.loiteringDelay);
-                        data.putMap("extras", jsonToMap(geofence.extras));
+                        if (geofence.extras != null) {
+                            data.putMap("extras", jsonToMap(geofence.extras));
+                        }
                         rs.pushMap(data);
                     }
                     success.invoke(rs);
@@ -856,7 +858,9 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule im
 
     public static WritableMap jsonToMap(JSONObject jsonObject) throws JSONException {
         WritableMap map = new WritableNativeMap();
-
+        if (jsonObject == null) {
+            return map;
+        }
         Iterator<String> iterator = jsonObject.keys();
         while (iterator.hasNext()) {
             String key = iterator.next();
