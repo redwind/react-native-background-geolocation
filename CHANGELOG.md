@@ -1,4 +1,7 @@
 # CHANGELOG
+- [Added] iOS Implement `requiresMainQueueSetup`
+- [Fixed] iOS not always firing location `failure` callback.
+- [Fixed] iOS was not forcing an HTTP flush on `motionchange` event when `autoSyncThreshold` was used.
 - [Fixed] Android `getGeofences` crash with geofence having `null` `#extras`.
 - [Fixed] iOS Add sanity-check for Settings `boolean` type.  It was possible to corrupt the Settings when a `boolean`-type setting was provided with a non-boolean value (eg: `{}`, `[]`).
 - [Fixed] Android `getState` could cause an NPE if executed before `#configure`.
