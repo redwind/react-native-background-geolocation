@@ -20,19 +20,52 @@ rnpm link react-native-background-geolocation-android
 
 ## Gradle Configuration
 
-RNPM does a nice job, but we need to do a bit of manual setup.
+react-native link does a nice job, but we need to do a bit of manual setup.
 
-* In **`android/app/build.gradle`**
+* :open_file_folder: **`android/build.gradle`**
 
 ```diff
-...
+allprojects {
+    repositories {
+        mavenLocal()
+        jcenter()
+        maven {
+            // All of React Native (JS, Obj-C sources, Android binaries) is installed from npm
+            url "$rootDir/../node_modules/react-native/android"
+        }
+        // Google now hosts their latest API dependencies on their own maven server.  
+        // React Native will eventually add this to their app template.
++       maven {
++           url 'https://maven.google.com'
++       }
+    }
+}
+```
+
+* :open_file_folder: **`android/app/build.gradle`**
+
+```diff
+android {
+    // BackgroundGeolocation REQUIRES SDK >=26 for new features in Android 8
++   compileSdkVersion 26
+    // Use latest available buildToolsVersion
++   buildToolsVersion "26.0.2"
+    .
+    .
+    .
+}
+.
+.
+.
 +repositories {
-+    flatDir {
-+        dirs "../../node_modules/react-native-background-geolocation-android/android/libs"
-+    }
++   flatDir {
++       dirs "../../node_modules/react-native-background-geolocation-android/android/libs"
++   }
 +}
+
 dependencies {
-+  compile(name: 'tslocationmanager', ext: 'aar')
++   compile(name: 'tslocationmanager', ext: 'aar')
++   compile "com.android.support:appcompat-v7:26.1.0"  // Or later
 }
 ```
 
@@ -69,11 +102,6 @@ dependencies {
 -keep class com.transistorsoft.** { *; }
 -dontwarn com.transistorsoft.**
 
--keep class com.google.**
--dontwarn com.google.**
--dontwarn org.apache.http.**
--dontwarn com.android.volley.toolbox.**
-
 # BackgroundGeolocation (EventBus)
 -keepclassmembers class * extends de.greenrobot.event.util.ThrowableFailureEvent {
     <init>(java.lang.Throwable);
@@ -91,5 +119,8 @@ dependencies {
 -keep class ch.qos.** { *; }
 -keep class org.slf4j.** { *; }
 -dontwarn ch.qos.logback.core.net.*
+
+# OkHttp3
+-dontwarn okio.**
 ```
 
