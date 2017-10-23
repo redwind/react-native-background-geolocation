@@ -89,15 +89,18 @@ let API = {
     failure = failure || emptyFn;
     RNBackgroundGeolocation.getState(success, failure);
   },
-  addListener: function(event, callback) {
+  addListener: function(event, callback, failure) {
     if (this.events.indexOf(event) < 0) {
       throw "RNBackgroundGeolocation: Unknown event '" + event + '"';
     }
     this.subscriptions.push(EventEmitter.addListener(event, callback));
+    if (typeof(failure) === 'function') {
+      this.subscriptions.push(EventEmitter.addListener("error", failure));
+    }
     RNBackgroundGeolocation.addEventListener(event);
   },
-  on: function(event, callback) {
-    return this.addListener(event, callback);
+  on: function(event, callback, failure) {
+    return this.addListener(event, callback, failure);
   },
   removeListener: function(event, callback) {
     if (this.events.indexOf(event) < 0) {

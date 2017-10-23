@@ -1,4 +1,7 @@
 # CHANGELOG
+- [Added] Impmlement Android 8 `NotificationChannel`, now required for displaying application notifications (ie: `foregroundService` notification).
+- [Changed] Your `app/build.gradle` now requires `compileSdkVersion: 26, buildToolsVersion: "26.0.2"` (or latest) for the plugin's Android 8 support.  See updated Android SETUP guide.
+- [Changed] You `app/build.gradle` now requires `"com.android.support:appcompat-v7:26.1.0"` (or later) for Android 8 support.  See updated Android SETUP guide.
 - [Added] iOS Implement `requiresMainQueueSetup`
 - [Fixed] iOS not always firing location `failure` callback.
 - [Fixed] iOS was not forcing an HTTP flush on `motionchange` event when `autoSyncThreshold` was used.
