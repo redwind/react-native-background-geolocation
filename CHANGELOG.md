@@ -1,19 +1,17 @@
 # CHANGELOG
 
-## Unreleased
-
+- [Changed] Update Android to use new [`FusedLocationProviderClient`](https://developers.google.com/android/reference/com/google/android/gms/location/FusedLocationProviderClient) instead of now-deprectated `FusedLocationProviderAPI`.  It's the same underlying play-services location API -- just with a much simpler, less error-prone interface to implement.
+- [Fixed] On Android, when `changePace(true)` is executed while device is currently `still` (and remains `still`), `stopTimeout` timer would never initiate until device movement is detected.
 - [Fixed] iOS manual `#sync` was not executing *any* callback if database was empty.
-- [Added] Impmlement Android 8 `NotificationChannel`, now required for displaying application notifications (ie: `foregroundService` notification).
-- [Changed] Your `app/build.gradle` now requires `compileSdkVersion: 26, buildToolsVersion: "26.0.2"` (or latest) for the plugin's Android 8 support.  See updated Android SETUP guide.
-- [Changed] You `app/build.gradle` now requires `"com.android.support:appcompat-v7:26.1.0"` (or later) for Android 8 support.  See updated Android SETUP guide.
-- [Added] iOS Implement `requiresMainQueueSetup`
+- [Added] Implement new Android 8 `NotificationChannel` which is now required for displaying the `foregroundService` notification.
+- [Added] Android foreground-service notification now uses `id: 9942585`.  If you wish to interact with the foreground-service notification in native code, this is the `id`.
 - [Fixed] iOS not always firing location `failure` callback.
 - [Fixed] iOS was not forcing an HTTP flush on `motionchange` event when `autoSyncThreshold` was used.
-- [Fixed] Android `getGeofences` crash with geofence having `null` `#extras`.
 - [Fixed] iOS Add sanity-check for Settings `boolean` type.  It was possible to corrupt the Settings when a `boolean`-type setting was provided with a non-boolean value (eg: `{}`, `[]`).
 - [Fixed] Android `getState` could cause an NPE if executed before `#configure`.
 - [Fixed] Work around iOS 11 bug with `CLLocationManager#stopMonitoringSignificantLocationChanges` (SLC):  When this method is called upon *any* single `CLLocationManager` instance, it would cause *all* instances to `#stopMonitoringSignificantLocationChanges`.  This caused problems with Scheduler evaluation, since SLC is required to periodically evaluate the schedule.
 
+## Unreleased
 ## [2.9.4] - 2017-09-25
 - [Added] Re-build for iOS 11, XCode 9
 - [Added] Implement new `powersavechange` event in addition to `isPowerSaveMode` method for determining if OS "Power saving" mode is enabled.
@@ -21,8 +19,7 @@
 - [Fixed] Android bug not firing `schedule` Javascript listeners
 - [Fixed] Android crash `onGooglePlayServicesConnectdError` when Google Play Services needs to be updated on device.
 
-## [2.9.3] - 2017-09-14
-
+## [2.9.3] - 2017-09-15
 - [Changed] Refactor Android `onDestroy` mechanism attempting to solve nagging and un-reproducible null pointer exceptions.
 - [Added] Implement Android location permissions handling using `PermissionsAndroid` API.  You no longer need to use 3rd-party permissions module to obtain Android location permission.
 - [Fixed] Fixed bug not where `stopAfterElapsedMinutes` is not evaluated when executing `#getCurrentPosition`.
