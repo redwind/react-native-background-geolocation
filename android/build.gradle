@@ -24,7 +24,7 @@ repositories{
 
 dependencies {
     compile 'com.facebook.react:react-native:+'
-    compile 'com.google.android.gms:play-services-location:+'
+    compile 'com.google.android.gms:play-services-location:11.6.0'
     compile 'org.greenrobot:eventbus:3.0.0'
     compile 'com.squareup.okhttp3:okhttp:3.8.1'
     compile(name:'tslocationmanager', ext:'aar')

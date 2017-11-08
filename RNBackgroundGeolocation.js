@@ -127,6 +127,10 @@ let API = {
     this.subscriptions = [];
     RNBackgroundGeolocation.removeAllListeners();
   },
+  // @alias #removeAllListeners
+  removeListeners: function() {
+    this.removeAllListeners();
+  },
   un: function(event, callback) {
     this.removeListener(event, callback);
   },
