@@ -1,5 +1,7 @@
 # CHANGELOG
 
+## [2.10.0] - 2017-11-08
+- [Changed] Android minimum required play-services version is `11.2.0` (required for new `play-services` APis.  Anything less and plugin will crash.
 - [Changed] Update Android to use new [`FusedLocationProviderClient`](https://developers.google.com/android/reference/com/google/android/gms/location/FusedLocationProviderClient) instead of now-deprectated `FusedLocationProviderAPI`.  It's the same underlying play-services location API -- just with a much simpler, less error-prone interface to implement.
 - [Fixed] On Android, when `changePace(true)` is executed while device is currently `still` (and remains `still`), `stopTimeout` timer would never initiate until device movement is detected.
 - [Fixed] iOS manual `#sync` was not executing *any* callback if database was empty.
@@ -11,7 +13,6 @@
 - [Fixed] Android `getState` could cause an NPE if executed before `#configure`.
 - [Fixed] Work around iOS 11 bug with `CLLocationManager#stopMonitoringSignificantLocationChanges` (SLC):  When this method is called upon *any* single `CLLocationManager` instance, it would cause *all* instances to `#stopMonitoringSignificantLocationChanges`.  This caused problems with Scheduler evaluation, since SLC is required to periodically evaluate the schedule.
 
-## Unreleased
 ## [2.9.4] - 2017-09-25
 - [Added] Re-build for iOS 11, XCode 9
 - [Added] Implement new `powersavechange` event in addition to `isPowerSaveMode` method for determining if OS "Power saving" mode is enabled.
