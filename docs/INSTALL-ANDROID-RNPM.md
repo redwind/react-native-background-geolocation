@@ -45,18 +45,6 @@ allprojects {
 * :open_file_folder: **`android/app/build.gradle`**
 
 ```diff
-android {
-    // BackgroundGeolocation REQUIRES SDK >=26 for new features in Android 8
-+   compileSdkVersion 26
-    // Use latest available buildToolsVersion
-+   buildToolsVersion "26.0.2"
-    .
-    .
-    .
-}
-.
-.
-.
 +repositories {
 +   flatDir {
 +       dirs "../../node_modules/react-native-background-geolocation-android/android/libs"
