@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## Unreleased
+- [Added] Add iOS `CLFloor` attribute to `location.coordinate` for use in indoor-tracking when required RF hardware is present in the environment (specifies which floor the device is on).
+
 ## [2.10.1] - 2017-11-12
 - [Fixed] Rare issue with iOS where **rapidly** toggling executing `start` with `changePace(true)` in the callback followed by `stop`, over and over again, would lock up the main thread.
 - [Changed] Android `GEOFENCE_INITIAL_TRIGGER_DWELL` defaulted to `true`.
