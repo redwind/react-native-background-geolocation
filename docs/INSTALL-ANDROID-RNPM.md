@@ -52,6 +52,7 @@ allprojects {
 +}
 
 dependencies {
++   compile project(':react-native-background-geolocation')
 +   compile(name: 'tslocationmanager', ext: 'aar')
 +   compile "com.android.support:appcompat-v7:26.1.0"  // Or later
 }
