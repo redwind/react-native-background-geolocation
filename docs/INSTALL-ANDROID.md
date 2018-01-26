@@ -62,14 +62,16 @@ dependencies {
 }
 ```
 
-If you have a different version of play-services than the one included in this library, or you're experiencing gradle conflicts from other libraries using a *different* version of play-services, use the following instead (switch `11.2.0` for the desired version):
+If you have a different version of play-services than the one included in this library, or you're experiencing gradle conflicts from other libraries using a *different* version of play-services, use the following instead (switch `11.6.0` for the desired version):
+
+:warning: The plugin requires minimum `play-services-location` version of **`11.2.0`**.  You should always try and use the latest available version of `play-services`.  See [here](https://developers.google.com/android/guides/releases) for Play Services Release notes.
 
 ```diff
 compile(project(':react-native-background-geolocation')) {    
 +   exclude group: 'com.google.android.gms', module: 'play-services-location'
 }
 // Apply your desired play-services version here
-+compile 'com.google.android.gms:play-services-location:11.2.0'
++compile 'com.google.android.gms:play-services-location:11.6.0'
 ```
 
 
