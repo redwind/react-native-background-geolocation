@@ -3,7 +3,8 @@
 import {
   NativeEventEmitter,
   NativeModules,
-  Platform
+  Platform,
+  AppRegistry
 } from "react-native"
 
 const { RNBackgroundGeolocation } = NativeModules;
@@ -370,6 +371,9 @@ let API = {
   },
   playSound: function(soundId) {
     RNBackgroundGeolocation.playSound(soundId);
+  },
+  registerHeadlessTask: function(task) {
+    AppRegistry.registerHeadlessTask('BackgroundGeolocation', () => task);
   }
 };
 

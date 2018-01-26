@@ -54,6 +54,7 @@ import java.util.List;
 public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule implements ActivityEventListener, LifecycleEventListener {
 
     private static final String TAG = "TSLocationManager";
+    private static final String JOB_SERVICE_CLASS = "HeadlessJobService";
 
     public static final String ACCESS_COARSE_LOCATION = Manifest.permission.ACCESS_COARSE_LOCATION;
     public static final String ACCESS_FINE_LOCATION = Manifest.permission.ACCESS_FINE_LOCATION;
@@ -299,7 +300,16 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule im
             }
         }));
 
-        adapter.configure(mapToJson(config), new TSCallback() {
+        WritableMap myConfig = new WritableNativeMap();
+        myConfig.merge(config);
+
+
+        // Configure optional headlessJobService
+        if (config.hasKey("enableHeadless") && config.getBoolean("enableHeadless")) {
+            myConfig.putString("headlessJobService", getClass().getPackage().getName() + "." + JOB_SERVICE_CLASS);
+        }
+
+        adapter.configure(mapToJson(myConfig), new TSCallback() {
             public void onSuccess() {
                 success.invoke(getState());
             }
@@ -967,7 +977,7 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule im
         }
         return jsonArray;
     }
-    
+
     // TODO placehold for implementing Android M permissions request.  Just return true for now.
     private Boolean hasPermission(String permission) {
         return true;
