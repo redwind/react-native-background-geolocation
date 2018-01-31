@@ -288,7 +288,6 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule im
             setConfig(config, success, failure);
             return;
         }
-
         configured = true;
 
         BackgroundGeolocation adapter = getAdapter();
@@ -729,16 +728,16 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule im
                     WritableArray rs = new WritableNativeArray();
                     for (TSGeofence geofence : geofences) {
                         WritableMap data = new WritableNativeMap();
-                        data.putString("identifier", geofence.identifier);
-                        data.putDouble("latitude", geofence.latitude);
-                        data.putDouble("longitude", geofence.longitude);
-                        data.putDouble("radius", geofence.radius);
-                        data.putBoolean("notifyOnEntry", geofence.notifyOnEntry);
-                        data.putBoolean("notifyOnExit", geofence.notifyOnExit);
-                        data.putBoolean("notifyOnDwell", geofence.notifyOnDwell);
-                        data.putInt("loiteringDelay", geofence.loiteringDelay);
-                        if (geofence.extras != null) {
-                            data.putMap("extras", jsonToMap(geofence.extras));
+                        data.putString("identifier", geofence.getIdentifier());
+                        data.putDouble("latitude", geofence.getLatitude());
+                        data.putDouble("longitude", geofence.getLongitude());
+                        data.putDouble("radius", geofence.getRadius());
+                        data.putBoolean("notifyOnEntry", geofence.getNotifyOnEntry());
+                        data.putBoolean("notifyOnExit", geofence.getNotifyOnExit());
+                        data.putBoolean("notifyOnDwell", geofence.getNotifyOnDwell());
+                        data.putInt("loiteringDelay", geofence.getLoiteringDelay());
+                        if (geofence.getExtras() != null) {
+                            data.putMap("extras", jsonToMap(geofence.getExtras()));
                         }
                         rs.pushMap(data);
                     }
