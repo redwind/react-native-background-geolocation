@@ -9,8 +9,8 @@ $ npm install git+https://git@github.com:transistorsoft/react-native-background-
 * :open_file_folder: **`android/settings.gradle`**
 
 ```diff
-+include ':react-native-background-geolocation'
-+project(':react-native-background-geolocation').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-background-geolocation-android/android')
++include ':react-native-background-geolocation-android'
++project(':react-native-background-geolocation-android').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-background-geolocation-android/android')
 ```
 
 * :open_file_folder: **`android/build.gradle`**
@@ -56,22 +56,22 @@ android {
 +}
 
 dependencies {
-+   compile project(':react-native-background-geolocation')
++   compile project(':react-native-background-geolocation-android')
 +   compile(name: 'tslocationmanager', ext: 'aar')
 +   compile "com.android.support:appcompat-v7:26.1.0"  // Or later
 }
 ```
 
-If you have a different version of play-services than the one included in this library, or you're experiencing gradle conflicts from other libraries using a *different* version of play-services, use the following instead (switch `11.6.0` for the desired version):
+If you have a different version of play-services than the one included in this library, or you're experiencing gradle conflicts from other libraries using a *different* version of play-services, use the following instead (switch `11.8.0` for the desired version):
 
 :warning: The plugin requires minimum `play-services-location` version of **`11.2.0`**.  You should always try and use the latest available version of `play-services`.  See [here](https://developers.google.com/android/guides/releases) for Play Services Release notes.
 
 ```diff
-compile(project(':react-native-background-geolocation')) {    
+compile(project(':react-native-background-geolocation-android')) {    
 +   exclude group: 'com.google.android.gms', module: 'play-services-location'
 }
 // Apply your desired play-services version here
-+compile 'com.google.android.gms:play-services-location:11.6.0'
++compile 'com.google.android.gms:play-services-location:11.8.0'
 ```
 
 

@@ -476,7 +476,14 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule im
 
     @ReactMethod
     public void setConfig(ReadableMap config, final Callback success, final Callback failure) {
-        getAdapter().setConfig(mapToJson(config), new TSCallback() {
+        WritableMap myConfig = new WritableNativeMap();
+        myConfig.merge(config);
+
+        // Configure optional headlessJobService
+        if (config.hasKey("enableHeadless") && config.getBoolean("enableHeadless")) {
+            myConfig.putString("headlessJobService", getClass().getPackage().getName() + "." + JOB_SERVICE_CLASS);
+        }
+        getAdapter().setConfig(mapToJson(myConfig), new TSCallback() {
             @Override
             public void onSuccess() {
                 success.invoke(getState());
