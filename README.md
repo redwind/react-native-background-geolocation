@@ -25,8 +25,8 @@ Also available for [Cordova](https://github.com/transistorsoft/cordova-backgroun
 
 # Contents
 - ### :books: [API Documentation](./docs/README.md)
-  - :wrench: [Configuration Options](./docs/README.md#wrench-configuration-options)
-  - :zap: [Events](./docs/README.md#zap-events)
+  - :wrench: [Configuration Options](./docs/README.md#wrench-configuration-options-1)
+  - :zap: [Events](./docs/README.md#zap-events-1)
   - :small_blue_diamond: [Methods](./docs/README.md#large_blue_diamond-methods)        
 - ### [Installing the Plugin](#large_blue_diamond-installing-the-plugin)
 - ### [Setup Guides](#large_blue_diamond-setup-guides)
