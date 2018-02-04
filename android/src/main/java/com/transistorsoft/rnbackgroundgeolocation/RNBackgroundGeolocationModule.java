@@ -889,6 +889,8 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule im
                 map.putBoolean(key, (Boolean) value);
             } else if (value instanceof  Integer) {
                 map.putInt(key, (Integer) value);
+            } else if (value instanceof Long) {
+                map.putDouble(key, ((Long) value).doubleValue());
             } else if (value instanceof  Double) {
                 map.putDouble(key, (Double) value);
             } else if (value instanceof String)  {
