@@ -2545,7 +2545,7 @@ Removes all geofences.
 
 ```javascript
 BackgroundGeolocation.removeGeofences(function() {
-  console.log("Successfully removed alll geofences");
+  console.log("Successfully removed all geofences");
 }, function(error) {
   console.warn("Failed to remove geofence", error);
 });
