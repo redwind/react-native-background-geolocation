@@ -8,21 +8,14 @@ npm install git+https://git@github.com:transistorsoft/react-native-background-ge
 
 ```shell
 react-native link react-native-background-geolocation-android
-```
-
-#### With older versions of React Native
-
-You need [`rnpm`](https://github.com/rnpm/rnpm) (`npm install -g rnpm`)
-
-```shell
-rnpm link react-native-background-geolocation-android
+react-natvie link react-native-background-fetch
 ```
 
 ## Gradle Configuration
 
 react-native link does a nice job, but we need to do a bit of manual setup.
 
-* :open_file_folder: **`android/build.gradle`**
+### :open_file_folder: **`android/build.gradle`**
 
 ```diff
 allprojects {
@@ -38,23 +31,85 @@ allprojects {
 +       maven {
 +           url 'https://maven.google.com'
 +       }
++       maven {
++           url "$rootDir/../node_modules/react-native-background-geolocation-android/android/libs"
++       }
++       maven {
++           url "$rootDir/../node_modules/react-native-background-fetch/android/libs"
++       }
     }
 }
+
+/**
+-* !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+-* !!! THE FOLLOWING IS OPTIONAL BUT HIGHLY RECOMMENDED FOR YOUR SANITY !!!
+-* !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+*
+* Do you hate Gradle conflicts where other plugin require some particular
+* version of play-services or define a compileSdkVersion, buildToolsVersion
+* which conflicts with that of your app?  Me too!
+*
+* If you define these key gradle configuration variables globally, the 
+* background-geolocation plugin (and any other "wise" plugins you've installed) 
+* can align themselves to YOUR desired versions!  You should define these variables 
+* as desired according to current values in your app/build.gradle
+*
+* You'll find that more and more plugins are beginning to wise up to checking 
+* for the presense of global gradle variables like this.
+*
+* BackgroundGeolocation is aware of the following variables:
+*/
++ext {
++    compileSdkVersion   = 26
++    targetSdkVersion    = 26
++    buildToolsVersion   = "26.0.2"
++    supportLibVersion   = "26.1.0"
++    playServicesVersion = "11.8.0" 
++}
+-// BackgroundGeolocation is also aware of googlePlayServicesVersion if you prefer
 ```
 
-* :open_file_folder: **`android/app/build.gradle`**
+#### :information_source: Project-wide Configuration Properties
+
+The technique of **defining project-wide properties** can be found in the **Android Developer Document** [Gradle Tip &amp; Tricks](https://developer.android.com/studio/build/gradle-tips.html) (see *Configure project-wide properties*) and another good explanation [here](https://segunfamisa.com/posts/android-gradle-extra-properties).  The *BackgroundGeolocation* plugin [is aware of the presense of these configuration properties](../android/build.gradle#L3-L18).
+
+-------------------------------------------------------------------------------
+
+
+### :open_file_folder: **`android/app/build.gradle`**
 
 ```diff
-+repositories {
-+   flatDir {
-+       dirs "../../node_modules/react-native-background-geolocation-android/android/libs"
-+   }
-+}
+-/**
+-* OPTIONAL:  If you've implemeted the "OPTIONAL BUT HIGHLY RECOMMENDED" note
+-* above, you can define your compileSdkVersion, buildToolsVersion, targetSdkVersion 
+-* using your own global variables as well:
+-* Android Studio is smart enough to be aware of the evaulated values here,
+-* to offer upgrade notices when applicable.
+-*
+-*/
+android {
++    compileSdkVersion rootProject.compileSdkVersion
++    buildToolsVersion rootProject.buildToolsVersion
+
+    defaultConfig {
++        targetSdkVersion rootProject.targetSdkVersion
+         .
+         .
+         .
+    }
+}
 
 dependencies {
     compile project(':react-native-background-geolocation-android')
-+   compile(name: 'tslocationmanager', ext: 'aar')
-+   compile "com.android.support:appcompat-v7:26.1.0"  // Or later
+    compile project(':react-native-background-fetch')
+
+    // You are advised to use latest appcompat-v7 corresponding to your compileSdkVersion
+    // eg:  if compileSdkVersion 27 -> appcompat-v7:27.x.x
+    //      if compileSdkVersion 26 -> appcompat-v7:26.x.x
+    //      if compileSdkVersion 25 -> appcompat-v7:25.x.x
+    // NOTE:  It's up to you to define the variable supportLibVersion 
+    // as noted above.  IT IS HIGHLY RECOMMENDED TO DO THIS.
++   compile "com.android.support:appcompat-v7:$rootProject.supportLibVersion"
 }
 ```
 
@@ -84,7 +139,8 @@ dependencies {
 
 
 ## Proguard Config
-* In your `proguard-rules.pro` (`android/app/proguard-rules.pro`)
+
+### :open_file_folder: `proguard-rules.pro` (`android/app/proguard-rules.pro`)
 
 ```proguard
 # BackgroundGeolocation lib tslocationmanager.aar is *already* proguarded

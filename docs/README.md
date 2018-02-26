@@ -29,11 +29,11 @@
 
 # :wrench: Configuration Options
 
-The following **Options** can all be provided to the plugin's `#configure` method:
+The following **Options** can all be provided to the plugin's `#ready` method:
 
 ```javascript
-BackgroundGeolocation.configure({
-  desiredAccuracy: 0,
+BackgroundGeolocation.ready({
+  desiredAccuracy: BackgroundGeolocation.DESIRED_ACCURACY_HIGH,
   distanceFilter: 50,
   .
   .
@@ -109,7 +109,7 @@ BackgroundGeolocation.setConfig({
 
 | Option      | Type      | Default   | Note                              |
 |-------------|-----------|-----------|-----------------------------------|
-| [`activityType`](#config-string-activitytype-automotivenavigation-othernavigation-fitness-other) | `String` |  `Other` | Presumably, this affects ios GPS algorithm.  See [Apple docs](https://developer.apple.com/library/ios/documentation/CoreLocation/Reference/CLLocationManager_Class/CLLocationManager/CLLocationManager.html#//apple_ref/occ/instp/CLLocationManager/activityType) for more information |
+| [`activityType`](#config-string-activitytype-automotivenavigation-othernavigation-fitness-other) | `Integer` |  `ACTIVITY_TYPE_OTHER` | Presumably, this affects ios GPS algorithm.  See [Apple docs](https://developer.apple.com/library/ios/documentation/CoreLocation/Reference/CLLocationManager_Class/CLLocationManager/CLLocationManager.html#//apple_ref/occ/instp/CLLocationManager/activityType) for more information |
 | [`disableMotionActivityUpdates`](#config-boolean-disablemotionactivityupdates-false) | `Boolean` | `false` | Disable iOS motion-activity updates (eg: "walking", "in_vehicle").  This feature requires a device having the **M7** co-processor (ie: iPhone 5s and up). :warning: The plugin is **HIGHLY** optimized to use this for improved battery performance.  You are **STRONLY** recommended to **NOT** disable this. |
 
 
@@ -210,6 +210,8 @@ BackgroundGeolocation.setConfig({
 | [`heartbeat`](#heartbeat) | Fired each [`#heartbeatInterval`](#config-integer-heartbeatinterval-undefined) while the plugin is in the **stationary** state with.  Your callback will be provided with a `params {}` containing the last known `location {Object}` |
 | [`schedule`](#schedule) | Fired when a schedule event occurs.  Your `callbackFn` will be provided with the current **`state`** Object. | 
 | [`powersavechange`](#powersavechange) | Fired when the state of the operating-system's "Power Saving" system changes.  Your `callbackFn` will be provided with a `Boolean` showing whether "Power Saving" is **enabled** or **disabled** | 
+| [`connectivitychange`](#connectivitychange) | Fired when the state of the device's network connectivity changes (enabled -> disabled and vice-versa) |
+| [`enabledchange`](#enabledchange) | Fired when the plugin's `enabled` state changes.  For example, executing `#start` and `#stop` will fire the `enabledchange` event. | 
 
 ### Adding event-listeners: `#on`
 
@@ -242,12 +244,46 @@ BackgroundGeolocation.un('location', onLocation);
 
 # :large_blue_diamond: Methods
 
+`BackgroundGeolocation` Javascript API supports [Promises](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) for *nearly* every method (the exceptions are **`#watchPosition`** and adding event-listeners via **`#on`** method.
+
+```javascript
+// Traditional API still works:
+bgGeo.getCurrentPosition((location) => {
+  console.log('- current position: ', location);
+}, (error) => {
+  console.log('- location error: ', error);
+}, {samples: 1, persist: false});
+
+// Promise API
+bgGeo.getCurrentPosition({samples:1, persist: false}).then(location => {
+  console.log('- current position: ', location);
+}).catch(error => {
+  console.log('- location error: ', error);
+});
+```
+
+### Using `await`
+
+By marking one of your application methods as **`async`** you can use the **`await`** mechanism instead of callbacks:
+
+```javascript
+async onClickGetPosition() {
+  let location = await bgGeo.getCurrentPosition({samples:1, persist: false});
+  conosle.log('- current position: ', location);
+
+  let count = await bgGeo.getCount();
+  console.log('- There are ', count, ' records in the database');
+}
+```
+
 ### :small_blue_diamond: Core API Methods
 
 | Method Name      | Arguments       | Notes                                |
 |------------------|-----------------|--------------------------------------|
-| [`configure`](#configureconfig-successfn-failurefn) | `{config}`, `successFn`, `failureFn` | Initializes the plugin and configures its config options. The **`success`** callback will be executed after the plugin has successfully configured and provided with the current **`state`** `Object`. |
+| [`ready`](#readydefaultconfig-successfn-failurefn) | `{defaultConfig}`, `successFn`, `failureFn` | Initializes the plugin with previously persisted configuration.  The supplied **`defaultConfig`** will be applied only for the **first boot** of you app &mdash; thereafter, the plugin will automatically load its configuration from persisent storage |
+| [`configure`](#configureconfig-successfn-failurefn) :warning: **deprecated**| `{config}`, `successFn`, `failureFn` | Initializes the plugin and configures its config options. The **`success`** callback will be executed after the plugin has successfully configured and provided with the current **`state`** `Object`. |
 | [`setConfig`](#setconfigconfig-successfn-failurefn) | `{config}`, `successFn`, `failureFn` | Re-configure the plugin with new config options. |
+| [`reset`](#resetconfig-successfn-failurefn) | `{defaultConfig}`, `successFn`, `failureFn` | Resets the  plugin configuration to documented default-values.  If a **`defaultConfig`** is provided, it will be applied *after* the configuration reset. |
 | [`on`](#onevent-successfn-failurefn) | `event`,`successFn`,`failureFn` | Adds an event-listener |
 | [`un`](#unevent-callbackfn) | `event`,`callbackFn`, | Removes an event-listener |
 | [`start`](#startsuccessfn-failurefn) | `callbackFn`| Enable location tracking.  Supplied **`callbackFn`** will be executed when tracking is successfully engaged.  This is the plugin's power **ON** button. |
@@ -321,15 +357,16 @@ Specify the desired-accuracy of the geolocation system with 1 of 4 values, `0`, 
 
 You may also use the following constants upon `BackgroundGeolocation`:
 
-| Name                        | Value | Location Providers | Description |
-|-----------------------------|-------|--------------------|-------------|
-| `DESIRED_ACCURACY_HIGH`     | `0`   | GPS + Wifi + Cellular | Highest power; highest accuracy |
-| `DESIRED_ACCURACY_MEDIUM`   | `10`  | Wifi + Cellular | Medium power; Medium accuracy; |
-| `DESIRED_ACCURACY_LOW`      | `100` | Wifi (low power) + Cellular | Lower power; No GPS |
-| `DESIRED_ACCURACY_VERY_LOW` | `1000`| Cellular only | Lowest power; lowest accuracy |
-
+| Name                          | Value | Location Providers | Description |
+|-------------------------------|-------|--------------------|-------------|
+| `DESIRED_ACCURACY_NAVIGATION` | `-2`   | (**iOS only**) GPS + Wifi + Cellular | Highest power; highest accuracy |
+| `DESIRED_ACCURACY_HIGH`       | `-1`   | GPS + Wifi + Cellular | Highest power; highest accuracy |
+| `DESIRED_ACCURACY_MEDIUM`     | `10`  | Wifi + Cellular | Medium power; Medium accuracy; |
+| `DESIRED_ACCURACY_LOW`        | `100` | Wifi (low power) + Cellular | Lower power; No GPS |
+| `DESIRED_ACCURACY_VERY_LOW`   | `1000`| Cellular only | Lowest power; lowest accuracy |
+| `DESIRED_ACCURACY_THREE_KILOMETER` | `3000` | (**iOS only**) Lowest power; lowest accuracy |
 ```javascript
-BackgroundGeoloction.configure({
+BackgroundGeoloction.ready({
   desiredAccuracy: BackgroundGeolocation.DESIRED_ACCURACY_HIGH
 });
 ```
@@ -404,7 +441,7 @@ Controls the scale of automatic speed-based [`#distanceFilter`](#config-integer-
 The plugin can optionally automatically stop tracking after some number of minutes elapses after the `#start` method was called.
 
 ```javascript
-BackgroundGeolocation.configure({
+BackgroundGeolocation.ready({
   stopAfterElapsedMinutes: 30
 }, function(state) {
   BackgroundGeolocation.start();  // <-- plugin will automatically #stop in 30 minutes
@@ -420,7 +457,7 @@ The plugin can optionally automatically stop tracking when the `stopTimeout` tim
 :warning: `stopOnStationary` will **only** occur due to `stopTimeout` timer elapse.  It will **not** occur by manually executing `changePace(false)`.
 
 ```javascript
-BackgroundGeolocation.configure({
+BackgroundGeolocation.ready({
   stopOnStationary: true
 }, function(state) {
   BackgroundGeolocation.start();
@@ -493,7 +530,7 @@ When you configure the plugin location-authorization `Always` or `WhenInUse` and
 ![](s/wyoaf16buwsw7ed/docs-locationAuthorizationAlert.jpg?dl=1)
 
 ```javascript
-BackgroundGeolocation.configure({
+BackgroundGeolocation.ready({
   locationAuthorizationAlert: {
     titleWhenNotEnabled: "Yo, location-services not enabled",
     titleWhenOff: "Yo, location-services OFF",
@@ -522,7 +559,7 @@ Applications with only the coarse location permission may have their interval si
 :blue_book: [Android docs](https://developers.google.com/android/reference/com/google/android/gms/location/LocationRequest.html#setInterval(long))
 
 ```javascript
-BackgroundGeolocation.configure({
+BackgroundGeolocation.ready({
   distanceFilter: 0,            // Must be 0 or locationUpdateInterval is ignored!
   locationUpdateInterval: 5000  // Get a location every 5 seconds
 });
@@ -585,12 +622,12 @@ If you wish, you can configure the plugin to only engage the **moving** state fo
 
 ```javascript
 // Only trigger tracking for vehicles
-BackgroundGeolocation.configure({
+BackgroundGeolocation.ready({
   triggerActivities: 'in_vehicle'
 });
 
 // Only trigger tracking for on_foot, walking and running
-BackgroundGeolocation.configure({
+BackgroundGeolocation.ready({
   triggerActivities: 'on_foot, walking, running'
 });
 ```
@@ -639,9 +676,25 @@ Location-services **will never turn OFF** if you set this to **`true`**!  It wil
 ## :wrench: [Activity Recognition] iOS Options
 
 
-#### `@config {String} activityType [AutomotiveNavigation, OtherNavigation, Fitness, Other]`
+#### `@config {Integer} activityType [ACTIVITY_TYPE_AUTOMOTIVE_NAVIGATION, ACTIVITY_TYPE_OTHER_NAVIGATION, ACTIVITY_TYPE_FITNESS, ACTIVITY_TYPE_OTHER]`
 
-Presumably, this affects ios GPS algorithm.
+Presumably, this affects iOS stop-detect algorithm.  Apple is vague on what exactly this configuration does.
+
+Available values are defined as constants upon the `BackgroundGeolocation` plugin object:
+
+| Name                                   | Value |
+|----------------------------------------|-------|
+| `ACTIVITY_TYPE_OTHER`                  |   `1` |
+| `ACTIVITY_TYPE_AUTOMOTIVE_NAVIGATION`  |   `2` |
+| `ACTIVITY_TYPE_FITNESS`                |   `3` |
+| `ACTIVITY_TYPE_OTHER_NAVIGATION`       |   `4` |
+
+eg:
+```javascript
+BackgroundGeolocation.ready({
+  activityType: BackgroundGeolocation.ACTIVITY_TYPE_OTHER
+});
+```
 
 :blue_book: [Apple docs](https://developer.apple.com/reference/corelocation/cllocationmanager/1620567-activitytype?language=objc).
 
@@ -690,7 +743,7 @@ Defaults to `true`.  Set `false` to disable triggering a geofence immediately if
 Your server **`url`** where you wish to HTTP POST location data to.
 
 ```javascript
-BackgroundGeolocation.configure({
+BackgroundGeolocation.ready({
   url: 'http://my-server.com/locations'
 });
 ```
@@ -712,7 +765,7 @@ BackgroundGeolocation.on('http', function(request) {
   console.log('HTTP FAILURE', response);
 });
 
-BackgroundGeolocation.configure({
+BackgroundGeolocation.ready({
   url: 'http://my-server.com/locations',
   httpTimeout: 3000
 });
@@ -725,7 +778,7 @@ BackgroundGeolocation.configure({
 The HTTP method to use when creating an HTTP request to your configured [`#url`](#config-string-url-undefined).  Defaults to `POST`.  Valid values are `POST`, `PUT` and `OPTIONS`.
 
 ```javascript
-BackgroundGeolocation.configure({
+BackgroundGeolocation.ready({
   url: 'http://my-server.com/locations',
   method: 'PUT'
 });
@@ -738,7 +791,7 @@ BackgroundGeolocation.configure({
 Optional HTTP **`params`** sent along in each HTTP request.
 
 ```javascript
-BackgroundGeolocation.configure({
+BackgroundGeolocation.ready({
   url: 'http://my-server.com/locations',
   params: {
     user_id: 1234,
@@ -814,12 +867,12 @@ Optional custom template for rendering `location` JSON request data in HTTP requ
 :blue_book: See [HTTP Guide](http.md) for more information.
 
 ```javascript
-BackgroundGeolocation.configure({
+BackgroundGeolocation.ready({
   locationTemplate: '{"lat":<%= latitude %>,"lng":<%= longitude %>,"event":"<%= event %>",isMoving:<%= isMoving %>}'
 });
 
 // Or use a compact [Array] template!
-BackgroundGeolocation.configure({
+BackgroundGeolocation.ready({
   locationTemplate: '[<%=latitude%>, <%=longitude%>, "<%=event%>", <%=is_moving%>]'
 })
 ```
@@ -827,7 +880,7 @@ BackgroundGeolocation.configure({
 :warning: If you've configured [`#extras`](#config-object-extras), these key-value pairs will be merged *directly* onto your location data.  Eg:
 
 ```javascript
-BackgroundGeolocation.configure({
+BackgroundGeolocation.ready({
   httpRootProperty: 'data',
   locationTemplate: '{"lat":<%= latitude %>,"lng":<%= longitude %>}',
   extras: {
@@ -882,12 +935,12 @@ Evaulate variables in your **`geofenceTemplate`** using Ruby `erb`-style tags:
 :blue_book: See [HTTP Guide](http.md) for more information.
 
 ```javascript
-BackgroundGeolocation.configure({
+BackgroundGeolocation.ready({
   geofenceTemplate: '{ "lat":<%= latitude %>, "lng":<%= longitude %>, "geofence":"<%= geofence.identifier %>:<%= geofence.action %>" }'
 });
 
 // Or use a compact [Array] template!
-BackgroundGeolocation.configure({
+BackgroundGeolocation.ready({
   geofenceTemplate: '[<%= latitude %>, <%= longitude %>, "<%= geofence.identifier %>", "<%= geofence.action %>"]'
 })
 
@@ -951,7 +1004,7 @@ Eg: Every recorded location will have the following **`extras`** appended:
 :blue_book: See [HTTP Guide](http.md) for more information.
 
 ```javascript
-BackgroundGeolocation.configure({
+BackgroundGeolocation.ready({
   url: 'http://my-server.com/locations',
   extras: {
     route_id: 1234
@@ -1078,7 +1131,7 @@ The `START_TIME`, `END_TIME` are in **24h format**.  The `DAY` param corresponds
 
 
 ```javascript
-BackgroundGeolocation.configure({
+BackgroundGeolocation.ready({
   .
   .
   .
@@ -1135,7 +1188,7 @@ The schedule can also be configured with a literal start date of the form:
 eg:
 
 ```javascript
-BackgroundGeolocation.configure({
+BackgroundGeolocation.ready({
   schedule: [
     "2018-01-01 09:00-17:00"
   ]
@@ -1265,7 +1318,7 @@ The following `notificationPriority` values defined as **constants** on the `Bac
 | `NOTIFICATION_PRIORITY_MIN`     | Notification **strongly** weighted to bottom of list; notification-bar icon **hidden**                          |
 
 ```javascript
-BackgroundGeolocation.configure({
+BackgroundGeolocation.ready({
   foregroundService: true,
   notificationPriority: BackgroundGeolocation.NOTIFICATION_PRIORITY_MIN
 });
@@ -1306,12 +1359,12 @@ eg:
 
 ```javascript
 // 1. drawable
-BackgroundGeolocation.configure({
+BackgroundGeolocation.ready({
   notificationSmallIcon: "drawable/my_custom_notification_small_icon"
 });
 
 // 2. mipmap
-BackgroundGeolocation.configure({
+BackgroundGeolocation.ready({
   notificationSmallIcon: "mipmap/my_custom_notification_small_icon"
 });
 ```
@@ -1330,12 +1383,12 @@ eg:
 
 ```javascript
 // 1. drawable
-BackgroundGeolocation.configure({
+BackgroundGeolocation.ready({
   notificationLargeIcon: "drawable/my_custom_notification_large_icon"
 });
 
 // 2. mipmap
-BackgroundGeolocation.configure({
+BackgroundGeolocation.ready({
   notificationLargeIcon: "mipmap/my_custom_notification_large_icon"
 });
 ```
@@ -1376,7 +1429,7 @@ The following log-levels are defined as **constants** on the `BackgroundGeolocat
 
 Eg:
 ```javascript
-BackgroundGeolocation.configure({
+BackgroundGeolocation.ready({
   logLevel: BackgroundGeolocation.LOG_LEVEL_WARNING
 });
 ```
@@ -1707,17 +1760,142 @@ BackgroundGeolocation.on('powersavechange', function(isPowerSaveMode) {
 });
 ```
 
+------------------------------------------------------------------------------
+
+
+### `connectivitychange`
+
+Fired when the state of the device's network-connectivity changes (enabled -> disabled and vice-versa).  By default, the plugin will automatically fire a `connectivitychange` event with the current state network-connectivity whenever the **`#start`** method is executed.
+
+```javascript
+BackgroundGeolocation.on('connectivitychange', function(event) {
+  console.log("- connectivitychange, network is connected? ", event.connected);
+});
+```
+
+------------------------------------------------------------------------------
+
+
+### `enabledchange`
+
+Fired when the plugin's **`enabled`** state changes.  For example, executing `#start` and `#stop` will cause the `enabledchange` event to fire.  This event is primarily desigend for use with the configuration option **[`stopAfterElapsedMinutes`]**, which automatically executes the plugin's `#stop` method.
+
+```javascript
+BackgroundGeolocation.on('enabledchange', function(event) {
+  console.log("- enabledchange, plugin is enabled? ", event.enabled);
+});
+```
 
 ------------------------------------------------------------------------------
 
 
 # :large_blue_diamond: Methods
 
+`BackgroundGeolocation` Javascript API supports [Promises](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) for *nearly* every method (the exceptions are **`#watchPosition`** and adding event-listeners via **`#on`** method.
+
+```javascript
+// Traditional API still works:
+bgGeo.getCurrentPosition((location) => {
+  console.log('- current position: ', location);
+}, (error) => {
+  console.log('- location error: ', error);
+}, {samples: 1, persist: false});
+
+// Promise API
+bgGeo.getCurrentPosition({samples:1, persist: false}).then(location => {
+  console.log('- current position: ', location);
+}).catch(error => {
+  console.log('- location error: ', error);
+});
+```
+
+### Using `await`
+
+By marking one of your application methods as **`async`** you can use the **`await`** mechanism instead of callbacks:
+
+```javascript
+async onClickGetPosition() {
+  let location = await bgGeo.getCurrentPosition({samples:1, persist: false});
+  conosle.log('- current position: ', location);
+
+  let count = await bgGeo.getCount();
+  console.log('- There are ', count, ' records in the database');
+}
+```
+
 ## :small_blue_diamond: Core API Methods
 
-### `configure(config, successFn, failureFn)`
+### `ready(defaultConfig, successFn, failureFn)`
 
-This is the **most** important method of the API.  **`#configure`** must be called **once** (and *only* once) **each time** your application boots, providing the initial [configuration options](#wrench-configuration-options).  The **`successFn`** will be executed after the plugin has successfully configured.
+The **`#ready`** method is your first point-of-contact with the plugin.  The supplied **`defaultConfig`** will be applied *only* at **first launch** of your app &mdash; for every launch thereafter, the plugin will *automatically* load its last-known configuration from persisent storage.  The plugin *always* remembers the configuration you apply to it.
+
+Observe the following example.  Imagine you've deleted the app from the device and re-installed it:
+
+```javascript
+bgGeo.ready({distanceFilter: 10}, (state) => {
+  console.log('- Plugin is ready.  distanceFilter: ', state.distanceFilter);  
+});
+```
+
+In the console, you'll see
+```
+> - Plugin is ready.  distanceFilter: 10
+```
+
+Somewhere else in your code, you change the **`distanceFilter`**:
+```javascript
+bgGeo.setConfig({distanceFilter: 250});
+```
+
+Now terminate the app and reboot.  In the console, you'll see:
+```
+> - Plugin is ready.  distanceFilter: 250
+```
+
+:warning: The **`#ready`** method only applies the supplied **`defaultConfig`** for the **first launch of the app** &mdash; Forever after, the plugin is going to remember **every configuration change** you apply at runtime (eg: `#setConfig`) and reload that *same config* every time your app boots.
+
+#### The [`#reset`](#resetconfig-successfn-failurefn) Method
+
+If you wish, you can use the **[`#reset`](#resetdefaultconfig-succcessfn-falurefn)** method to reset all configuration options to documented default-values (with optional overrides):
+
+```javascript
+// Reset to documented default-values
+bgGeo.reset();
+// Reset to documented default-values with overrides
+bgGeo.reset({distanceFilter:  10});
+```
+
+#### `reset: true`
+
+Optionally, you can specify **`reset: true`** to **`#ready`**.  This will esentially *force* the supplied `{config}` to be applied with each launch of your application, making it behave like the traditional [`#configure`](#configureconfig-successfn-failurefn) method.
+
+```javascript
+bgGeo.ready({
+  reset: true,  // <-- set true to ALWAYS apply supplied config; not just at first launch.
+  distanceFilter: 50
+}, (state) => {
+  conosle.log('Ready with reset: true: ', state.distanceFilter);
+});
+
+```
+
+#### With Promise API
+
+```javascript
+bgGeo.ready({distanceFilter: 50}).then(state => {
+  console.log('- BackgroundGeolocation is ready: ', state);
+}).catch(error => {
+  console.log('- BackgroundGeolocation ready failure: ', error);
+});
+```
+
+------------------------------------------------------------------------------
+
+
+### `configure(config, successFn, failureFn)`
+:warning: **DEPRECATED IN FAVOUR OF [`#ready`](#readydefaultconfig-successfn-failurefn)**.  The `#configure` method is essentially the same as performing `#reset` + `#ready`.
+
+The **`#configure`** must be called **once** (and *only* once) **each time** your application boots, providing the initial [configuration options](#wrench-configuration-options).  The **`successFn`** will be executed after the plugin has successfully configured.
 
 If you later need to re-configure the plugin's [config options](#wrench-configuration-options), use the [`setConfig`](#setconfigconfig-successfn-failurefn) method.
 
@@ -1726,8 +1904,8 @@ If you later need to re-configure the plugin's [config options](#wrench-configur
 ##### `@param {Object} state` Current plugin state.
 
 ```javascript
-BackgroundGeolocation.configure({
-  desiredAccuracy: 0,
+BackgroundGeolocation.ready({
+  desiredAccuracy: BackgroundGeolocation.DESIRED_ACCURACY_HIGH,
   distanceFilter: 50,
   stationaryRadius: 25,
   locationUpdateInterval: 1000,
@@ -1752,7 +1930,7 @@ BackgroundGeolocation.configure({
 BackgroundGeolocation.on('location', onLocation);
 BackgroundGeolocation.on('motionchange', onMotionChange);
 
-BackgroundGeolocation.configure(options, function(state) {
+BackgroundGeolocation.ready(options, function(state) {
   // YES
   BackgroundGeolocation.getCurrentPosition(succes, fail);
 });
@@ -1777,6 +1955,21 @@ BackgroundGeolocation.setConfig({
 }, function(){
   console.warn("- Failed to setConfig");
 });
+```
+
+------------------------------------------------------------------------------
+
+
+### `reset([config], successFn, failureFn)`
+
+Resets the plugin configuration to documented default-values.  If a **`{config}`** is provided, it will be applied *after* the configuration reset.
+
+```javascript
+BackgroundGeolocation.reset({distanceFilter: 50}, function(state) {
+  // All config options are now reset to documented default-values
+  // + distanceFilter: 50
+});
+
 ```
 
 ------------------------------------------------------------------------------
@@ -2369,7 +2562,7 @@ Engages the geofences-only `trackingMode`.  In this mode, no active location-tra
 
 ```javascript
 
-BackgroundGeolocation.configure(config, function(state) {
+BackgroundGeolocation.ready(config, function(state) {
   // Add some geofences.
   BackgroundGeolocation.addGeofences([
     notifyOnExit: true,
