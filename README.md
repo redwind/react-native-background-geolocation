@@ -62,6 +62,16 @@ $ npm install git+https://git@github.com:transistorsoft/react-native-background-
 * [`react-native link` Setup](docs/INSTALL-ANDROID-RNPM.md)
 * [Manual Setup](docs/INSTALL-ANDROID.md)
 
+#### :information_source: Solving Android Gradle Conflicts.
+
+Once of the most common build-issues with Android apps are gradle conflicts between modules specifying different versions of:
+- `compileSdkVersion`
+- `buildToolsVersion`
+- Google `play-services` / `firebase` version.
+- Google support libraries (ie `appcompat-v4`, `appcompat-v7`)
+
+For more information, see the Wiki [Solving Android Gradle Conflicts](../../wiki/Solving-Android-Gradle-Conflicts)
+
 
 ## :large_blue_diamond: Configure your license
 
@@ -112,7 +122,7 @@ import BackgroundGeolocation from 'react-native-background-geolocation-android';
 
 There are three main steps to using `BackgroundGeolocation`
 1. Wire up [event-listeners](./docs/README.md#zap-events)
-2. [`#configure`](./docs/README.md#configureconfig-successfn-failurefn) the plugin
+2. Executer [`#ready`](./docs/README.md#readydefaultconfig-successfn-failurefn) the plugin
 3. [`#start`](./docs/README.md#startsuccessfn-failurefn) the plugin
 
 ```javascript
@@ -138,9 +148,9 @@ export default class App extends Component {
     BackgroundGeolocation.on('providerchange', this.onProviderChange);
 
     ////
-    // 2.  #configure the plugin (just once for life-time of app)
+    // 2.  Execute #ready method
     //
-    BackgroundGeolocation.configure({
+    BackgroundGeolocation.ready({
       // Geolocation Config
       desiredAccuracy: 0,
       distanceFilter: 10,
@@ -205,6 +215,31 @@ export default class App extends Component {
 
 ```
 
+:information_source: **NOTE:** The configuration **`{}`** provided to the `#ready` method is applied **only** when your app is **first booted** &mdash; for every launch thereafter, the plugin will automatically load the last known configuration from persistant storage.  If you wish to **force** the `#ready` method to *always* apply the supplied config `{}`, you can specify **`reset: true`**
+
+```javascript
+BackgroundGeolocation.ready({
+  reset: true,  // <-- true to always apply the supplied config
+  distanceFilter: 10
+}, (state) => {
+  console.log('- BackgroundGeolocation is ready: ', state);
+});
+```
+
+:warning: Do not execute *any* API method which will require accessing location-services until the callback to **`#ready*` executes (eg: `#getCurrentPosition`, `#watchPosition`, `#start`).
+
+### Promise API
+
+The `BackgroundGeolocation` Javascript API supports [Promises](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) for *nearly* every method (the exceptions are **`#watchPosition`** and adding event-listeners via **`#on`** method.  For more information, see the [API Documentation](docs/README.md#large_blue_diamond-methods)
+
+```javascript
+// Traditional API still works:
+BackgroundGeolocation.ready({desiredAccuracy: 0, distanceFilter: 50}).then(state => {
+  console.log('- BackgroundGeolocation is ready: ', state);
+}).catch(error => {
+  console.log('- BackgroundGeolocation error: ', error);
+});
+```
 
 ## :large_blue_diamond: [Demo Application](https://github.com/transistorsoft/rn-background-geolocation-demo)
 

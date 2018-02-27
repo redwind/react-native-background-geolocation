@@ -15,7 +15,7 @@ The plugin supports customizable JSON request schemas with the following config 
 Traditionally, the plugin had a hard-coded "Location Data Schema", where it automatically appended location-data to the `location` key in the JSON data, eg:
 
 ```javascript
-bgGeo.configure({
+bgGeo..ready(({
   url: 'http://my_url',
   params: {
     myParams: {foo: 'bar'}
@@ -41,7 +41,7 @@ POST /my_url
 With `httpRootProperty`, you can now customize this key:
 
 ```javascript
-bgGeo.configure({
+bgGeo.ready({
   url: 'http://my_url',
   httpRootProperty: 'data',
   params: {
@@ -70,7 +70,7 @@ POST /my_url
 If you'd rather POST your data *as* the root of the JSON, use **`httpRootProperty: "."`**:
 
 ```javascript
-bgGeo.configure({
+bgGeo.ready({
   url: 'http://my_url',
   httpRootProperty: '.',
   params: {
@@ -94,7 +94,7 @@ POST /my_url
 
 ### `locationTemplate` & `geofenceTemplate`
 
-If you wish to provide your own custom HTTP JSON schema, you can configure distinct templates for both `location` and `geofence` data.  Evaluate variables in your template using Ruby `erb`-style tags:
+If you wish to provide your own custom HTTP JSON schema, you can .ready( distinct templates for both `location` and `geofence` data.  Evaluate variables in your template using Ruby `erb`-style tags:
 
 ```erb
 <%= variable_name %>
@@ -103,7 +103,7 @@ If you wish to provide your own custom HTTP JSON schema, you can configure disti
 Example:
 
 ```javascript
-bgGeo.configure({
+bgGeo..ready(({
   url: 'http://my_url',
   httpRootProperty: 'data',
   params: {
@@ -168,7 +168,7 @@ The following template tags are specific to **`geofenceTemplate`** only:
 You're completely responsible for `"quoting"` your own `String` values.  The following will generate a JSON parsing error:
 
 ```javascript
-bgGeo.configure({
+bgGeo..ready(({
   locationTemplate: '{ "event":<%= event %> }',
 });
 ```
@@ -182,7 +182,7 @@ In the logs, you'll find:
 To fix this, the `String` tag `<%= event %>` must be wrapped in `""`:
 
 ```javascript
-bgGeo.configure({
+bgGeo..ready(({
   locationTemplate: '{ "event":"<%= event %>" }',
 });
 ```
@@ -192,7 +192,7 @@ bgGeo.configure({
 `Boolean`, `Float` and `Integer` values do **not** require quoting:
 
 ```
-bgGeo.configure({
+bgGeo..ready(({
   locationTemplate: '{ "is_moving":<%= is_moving %>, "odometer":<%= odometer %> }',
 });
 ```
@@ -202,7 +202,7 @@ bgGeo.configure({
 You're not forced to define your templates as an **`{Object}`** &mdash; You can define them as an **`[Array]`** too.
 
 ```javascript
-bgGeo.configure({
+bgGeo..ready(({
   url: 'http://my_url',
   httpRootProperty: 'data',
   params: {
@@ -233,10 +233,10 @@ POST /my_url
 
 #### Array Template with `httpRootProperty: "."`
 
-:warning: This case is tricky and should probably be avoided, particularly if you have configured `#params`, since there no place in the request JSON to append them.
+:warning: This case is tricky and should probably be avoided, particularly if you have .ready(d `#params`, since there no place in the request JSON to append them.
 
 ```javascript
-bgGeo.configure({
+bgGeo.ready({
   url: 'http://my_url',
   httpRootProperty: '.',
   params: {

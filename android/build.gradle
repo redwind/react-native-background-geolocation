@@ -1,12 +1,17 @@
 apply plugin: 'com.android.library'
 
+def DEFAULT_COMPILE_SDK_VERSION     = 26
+def DEFAULT_BUILD_TOOLS_VERSION     = "26.0.2"
+def DEFAULT_TARGET_SDK_VERSION      = 26
+def DEFAULT_PLAY_SERVICES_VERSION   = "11.8.0"
+
 android {
-    compileSdkVersion 26
-    buildToolsVersion '27.0.3'
+    compileSdkVersion project.hasProperty('compileSdkVersion') ? project.compileSdkVersion : DEFAULT_COMPILE_SDK_VERSION
+    buildToolsVersion project.hasProperty('buildToolsVersion') ? project.buildToolsVersion : DEFAULT_BUILD_TOOLS_VERSION
 
     defaultConfig {
         minSdkVersion 16
-        targetSdkVersion 26
+        targetSdkVersion project.hasProperty('targetSdkVersion') ? project.targetSdkVersion : DEFAULT_TARGET_SDK_VERSION
         versionCode 1
         versionName "1.0"
     }
@@ -14,8 +19,8 @@ android {
 
 repositories{
     jcenter()
-    flatDir{
-        dirs 'libs'
+    maven {
+        url './libs'
     }
     maven {
         url 'https://maven.google.com'
@@ -23,11 +28,19 @@ repositories{
 }
 
 dependencies {
+    // Check for application-defined play-services version
+    def playServicesVersion = DEFAULT_PLAY_SERVICES_VERSION
+    if (project.hasProperty('playServicesVersion')) {
+        playServicesVersion = project.playServicesVersion
+    } else if (project.hasProperty('googlePlayServicesVersion')) {
+        playServicesVersion = project.googlePlayServicesVersion
+    }
     compile 'com.facebook.react:react-native:+'
-    compile 'com.google.android.gms:play-services-location:11.8.0'
+    compile "com.google.android.gms:play-services-location:$playServicesVersion"
     compile 'org.greenrobot:eventbus:3.0.0'
     compile 'com.squareup.okhttp3:okhttp:3.8.1'
-    compile(name:'tslocationmanager', ext:'aar')
+    compile(group: 'com.transistorsoft', name:'tslocationmanager', version: '+')
+
     compile 'org.slf4j:slf4j-api:1.7.21'
     compile 'com.github.tony19:logback-android-core:1.1.1-6'
     compile('com.github.tony19:logback-android-classic:1.1.1-6') {
