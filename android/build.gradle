@@ -47,5 +47,5 @@ dependencies {
         exclude group: 'com.google.android', module: 'android'
     }
     // android-permissions
-    compile 'com.intentfilter:android-permissions:0.1.5'
+    compile 'com.intentfilter:android-permissions:0.1.6'
 }
