@@ -366,7 +366,7 @@ You may also use the following constants upon `BackgroundGeolocation`:
 | `DESIRED_ACCURACY_VERY_LOW`   | `1000`| Cellular only | Lowest power; lowest accuracy |
 | `DESIRED_ACCURACY_THREE_KILOMETER` | `3000` | (**iOS only**) Lowest power; lowest accuracy |
 ```javascript
-BackgroundGeoloction.ready({
+BackgroundGeoloction.configure({
   desiredAccuracy: BackgroundGeolocation.DESIRED_ACCURACY_HIGH
 });
 ```
@@ -441,7 +441,7 @@ Controls the scale of automatic speed-based [`#distanceFilter`](#config-integer-
 The plugin can optionally automatically stop tracking after some number of minutes elapses after the `#start` method was called.
 
 ```javascript
-BackgroundGeolocation.ready({
+BackgroundGeolocation.configure({
   stopAfterElapsedMinutes: 30
 }, function(state) {
   BackgroundGeolocation.start();  // <-- plugin will automatically #stop in 30 minutes
@@ -457,7 +457,7 @@ The plugin can optionally automatically stop tracking when the `stopTimeout` tim
 :warning: `stopOnStationary` will **only** occur due to `stopTimeout` timer elapse.  It will **not** occur by manually executing `changePace(false)`.
 
 ```javascript
-BackgroundGeolocation.ready({
+BackgroundGeolocation.configure({
   stopOnStationary: true
 }, function(state) {
   BackgroundGeolocation.start();
@@ -530,7 +530,7 @@ When you configure the plugin location-authorization `Always` or `WhenInUse` and
 ![](s/wyoaf16buwsw7ed/docs-locationAuthorizationAlert.jpg?dl=1)
 
 ```javascript
-BackgroundGeolocation.ready({
+BackgroundGeolocation.configure({
   locationAuthorizationAlert: {
     titleWhenNotEnabled: "Yo, location-services not enabled",
     titleWhenOff: "Yo, location-services OFF",
@@ -559,7 +559,7 @@ Applications with only the coarse location permission may have their interval si
 :blue_book: [Android docs](https://developers.google.com/android/reference/com/google/android/gms/location/LocationRequest.html#setInterval(long))
 
 ```javascript
-BackgroundGeolocation.ready({
+BackgroundGeolocation.configure({
   distanceFilter: 0,            // Must be 0 or locationUpdateInterval is ignored!
   locationUpdateInterval: 5000  // Get a location every 5 seconds
 });
@@ -622,12 +622,12 @@ If you wish, you can configure the plugin to only engage the **moving** state fo
 
 ```javascript
 // Only trigger tracking for vehicles
-BackgroundGeolocation.ready({
+BackgroundGeolocation.configure({
   triggerActivities: 'in_vehicle'
 });
 
 // Only trigger tracking for on_foot, walking and running
-BackgroundGeolocation.ready({
+BackgroundGeolocation.configure({
   triggerActivities: 'on_foot, walking, running'
 });
 ```
@@ -743,7 +743,7 @@ Defaults to `true`.  Set `false` to disable triggering a geofence immediately if
 Your server **`url`** where you wish to HTTP POST location data to.
 
 ```javascript
-BackgroundGeolocation.ready({
+BackgroundGeolocation.configure({
   url: 'http://my-server.com/locations'
 });
 ```
@@ -765,7 +765,7 @@ BackgroundGeolocation.on('http', function(request) {
   console.log('HTTP FAILURE', response);
 });
 
-BackgroundGeolocation.ready({
+BackgroundGeolocation.configure({
   url: 'http://my-server.com/locations',
   httpTimeout: 3000
 });
@@ -778,7 +778,7 @@ BackgroundGeolocation.ready({
 The HTTP method to use when creating an HTTP request to your configured [`#url`](#config-string-url-undefined).  Defaults to `POST`.  Valid values are `POST`, `PUT` and `OPTIONS`.
 
 ```javascript
-BackgroundGeolocation.ready({
+BackgroundGeolocation.configure({
   url: 'http://my-server.com/locations',
   method: 'PUT'
 });
@@ -791,7 +791,7 @@ BackgroundGeolocation.ready({
 Optional HTTP **`params`** sent along in each HTTP request.
 
 ```javascript
-BackgroundGeolocation.ready({
+BackgroundGeolocation.configure({
   url: 'http://my-server.com/locations',
   params: {
     user_id: 1234,
@@ -867,12 +867,12 @@ Optional custom template for rendering `location` JSON request data in HTTP requ
 :blue_book: See [HTTP Guide](http.md) for more information.
 
 ```javascript
-BackgroundGeolocation.ready({
+BackgroundGeolocation.configure({
   locationTemplate: '{"lat":<%= latitude %>,"lng":<%= longitude %>,"event":"<%= event %>",isMoving:<%= isMoving %>}'
 });
 
 // Or use a compact [Array] template!
-BackgroundGeolocation.ready({
+BackgroundGeolocation.configure({
   locationTemplate: '[<%=latitude%>, <%=longitude%>, "<%=event%>", <%=is_moving%>]'
 })
 ```
@@ -880,7 +880,7 @@ BackgroundGeolocation.ready({
 :warning: If you've configured [`#extras`](#config-object-extras), these key-value pairs will be merged *directly* onto your location data.  Eg:
 
 ```javascript
-BackgroundGeolocation.ready({
+BackgroundGeolocation.configure({
   httpRootProperty: 'data',
   locationTemplate: '{"lat":<%= latitude %>,"lng":<%= longitude %>}',
   extras: {
@@ -935,12 +935,12 @@ Evaulate variables in your **`geofenceTemplate`** using Ruby `erb`-style tags:
 :blue_book: See [HTTP Guide](http.md) for more information.
 
 ```javascript
-BackgroundGeolocation.ready({
+BackgroundGeolocation.configure({
   geofenceTemplate: '{ "lat":<%= latitude %>, "lng":<%= longitude %>, "geofence":"<%= geofence.identifier %>:<%= geofence.action %>" }'
 });
 
 // Or use a compact [Array] template!
-BackgroundGeolocation.ready({
+BackgroundGeolocation.configure({
   geofenceTemplate: '[<%= latitude %>, <%= longitude %>, "<%= geofence.identifier %>", "<%= geofence.action %>"]'
 })
 
@@ -1004,7 +1004,7 @@ Eg: Every recorded location will have the following **`extras`** appended:
 :blue_book: See [HTTP Guide](http.md) for more information.
 
 ```javascript
-BackgroundGeolocation.ready({
+BackgroundGeolocation.configure({
   url: 'http://my-server.com/locations',
   extras: {
     route_id: 1234
@@ -1131,7 +1131,7 @@ The `START_TIME`, `END_TIME` are in **24h format**.  The `DAY` param corresponds
 
 
 ```javascript
-BackgroundGeolocation.ready({
+BackgroundGeolocation.configure({
   .
   .
   .
@@ -1188,7 +1188,7 @@ The schedule can also be configured with a literal start date of the form:
 eg:
 
 ```javascript
-BackgroundGeolocation.ready({
+BackgroundGeolocation.configure({
   schedule: [
     "2018-01-01 09:00-17:00"
   ]
@@ -1318,7 +1318,7 @@ The following `notificationPriority` values defined as **constants** on the `Bac
 | `NOTIFICATION_PRIORITY_MIN`     | Notification **strongly** weighted to bottom of list; notification-bar icon **hidden**                          |
 
 ```javascript
-BackgroundGeolocation.ready({
+BackgroundGeolocation.configure({
   foregroundService: true,
   notificationPriority: BackgroundGeolocation.NOTIFICATION_PRIORITY_MIN
 });
@@ -1359,12 +1359,12 @@ eg:
 
 ```javascript
 // 1. drawable
-BackgroundGeolocation.ready({
+BackgroundGeolocation.configure({
   notificationSmallIcon: "drawable/my_custom_notification_small_icon"
 });
 
 // 2. mipmap
-BackgroundGeolocation.ready({
+BackgroundGeolocation.configure({
   notificationSmallIcon: "mipmap/my_custom_notification_small_icon"
 });
 ```
@@ -1383,12 +1383,12 @@ eg:
 
 ```javascript
 // 1. drawable
-BackgroundGeolocation.ready({
+BackgroundGeolocation.configure({
   notificationLargeIcon: "drawable/my_custom_notification_large_icon"
 });
 
 // 2. mipmap
-BackgroundGeolocation.ready({
+BackgroundGeolocation.configure({
   notificationLargeIcon: "mipmap/my_custom_notification_large_icon"
 });
 ```
@@ -1429,7 +1429,7 @@ The following log-levels are defined as **constants** on the `BackgroundGeolocat
 
 Eg:
 ```javascript
-BackgroundGeolocation.ready({
+BackgroundGeolocation.configure({
   logLevel: BackgroundGeolocation.LOG_LEVEL_WARNING
 });
 ```
@@ -1904,7 +1904,7 @@ If you later need to re-configure the plugin's [config options](#wrench-configur
 ##### `@param {Object} state` Current plugin state.
 
 ```javascript
-BackgroundGeolocation.ready({
+BackgroundGeolocation.configure({
   desiredAccuracy: BackgroundGeolocation.DESIRED_ACCURACY_HIGH,
   distanceFilter: 50,
   stationaryRadius: 25,
@@ -1930,7 +1930,7 @@ BackgroundGeolocation.ready({
 BackgroundGeolocation.on('location', onLocation);
 BackgroundGeolocation.on('motionchange', onMotionChange);
 
-BackgroundGeolocation.ready(options, function(state) {
+BackgroundGeolocation.configure(options, function(state) {
   // YES
   BackgroundGeolocation.getCurrentPosition(succes, fail);
 });
@@ -2562,7 +2562,7 @@ Engages the geofences-only `trackingMode`.  In this mode, no active location-tra
 
 ```javascript
 
-BackgroundGeolocation.ready(config, function(state) {
+BackgroundGeolocation.configure(config, function(state) {
   // Add some geofences.
   BackgroundGeolocation.addGeofences([
     notifyOnExit: true,
