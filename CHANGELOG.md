@@ -1,6 +1,7 @@
 # CHANGELOG
 ## [Unreleased]
-
+- [Fixed] Fixed issue executing `#getCurrentPosition` from Headless mode while plugin is current disabled.
+- [Added] Add new iOS `locationAuthorizationRequest: "Any"` for allowing the plugin to operate in either `Always` or `WhenInUse` without being spammed by location-authorization dialog.
 - [Changed] Repackage android lib `tslocationmanager.aar` as a Maven Repositoroy.  :warning: Installation procedure has changed slightly.  Please review Android installation docs for your chosen install method (Manual or react-native link).
 - [Added] Added new initialization method `#ready`, desigend to replace `#configure` (which is now deprectated).  The new `#ready` method operates in the same manner as `#configure` with a crucial difference -- the plugin will only apply the supplied configuration `{}` at the first launch of your app &mdash; thereafter, it will automatically load the last-known config from persistent storage.
 - [Added] Add new method `#reset` for resetting the plugin configuration to documented defaults.
