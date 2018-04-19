@@ -1,5 +1,7 @@
 # CHANGELOG
 ## [Unreleased]
+- [Added] iOS config `disableLocationAuthorizationAlert` for disabling automatic location-authorization alert when location-services are disabled or user changes toggles location access (eg: `Always` -> `WhenInUse`).
+- [Fixed] Android was not executing `#getCurrentPosition` `failure` callback.
 - [Fixed] Fixed issue executing `#getCurrentPosition` from Headless mode while plugin is current disabled.
 - [Added] Add new iOS `locationAuthorizationRequest: "Any"` for allowing the plugin to operate in either `Always` or `WhenInUse` without being spammed by location-authorization dialog.
 - [Changed] Repackage android lib `tslocationmanager.aar` as a Maven Repositoroy.  :warning: Installation procedure has changed slightly.  Please review Android installation docs for your chosen install method (Manual or react-native link).
