@@ -8,7 +8,7 @@ npm install git+https://git@github.com:transistorsoft/react-native-background-ge
 
 ```shell
 react-native link react-native-background-geolocation-android
-react-natvie link react-native-background-fetch
+react-native link react-native-background-fetch
 ```
 
 ## Gradle Configuration
