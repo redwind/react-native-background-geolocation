@@ -1,5 +1,8 @@
 # CHANGELOG
-## [Unreleased]
+## [2.12.0] - 2018-05-11
+- [Fixed] Android bug where plugin could fail to translate iOS desiredAccuracy value to Android value, resulting in incorrect `desiredAccuracy` value for Android, probably defaulting to `DESIRED_ACCURACY_LOWEST`.
+
+## [2.12.0-beta.15] - 2018-05-02
 - [Fixed] iOS was not persiting odometer.
 - [Fixed] iOS geofence exit event not being executed due to a condition where a stationary event occurs while geofence exit events are awaiting their location to be returned.
 - [Added] iOS config `disableLocationAuthorizationAlert` for disabling automatic location-authorization alert when location-services are disabled or user changes toggles location access (eg: `Always` -> `WhenInUse`).
