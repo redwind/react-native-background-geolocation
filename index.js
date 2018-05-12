@@ -189,9 +189,9 @@ class BackgroundGeolocation {
   */
   static stopSchedule(success, failure) {
     if (!arguments.length) {
-      return NativeModule.startSchedule();
+      return NativeModule.stopSchedule();
     } else {
-      NativeModule.startSchedule().then(success).catch(failure);
+      NativeModule.stopSchedule().then(success).catch(failure);
     }
   }
   /**
