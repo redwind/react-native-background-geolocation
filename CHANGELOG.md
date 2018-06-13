@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## [Unreleased]
+
+- [Fixed] iOS `preventSuspend` was not working with `useSignificantChangesOnly`
+- [Changed] iOS disable encryption on SQLite database file when "Data Protection" capability is enabled with `NSFileProtectionNone` so that plugin can continue to insert records while device is locked.
+
 ## [2.12.2] - 2018-05-25
 
 - [Fixed] Fix `react-native link` error when iOS and npm project name are diferent.
