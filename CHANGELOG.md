@@ -1,7 +1,7 @@
 # CHANGELOG
 
 ## [Unreleased]
-
+- [Changed] Android Removed unnecessary attribute `android:supportsRtl="true"` from `AndroidManifest`
 - [Fixed] iOS `preventSuspend` was not working with `useSignificantChangesOnly`
 - [Changed] iOS disable encryption on SQLite database file when "Data Protection" capability is enabled with `NSFileProtectionNone` so that plugin can continue to insert records while device is locked.
 
