@@ -1,6 +1,8 @@
 # CHANGELOG
 
 ## [Unreleased]
+- [Fixed] Android `headlessJobService` class could fail to be applied when upgrading from previous version.  Ensure always applied.
+- [Fixed] Android `httpTimeout` was not being applied to new `okhttp3.Client#connectionTimeout`
 - [Fixed] Apply recommended XCode build settings. 
 - [Fixed] XCode warnings 'implicity retain self in block'
 - [Changed] Android Removed unnecessary attribute `android:supportsRtl="true"` from `AndroidManifest`
