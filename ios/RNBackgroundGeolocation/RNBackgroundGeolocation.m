@@ -144,6 +144,12 @@ RCT_EXPORT_MODULE();
     ];
 }
 
+RCT_EXPORT_METHOD(registerPlugin:(NSString*)pluginName) 
+{
+    TSConfig *config = [TSConfig sharedInstance];
+    [config registerPlugin:pluginName];
+}
+
 RCT_EXPORT_METHOD(reset:(NSDictionary*)params success:(RCTResponseSenderBlock)success failure:(RCTResponseSenderBlock)failure)
 {
     TSConfig *config = [TSConfig sharedInstance];
