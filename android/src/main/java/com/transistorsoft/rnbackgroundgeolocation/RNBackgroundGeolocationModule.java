@@ -114,6 +114,7 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule im
         return "RNBackgroundGeolocation";
     }
 
+
     /**
      * location event callback
      */
@@ -299,6 +300,11 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule im
     @Override
     public void onNewIntent(Intent intent) {
 
+    }
+
+    @ReactMethod
+    public void registerPlugin(String name) {
+        // Do nothing.  This is for iOS only.
     }
 
     @ReactMethod
