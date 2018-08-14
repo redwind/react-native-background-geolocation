@@ -1,6 +1,6 @@
 # CHANGELOG
-
-## [2.13.0] - 2018-08-13
+## [2.13.0] - 2018-08-14
+- [Added] New Android config-option `notificationChannelName` for configuring the notification-channel required by the foreground-service notification.  See *Settings->Apps & Notificaitions->Your App->App Notifications*.
 - [Added] Support for new [Firebase Adapter](https://github.com/transistorsoft/react-native-background-geolocation-firebase)
 - [Added] iOS support for HTTP method `PATCH` (Android already supports it).
 - [Fixed] Android was not using `httpTimeout` with latest `okhttp3`.
