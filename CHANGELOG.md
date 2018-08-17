@@ -1,4 +1,7 @@
 # CHANGELOG
+## [2.13.1] - 2018-08-17
+- [Fixed] Android firebase plugin bug in release build.
+
 ## [2.13.0] - 2018-08-14
 - [Added] New Android config-option `notificationChannelName` for configuring the notification-channel required by the foreground-service notification.  See *Settings->Apps & Notificaitions->Your App->App Notifications*.
 - [Added] Support for new [Firebase Adapter](https://github.com/transistorsoft/react-native-background-geolocation-firebase)
