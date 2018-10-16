@@ -1,0 +1,1 @@
+find ./src/declarations -type f -name "*.d.ts" -print0 | xargs -0 sed -i '' -e 's/declare module.*/declare module "react-native-background-geolocation-android" \{/g'
