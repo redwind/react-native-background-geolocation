@@ -1,5 +1,69 @@
 # CHANGELOG
 
+## [2.14.0-beta.1] 2018-10-16
+
+- [Added] Implement [Typescript API](https://facebook.github.io/react-native/blog/2018/05/07/using-typescript-with-react-native)
+- [Added] Refactor documentation.  Now auto-generated from Typescript api with [Typedoc](https://typedoc.org/) and served from https://transistorsoft.github.io/react-native-background-geolocation-android
+- [Breaking] Change event-signature of `location` event:  location-errors are now received in new `failure` callback rather than separate `error` event.  The `error` event has been removed.
+```javascript
+BackgroundGeolocation.onLocation((location) => {
+  console.log('[location] -', location);
+}, (errorCode) => {
+  // Location errors received here.
+  console.log('[location] ERROR -', errorCode);
+});
+```
+- [Added] With the new Typescript API, it's necessary to add dedicated listener-methods for each method (in order for code-assist to work).
+```javascript
+// Old:  No code-assist for event-signature with new Typescript API
+BackgroundGeolocation.on('location', (location) => {}, (error) => {});
+// New:  use dedicated listener-method #onLocation
+BackgroundGeolocation.onLocation((location) => {}, (error) => {});
+// And every other event:
+BackgroundGeolocation.onMotionChange(callback);
+BackgroundGeolocation.onMotionProviderChange(callback);
+BackgroundGeolocation.onActivityChange(callback);
+BackgroundGeolocation.onHttp(callback);
+BackgroundGeolocation.onGeofence(callback);
+BackgroundGeolocation.onGeofencesChange(callback);
+BackgroundGeolocation.onSchedule(callback);
+BackgroundGeolocation.onConnectivityChange(callback);
+BackgroundGeolocation.onPowerSaveChange(callback);
+BackgroundGeolocation.onEnabledChange(callback);
+```
+- [Breaking] Change event-signature of `enabledchange` event to return simple `boolean` instead of `{enabled: true}`:  It was pointless to return an `{}` for this event.
+```javascript
+// Old
+BackgroundGeolocation.onEnabledChange((enabledChangeEvent) => {
+  console.log('[enabledchange] -' enabledChangeEvent.enabled);
+})
+// New
+BackgroundGeolocation.onEnabledChange((enabled) => {
+  console.log('[enabledchange] -' enabled);
+})
+```
+- [Breaking] Change signature of `#getCurrentPosition` method:  Options `{}` is now first argument rather than last:
+```javascript
+// Old (Options as 3rd argument)
+BackgroundGeolocation.getCurrentPosition((location) => {
+  console.log('[getCurrentPosition] -', location);
+}, (error) => {
+  console.log('[getCurrentPosition] ERROR -', error);
+}, {  // <-- Options as 3rd argument
+  samples: 3,
+  extras: {foo: 'bar'}
+})
+
+// New (Options as 1st argument)
+BackgroundGeolocation.getCurrentPosition({
+  samples: 3,
+  extras: {foo: 'bar'}
+}, (location) => {
+  console.log('[getCurrentPosition] -', location);
+}, (error) => {
+  console.log('[getCurrentPosition] ERROR -', error);
+})
+```
 ## [2.13.4] - 2018-10-01
 - [Fixed] iOS was missing Firebase adapter hook for persisting geofences.
 - [Changed] Android headless events are now posted with using `EventBus` instead of `JobScheduler`.  Events posted via Android `JobScheduler` are subject to time-slicing by the OS so events could arrive late.
@@ -24,7 +88,7 @@
 - [Fixed] Android issue not firing `providerchange` on boot when configured with `stopOnTerminate: true`
 - [Fixed] Android `headlessJobService` class could fail to be applied when upgrading from previous version.  Ensure always applied.
 - [Fixed] Android `httpTimeout` was not being applied to new `okhttp3.Client#connectionTimeout`
-- [Fixed] Apply recommended XCode build settings. 
+- [Fixed] Apply recommended XCode build settings.
 - [Fixed] XCode warnings 'implicity retain self in block'
 - [Changed] Android Removed unnecessary attribute `android:supportsRtl="true"` from `AndroidManifest`
 - [Fixed] iOS `preventSuspend` was not working with `useSignificantChangesOnly`
@@ -134,7 +198,7 @@
 ## [2.8.4] -  2017-07-10
 - [Fixed] Android & iOS will ensure old location samples are ignored with `getCurrentPosition`
 - [Fixed] Android `providerchange` event would continue to persist a providerchange location even when plugin was disabled for the case where location-services is disabled by user.
-- [Fixed] Don't mutate iOS `url` to lowercase.  Just lowercase the comparison when checking for `301` redirects. 
+- [Fixed] Don't mutate iOS `url` to lowercase.  Just lowercase the comparison when checking for `301` redirects.
 - [Changed] Android will attempt up to 5 `motionchange` samples instead of 3.  Cheaper devices can take longer to lock onto GPS.
 - [Changed] Android foregroundService notification priority set to `PRIORITY_MIN` so that notification doesn't always appear on top.
 - [Fixed] Android plugin was not nullifying the odometer reference location when `#stop` method is executed, resulting in erroneous odometer calculations if plugin was stopped, moved some distance then started again.
@@ -153,7 +217,7 @@
 ## [2.8.2] - 2017-06-14
 - [Added] New config `stopOnStationary` for both iOS and Android.  Allows you to automatically `#stop` tracking when the `stopTimeout` timer elapses.
 - [Added] Support for configuring the "Large Icon" (`notificationLargeIcon`) on Android `foregroundService` notification.  `notificationIcon` has now been aliased -> `notificationSmallIcon`.
-- [Fixed] iOS timing issue when fetching `motionchange` position after initial `#start` -- since the significant-location-changes API (SLC) is engaged in the `#stop` method and eagerly returns a location ASAP, that first SLC location could sometimes be several minutes old and come from cell-tower triangulation (ie: ~1000m accuracy).  The plugin could mistakenly capture this location as the `motionchange` location instead of waiting for the highest possible accuracy location that was requested.  SLC API will be engaged only after the `motionchange` location has been received. 
+- [Fixed] iOS timing issue when fetching `motionchange` position after initial `#start` -- since the significant-location-changes API (SLC) is engaged in the `#stop` method and eagerly returns a location ASAP, that first SLC location could sometimes be several minutes old and come from cell-tower triangulation (ie: ~1000m accuracy).  The plugin could mistakenly capture this location as the `motionchange` location instead of waiting for the highest possible accuracy location that was requested.  SLC API will be engaged only after the `motionchange` location has been received.
 - [Fixed] Headless JS `RNBackgroundGeolocationEventReceiver` was broken in `react-native 0.45.0` -- they removed a mechanism for fetching the `ReactApplication`.  Changed to using a much simpler, backwards-compatible mechansim using simple `context.getApplicationContext()`.
 - [Fixed] On Android, when adding a *massive* number of geofences (ie: *thousands*), it can take several minutes to perform all `INSERT` queries.  There was a threading issue which could cause the main-thread to be blocked while waiting for the database lock from the geofence queries to be released, resulting in an ANR (app isn't responding) warning.
 - [Changed] Changing the Android foreground-service notification is now supported (you no longer need to `#stop` / `#start` the plugin for changes to take effect).
@@ -162,7 +226,7 @@
 - [Fixed] Android bug in `RNBackgroundGeolocationEventReceiver`.  Catch errors when `ReactNativeApplication` can not be referenced (this can happen during `startOnBoot` when the react native App has not yet booted, thus no `registerHeadlessTask` has been executed yet.  It can also occur if the plugin has not been configured with `foregroundService: true` -- Headless JS **requires** `foregroundService: true`)
 - [Fixed] When iOS engages the `stopTimeout` timer, the OS will pause background-execution if there's no work being performed, in spite of `startBackgroundTask`, preventing the `stopTimeout` timer from running.  iOS will now keep location updates running at minimum accuracy during `stopTimeout` to prevent this.
 - [Fixed] Ensure iOS background "location" capability is enabled before asking `CLLocationManager` to `setBackgroundLocationEnabled`.
-- [Added] Implement ability to provide literal dates to schedule (eg: `2017-06-01 09:00-17:00`) 
+- [Added] Implement ability to provide literal dates to schedule (eg: `2017-06-01 09:00-17:00`)
 - [Added] When Android motion-activity handler detects `stopTimeout` has expired, it will initiate a `motionchange` without waiting for the `stopTimeout` timer to expire (there were cases where the `stopTimeout` timer could be delayed from firing due likely to vendor-based battery-saving software)
 
 ## [2.8.1] - 2017-05-12
@@ -202,7 +266,7 @@
 
 ## [2.6.0] - 2017-02-22
 - [Fixed] Issue #186: `geofence` event not passing Geofence `#extras`.
-- [Fixed] iOS geofence identifiers containing ":" character were split and only the last chunk returned.  The plugin itself prefixes all geofences it creates with the string `TSGeofenceManager:` and the string-splitter was too naive.  Uses a `RegExp` replace to clear the plugin's internal prefix. 
+- [Fixed] iOS geofence identifiers containing ":" character were split and only the last chunk returned.  The plugin itself prefixes all geofences it creates with the string `TSGeofenceManager:` and the string-splitter was too naive.  Uses a `RegExp` replace to clear the plugin's internal prefix.
 - [Changed] Refactored API Documentation
 - [Added] HTTP JSON template features.  See [HTTP Features](./docs/http.md).  You can now template your entire JSON request data sent to the server by the plugin's HTTP layer.
 
@@ -246,7 +310,7 @@
 - [Changed] Location parameters `heading`, `accuracy`, `odometer`, `speed`, `altitude`, `altitudeAccuracy` are now fixed at 2 decimal places.
 - [Fixed] Bug reported with `EventBus already registered` error.  Found a few cases where `EventBus.isRegistered` was not being used.
 - [Added] Android will attempt to auto-sync on heartbeat events.
-- [Changed] permission `android.hardware.location.gps" **android:required="false"**` 
+- [Changed] permission `android.hardware.location.gps" **android:required="false"**`
 - [Added] Implement `IntentFilter` to capture `MY_PACKAGE_REPLACED`, broadcast when user upgrades the app.  If you've configured `startOnBoot: true, stopOnTerminate: false` and optionally `foreceRelaodOnBoot: true`, the plugin will automatically restart when user upgrades the app.
 - [Changed] When adding a geofence (either `#addGeofence` or `#addGeofences`), if a geofence already exists with the provided `identifier`, the plugin will first destroy the existing one before creating the new one.
 - [Changed] Merge iOS platform.  You no longer have to install both projects.
@@ -325,7 +389,7 @@ fetch logs with `#getLog` or `#emailLog` methods.  Destroy logs with `#destroyLo
 - [Changed] Changed API of `watchPosition` to match iOS.  See docs.
 - [Changed] Refactor setup guides.  Implement `Cocoapod` and `RNPM` guides.
 - [Changed] Render `-1`if location has no speed, bearing or altitude
-- [Fixed] Fix Android crash when resetOdometer called before `#configure`. 
+- [Fixed] Fix Android crash when resetOdometer called before `#configure`.
 - [Fixed] found bug where `TSLocationManager` doesn't initialize its odometer from Settings when first instantiated.
 
 ## [2.0.3] - 2016-08-29
