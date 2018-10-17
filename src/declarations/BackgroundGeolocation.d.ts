@@ -204,7 +204,14 @@ declare module "react-native-background-geolocation-android" {
     *
     * @example
     * ```typescript
-    * BackgroundGeolocation.removeListener('location', myLocationCallback);
+    * let locationHandler = (location) {
+    *   console.log('[location] - ', location)
+    * }
+    * BackgroundGeolocation.onLocation(locationHandler)
+    * .
+    * .
+    * // Remove the listener providing a reference to the original callback.
+    * BackgroundGeolocation.removeListener('location', locationHandler)
     * ```
     */
     static removeListener(event: string, handler: Function, success?:Function, failure?:Function): void;
