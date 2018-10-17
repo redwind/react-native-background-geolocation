@@ -23,7 +23,7 @@
 						<li class="state loading">Preparing search index...</li>
 						<li class="state failure">The search index is not available</li>
 					</ul>
-					<a href="../globals.html" class="title">[API Docs] React Native Background Geolocation</a>&nbsp;<span class="tsd-flag ts-flagOptional ts-flagVersion">v 2.14.0</span>
+					<a href="../globals.html" class="title">[API Docs] React Native Background Geolocation</a>&nbsp;<span class="tsd-flag ts-flagOptional ts-flagVersion">v 2.14.0-beta.1</span>
 				</div>
 				<div class="" id="tsd-widgets">
 					<a class="github" href="https://github.com/transistorsoft/react-native-background-geolocation-android">Github</a>
@@ -2609,7 +2609,14 @@ bgGeo.reset({
 								</div>
 								<dl class="tsd-comment-tags">
 									<dt class="tsd-comment-tag-example">example</dt>
-									<dd><pre><code class="language-typescript">BackgroundGeolocation.removeListener(<span class="hljs-string">'location'</span>, myLocationCallback);</code></pre>
+									<dd><pre><code class="language-typescript"><span class="hljs-keyword">let</span> locationHandler = (location) {
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'[location] - '</span>, location)
+}
+BackgroundGeolocation.onLocation(locationHandler)
+.
+.
+<span class="hljs-comment">// Remove the listener providing a reference to the original callback.</span>
+BackgroundGeolocation.removeListener(<span class="hljs-string">'location'</span>, locationHandler)</code></pre>
 									</dd>
 								</dl>
 							</div>
