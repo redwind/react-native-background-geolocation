@@ -204,7 +204,7 @@ declare module "react-native-background-geolocation-android" {
     *
     * @example
     * ```typescript
-    * let locationHandler = (location) {
+    * let locationHandler = (location) => {
     *   console.log('[location] - ', location)
     * }
     * BackgroundGeolocation.onLocation(locationHandler)
@@ -1209,5 +1209,24 @@ declare module "react-native-background-geolocation-android" {
     *
     */
     static logger: Logger;
+
+    /**
+    * Convenience method to compose a [[params]] Object suitable for posting to the **Transistor Software Test Server** at http://tracker.transistorsoft.com.  You must provide a reference to **`Device`** instance.
+    *
+    * The test server is a great way to debug location problems, since the results can easily be shared with *Transistor Software* when requesting support.
+    *
+    * ![](https://dl.dropboxusercontent.com/s/3abuyyhioyypk8c/screenshot-tracker-transistorsoft.png?dl=1)
+    *
+    * @example
+    * ```typescript
+    * BackgroundGeolocation.ready({
+    *   url: 'http://tracker.transistorsoft.com/locations/my-username',
+    *   params: BackgroundGeolocation.transistorTrackerParams(device)
+    * })
+    * ```
+    * ### ⚠️ Note:
+    * - To *view* your tracking results in the browser, the url is just __`/YOUR-USERNAME`__ &mdash; not `/locations/YOUR-USERNAME`
+    */
+    static transistorTrackerParams(device:Object):Object;
   }
 }

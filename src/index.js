@@ -570,6 +570,21 @@ export default class BackgroundGeolocation {
   */
   static get logger() { return NativeModule.logger; }
 
+  static transistorTrackerParams(deviceInfo) {
+    if (typeof(deviceInfo) === undefined) { throw "An instance of react-native-device-info must be provided"; }
+    if (typeof(deviceInfo.getModel) !== 'function') { throw "Invalid instance of DeviceInfo"; }
+    return {
+      device: {
+        uuid: (deviceInfo.getModel() + '-' + deviceInfo.getSystemVersion()).replace(/[\s\.,]/g, '-'),
+        model: deviceInfo.getModel(),
+        platform: deviceInfo.getSystemName(),
+        manufacturer: deviceInfo.getManufacturer(),
+        version: deviceInfo.getSystemVersion(),
+        framework: 'ReactNative'
+      }
+    }
+  }
+
   /**
   * Iterate and execute API methods to test validity of method signature for both Standard and Promise API
   */
