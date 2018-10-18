@@ -332,6 +332,7 @@ BackgroundGeolocation.ready({<span class="hljs-attr">desiredAccuracy</span>: <sp
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="_react_native_background_geolocation_android_.backgroundgeolocation.html#stopschedule" class="tsd-kind-icon">stop<wbr>Schedule</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="_react_native_background_geolocation_android_.backgroundgeolocation.html#stopwatchposition" class="tsd-kind-icon">stop<wbr>Watch<wbr>Position</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="_react_native_background_geolocation_android_.backgroundgeolocation.html#sync" class="tsd-kind-icon">sync</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="_react_native_background_geolocation_android_.backgroundgeolocation.html#transistortrackerparams" class="tsd-kind-icon">transistor<wbr>Tracker<wbr>Params</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="_react_native_background_geolocation_android_.backgroundgeolocation.html#watchposition" class="tsd-kind-icon">watch<wbr>Position</a></li>
 							</ul>
 						</section>
@@ -2609,7 +2610,7 @@ bgGeo.reset({
 								</div>
 								<dl class="tsd-comment-tags">
 									<dt class="tsd-comment-tag-example">example</dt>
-									<dd><pre><code class="language-typescript"><span class="hljs-keyword">let</span> locationHandler = (location) {
+									<dd><pre><code class="language-typescript"><span class="hljs-keyword">let</span> locationHandler = <span class="hljs-function">(<span class="hljs-params">location</span>) =&gt;</span> {
   <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'[location] - '</span>, location)
 }
 BackgroundGeolocation.onLocation(locationHandler)
@@ -3489,6 +3490,45 @@ BackgroundGeolocation.stopSchedule();</code></pre>
 					</ul>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-static">
+					<a name="transistortrackerparams" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> transistor<wbr>Tracker<wbr>Params</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-static">
+						<li class="tsd-signature tsd-kind-icon">transistor<wbr>Tracker<wbr>Params<span class="tsd-signature-symbol">(</span>device<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Object</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Object</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Convenience method to compose a <a href="../interfaces/_react_native_background_geolocation_android_.config.html#params">params</a> Object suitable for posting to the <strong>Transistor Software Test Server</strong> at <a href="http://tracker.transistorsoft.com">http://tracker.transistorsoft.com</a>.  You must provide a reference to <strong><code>Device</code></strong> instance.</p>
+								</div>
+								<p>The test server is a great way to debug location problems, since the results can easily be shared with <em>Transistor Software</em> when requesting support.</p>
+								<p><img src="https://dl.dropboxusercontent.com/s/3abuyyhioyypk8c/screenshot-tracker-transistorsoft.png?dl=1" alt=""></p>
+								<dl class="tsd-comment-tags">
+									<dt class="tsd-comment-tag-example">example</dt>
+									<dd><pre><code class="language-typescript">BackgroundGeolocation.ready({
+  url: <span class="hljs-string">'http://tracker.transistorsoft.com/locations/my-username'</span>,
+  params: BackgroundGeolocation.transistorTrackerParams(device)
+})</code></pre>
+										<h3 id="-note-">⚠️ Note:</h3>
+										<ul>
+											<li>To <em>view</em> your tracking results in the browser, the url is just <strong><code>/YOUR-USERNAME</code></strong> &mdash; not <code>/locations/YOUR-USERNAME</code></li>
+										</ul>
+									</dd>
+								</dl>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>device: <span class="tsd-signature-type">Object</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Object</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-static">
 					<a name="watchposition" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagStatic">Static</span> watch<wbr>Position</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-static">
@@ -3790,6 +3830,9 @@ BackgroundGeolocation.stopSchedule();</code></pre>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-static">
 								<a href="_react_native_background_geolocation_android_.backgroundgeolocation.html#sync" class="tsd-kind-icon">sync</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-static">
+								<a href="_react_native_background_geolocation_android_.backgroundgeolocation.html#transistortrackerparams" class="tsd-kind-icon">transistor<wbr>Tracker<wbr>Params</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-static">
 								<a href="_react_native_background_geolocation_android_.backgroundgeolocation.html#watchposition" class="tsd-kind-icon">watch<wbr>Position</a>
