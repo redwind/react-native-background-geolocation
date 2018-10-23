@@ -28,7 +28,6 @@ Also available for [Cordova](https://github.com/transistorsoft/cordova-backgroun
 - ### [Installing the Plugin](#large_blue_diamond-installing-the-plugin)
 - ### [Setup Guides](#large_blue_diamond-setup-guides)
 - ### [Configure your License](#large_blue_diamond-configure-your-license)
-- ### [Android SDK Setup](#large_blue_diamond-android-sdk)
 - ### [Using the plugin](#large_blue_diamond-using-the-plugin)
 - ### [Example](#large_blue_diamond-example)
 - ### [Debugging](../../wiki/Debugging)
@@ -97,16 +96,6 @@ For more information, see the Wiki [Solving Android Gradle Conflicts](../../wiki
   </application>
 </manifest>
 ```
-
-
-## :large_blue_diamond: Android SDK
-
-If building from your local machine (as you should be), ensure you have the following items installed or updated in Android SDK Manager
-#### SDK Tools
-![](https://dl.dropboxusercontent.com/s/qdscbas4krc27c4/android-sdk-tools.png?dl=1)
-#### SDK Platforms
-![](https://dl.dropboxusercontent.com/s/qetghugog00puz2/android-sdk-platforms.png?dl=1)
-
 
 ## :large_blue_diamond: Using the plugin ##
 
@@ -205,23 +194,22 @@ export default class App extends Component {
 
   // You must remove listeners when your component unmounts
   componentWillUnmount() {
-    // Remove BackgroundGeolocation listeners.  This is important during development when hot reloading.
     BackgroundGeolocation.removeListeners();
   }
   onLocation(location) {
-    console.log('- [event] location: ', location);
+    console.log('[location] -', location);
   }
   onError(error) {
-    console.warn('- [event] location error ', error);
+    console.warn('[location] ERROR -', error);
   }
-  onActivityChange(activity) {
-    console.log('- [event] activitychange: ', activity);  // eg: 'on_foot', 'still', 'in_vehicle'
+  onActivityChange(event) {
+    console.log('[activitychange] -', event);  // eg: 'on_foot', 'still', 'in_vehicle'
   }
   onProviderChange(provider) {
-    console.log('- [event] providerchange: ', provider);
+    console.log('[providerchange] -', provider.enabled, provider.status);
   }
-  onMotionChange(location) {
-    console.log('- [event] motionchange: ', location.isMoving, location);
+  onMotionChange(event) {
+    console.log('[motionchange] -', event.isMoving, event.location);
   }
 }
 
