@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## [2.14.0-beta.2] 2018-10-23
+- [Fixed] Documentation issue with method signature `getCurrentPosition`.
+- [iOS] Catch `NSInvalidArgumentException` when decoding `TSConfig`.
+- [Added] `.npmignore`:  ignore `/docs`, `node_modules`.
+
 ## [2.14.0-beta.1] 2018-10-16
 
 - [Added] Implement [Typescript API](https://facebook.github.io/react-native/blog/2018/05/07/using-typescript-with-react-native)
