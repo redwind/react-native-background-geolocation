@@ -40,7 +40,7 @@
   },
   "homepage": "https://www.transistorsoft.com/shop/products/react-native-background-geolocation",
   "dependencies": {
-    "react-native-background-fetch": "~2.4.3",
+    "react-native-background-fetch": "~2.4.4",
     "cocoa-lumberjack": "^3.0.5",
     "fast-plist": "^0.1.2",
     "plist": "^2.0.1",
