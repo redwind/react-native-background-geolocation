@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## [2.14.0] 2018-10-29
+- [Fixed] Android `NullPointerException` on `WatchPositionCallback` with `watchPosition`.
+
 ## [2.14.0-beta.2] 2018-10-23
 - [Fixed] Documentation issue with method signature `getCurrentPosition`.
 - [iOS] Catch `NSInvalidArgumentException` when decoding `TSConfig`.
