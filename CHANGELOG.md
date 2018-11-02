@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## Unreleased
+- [Added] Android SDK 28 requires new permission to use foreground-service.
+
 ## [2.14.1] 2018-10-29
 - [Fixed] react-native link on Windows.
 
