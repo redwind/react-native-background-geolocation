@@ -24,7 +24,7 @@ declare module "react-native-background-geolocation-android" {
   *   }
   * }).then((success) => {
   *   console.log('[addGeofence] success');
-  * }).catchError((error) => {
+  * }).catch((error) => {
   *   console.log('[addGeofence] FAILURE: ', error);
   * });
   * ```
@@ -46,7 +46,7 @@ declare module "react-native-background-geolocation-android" {
   *   notifyOnEntry: true
   * }]).then((success) => {
   *   console.log('[addGeofences] success');
-  * }).catchError((error) => {
+  * }).catch((error) => {
   *   console.log('[addGeofences] FAILURE: ', error);
   * });
   * ```
