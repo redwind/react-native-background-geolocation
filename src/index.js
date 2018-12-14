@@ -118,6 +118,23 @@ export default class BackgroundGeolocation {
       NativeModule.configure(config).then(success).catch(failure);
     }
   }
+
+  static requestPermission(success, failure) {
+    if (!arguments.length) {
+      return NativeModule.requestPermission();
+    } else {
+      NativeModule.requestPermission().then(success).catch(failure);
+    }
+  }
+
+  static getProviderState(success, failure) {
+    if (!arguments.length) {
+      return NativeModule.getProviderState();
+    } else {
+      NativeModule.getProviderState().then(success).catch(failure);
+    }
+  }
+
   /**
   * Listen to a plugin event
   */

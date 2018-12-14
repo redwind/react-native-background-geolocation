@@ -18,19 +18,29 @@ react-native link does a nice job, but we need to do a bit of manual setup.
 ### :open_file_folder: **`android/build.gradle`**
 
 ```diff
+buildscript {
+    ext {
+        buildToolsVersion = "27.0.3"
+        minSdkVersion = 16
+        compileSdkVersion = 27
+        targetSdkVersion = 26
+        supportLibVersion = "27.1.1"
++       playServicesVersion = "15.0.1"
+    }
+    .
+    .
+    .
+}
+
 allprojects {
     repositories {
         mavenLocal()
+        google()
         jcenter()
         maven {
             // All of React Native (JS, Obj-C sources, Android binaries) is installed from npm
             url "$rootDir/../node_modules/react-native/android"
         }
-        // Google now hosts their latest API dependencies on their own maven server.
-        // React Native will eventually add this to their app template.
-+       maven {
-+           url 'https://maven.google.com'
-+       }
 +       maven {
 +           url "$rootDir/../node_modules/react-native-background-geolocation-android/android/libs"
 +       }
@@ -39,34 +49,6 @@ allprojects {
 +       }
     }
 }
-
-/**
--* !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
--* !!! THE FOLLOWING IS OPTIONAL BUT HIGHLY RECOMMENDED FOR YOUR SANITY !!!
--* !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-*
-* Do you hate Gradle conflicts where other plugin require some particular
-* version of play-services or define a compileSdkVersion, buildToolsVersion
-* which conflicts with that of your app?  Me too!
-*
-* If you define these key gradle configuration variables globally, the
-* background-geolocation plugin (and any other "wise" plugins you've installed)
-* can align themselves to YOUR desired versions!  You should define these variables
-* as desired according to current values in your app/build.gradle
-*
-* You'll find that more and more plugins are beginning to wise up to checking
-* for the presense of global gradle variables like this.
-*
-* BackgroundGeolocation is aware of the following variables:
-*/
-+ext {
-+    compileSdkVersion   = 27
-+    targetSdkVersion    = 27
-+    buildToolsVersion   = "27.0.3"
-+    supportLibVersion   = "27.1.1"
-+    playServicesVersion = "15.0.1"
-+}
--// BackgroundGeolocation is also aware of googlePlayServicesVersion if you prefer
 ```
 
 #### :information_source: Project-wide Configuration Properties

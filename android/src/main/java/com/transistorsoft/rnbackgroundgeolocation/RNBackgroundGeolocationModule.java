@@ -738,6 +738,28 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule im
     }
 
     @ReactMethod
+    public void getProviderState(Callback success, Callback error) {
+        try {
+            success.invoke(jsonToMap(getAdapter().getProviderState().toJson()));
+        } catch (JSONException e) {
+            error.invoke(e.getMessage());
+        }
+    }
+
+    @ReactMethod
+    public void requestPermission(final Callback success, final Callback error) {
+        getAdapter().requestPermission(new TSRequestPermissionCallback() {
+            @Override public void onSuccess(int status) {
+                success.invoke(status);
+            }
+            @Override public void onFailure(int status) {
+                error.invoke(status);
+            }
+        });
+    }
+
+
+    @ReactMethod
     public void addEventListener(String event) {
         if (!events.contains(event)) {
             Log.e(TAG, "[RNBackgroundGeolocation addListener] Unknown event: " + event);
@@ -953,15 +975,6 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule im
             }
         }
         return jsonArray;
-    }
-
-    // TODO placehold for implementing Android M permissions request.  Just return true for now.
-    private Boolean hasPermission(String permission) {
-        return true;
-    }
-    // TODO placehold for implementing Android M permissions request.  Just return true for now.
-    private void requestPermissions(int requestCode, String[] action) {
-
     }
 
     private void initializeLocationManager() {

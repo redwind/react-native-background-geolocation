@@ -594,6 +594,19 @@ RCT_EXPORT_METHOD(isPowerSaveMode:(RCTResponseSenderBlock)successCallback failur
     successCallback(@[@(isPowerSaveMode)]);
 }
 
+RCT_EXPORT_METHOD(getProviderState:(RCTResponseSenderBlock)success failure:(RCTResponseSenderBlock)failure) {
+    TSProviderChangeEvent *event = [locationManager getProviderState];
+    success(@[[event toDictionary]]);
+}
+
+RCT_EXPORT_METHOD(requestPermission:(RCTResponseSenderBlock)success failure:(RCTResponseSenderBlock)failure) {
+    [locationManager requestPermission:^(NSNumber *status) {
+        success(@[status]);
+    } failure:^(NSNumber *status) {
+        failure(@[status]);
+    }];
+}
+
 RCT_EXPORT_METHOD(playSound:(int)soundId)
 {
     [locationManager playSound: soundId];
