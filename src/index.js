@@ -6,6 +6,9 @@ import {
 } from "react-native"
 
 import NativeModule from './NativeModule';
+import DeviceSettings from './DeviceSettings';
+
+let _deviceSettingsInstance = null;
 
 const TAG = "BackgroundGeolocation";
 
@@ -77,6 +80,13 @@ export default class BackgroundGeolocation {
   static get LOCATION_AUTHORIZATION_ALWAYS()        { return LOCATION_AUTHORIZATION_ALWAYS}
   static get LOCATION_AUTHORIZATION_WHEN_IN_USE()   { return LOCATION_AUTHORIZATION_WHEN_IN_USE}
   static get LOCATION_AUTHORIZATION_ANY()           { return LOCATION_AUTHORIZATION_ANY}
+
+  static get deviceSettings() {
+    if (_deviceSettingsInstance === null) {
+      _deviceSettingsInstance = new DeviceSettings();
+    }
+    return _deviceSettingsInstance;
+  }
 
   /**
   * Register HeadlessTask
@@ -157,8 +167,8 @@ export default class BackgroundGeolocation {
     this.addListener('motionchange', callback);
   }
 
-  static onHttp(success, failure) {
-    this.addListener('http', success, failure);
+  static onHttp(callback) {
+    this.addListener('http', callback);
   }
 
   static onHeartbeat(callback) {

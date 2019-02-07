@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.telecom.Call;
 import android.util.Log;
+import android.os.Build;
 
 import com.facebook.react.bridge.ActivityEventListener;
 import com.facebook.react.bridge.Callback;
@@ -15,6 +16,7 @@ import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.ReadableMapKeySetIterator;
+import com.facebook.react.bridge.ReadableNativeMap;
 import com.facebook.react.bridge.ReadableType;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
@@ -46,6 +48,7 @@ import com.transistorsoft.locationmanager.location.TSWatchPositionRequest;
 import com.transistorsoft.locationmanager.scheduler.ScheduleEvent;
 import com.transistorsoft.locationmanager.util.Sensors;
 import com.transistorsoft.locationmanager.logger.TSLog;
+import com.transistorsoft.locationmanager.device.DeviceSettingsRequest;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -735,6 +738,35 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule im
     @ReactMethod
     public void isPowerSaveMode(Callback success, Callback error) {
         success.invoke(getAdapter().isPowerSaveMode());
+    }
+
+    @ReactMethod
+    public void isIgnoringBatteryOptimizations(Callback success, Callback failure) {
+        boolean isIgnoring = getAdapter().isIgnoringBatteryOptimizations();
+        success.invoke(isIgnoring);
+    }
+
+    @ReactMethod
+    public void requestSettings(ReadableMap args, Callback success, Callback failure) throws JSONException {
+        String action = args.getString("action");
+        DeviceSettingsRequest request = getAdapter().requestSettings(action);
+
+        if (request != null) {
+            success.invoke(jsonToMap(request.toJson()));
+        } else {
+            failure.invoke("Failed to find " + action + " screen for device " + Build.MANUFACTURER + " " + Build.MODEL + "@" + Build.VERSION.RELEASE);
+        }
+    }
+
+    @ReactMethod
+    public void showSettings(ReadableMap args, Callback success, Callback failure) {
+        String action = args.getString("action");
+        boolean didShow = getAdapter().showSettings(action);
+        if (didShow) {
+            success.invoke();
+        } else {
+            failure.invoke("Failed to find " + action + " screen for device " + Build.MANUFACTURER + " " + Build.MODEL + "@" + Build.VERSION.RELEASE);
+        }
     }
 
     @ReactMethod

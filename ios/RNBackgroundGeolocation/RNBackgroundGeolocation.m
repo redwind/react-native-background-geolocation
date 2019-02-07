@@ -575,7 +575,6 @@ RCT_EXPORT_METHOD(log:(NSString*)level message:(NSString*)message)
     [locationManager log:level message:message];
 }
 
-
 RCT_EXPORT_METHOD(getSensors:(RCTResponseSenderBlock)successCallback failure:(RCTResponseSenderBlock)failureCallback)
 {
     NSDictionary *sensors = @{
@@ -592,6 +591,21 @@ RCT_EXPORT_METHOD(isPowerSaveMode:(RCTResponseSenderBlock)successCallback failur
 {
     BOOL isPowerSaveMode = [locationManager isPowerSaveMode];
     successCallback(@[@(isPowerSaveMode)]);
+}
+
+RCT_EXPORT_METHOD(isIgnoringBatteryOptimizations:(RCTResponseSenderBlock)success failure:(RCTResponseSenderBlock)failure)
+{
+    success(@[@(NO)]);
+}
+
+RCT_EXPORT_METHOD(requestSettings:(NSDictionary*)args success:(RCTResponseSenderBlock)success failure:(RCTResponseSenderBlock)failure)
+{
+    failure(@[@"No iOS Implementation"]);
+}
+
+RCT_EXPORT_METHOD(showSettings:(NSDictionary*)args success:(RCTResponseSenderBlock)success failure:(RCTResponseSenderBlock)failure)
+{
+    failure(@[@"No iOS Implementation"]);
 }
 
 RCT_EXPORT_METHOD(getProviderState:(RCTResponseSenderBlock)success failure:(RCTResponseSenderBlock)failure) {

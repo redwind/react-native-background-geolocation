@@ -1,5 +1,26 @@
 # CHANGELOG
 
+## [2.15.0] 2019-02-07
+- [Added] New `DeviceSettings` API for redirecting user to Android Settings screens, including vendor-specific screens (eg: Huawei, OnePlus, Xiaomi, etc).  This is an attempt to help direct the user to appropriate device-settings screens for poor Android vendors as detailed in the site [Don't kill my app](https://dontkillmyapp.com/).
+- [Added] `schedule` can now be configured to optionally execute geofences-only mode (ie: `#startGeofences`) per schedule entry.  See `schedule` docs.
+- [Changed] Update Gradle config to use `implementation` instead of deprecated `compile`
+- **[BREAKING]** Change Gradle `ext` configuration property `googlePlayServicesVersion` -> `googlePlayServicesLocationVersion`.  Now that Google has decoupled all their libraries, `play-services:location` now has its own version, independant of all other libs.
+
+`android/build.gradle`:
+```diff
+buildscript {
+    ext {
+        buildToolsVersion = "28.0.3"
+        minSdkVersion = 16
+        compileSdkVersion = 28
+        targetSdkVersion = 27
+        supportLibVersion = "28.0.0"
+-       googlePlayServicesVersion = "16.0.0"
++       googlePlayServicesLocationVersion = "16.0.0"
+    }
+}
+```
+
 ## [2.14.6] 2019-01-11
 - [Changed] Android Service: Return `START_STICKY` instead of `START_REDELIVER_INTENT`.
 - [Changed] Android: `setShowBadge(false)` on Android `NotificationChannel`.  Some users reporting that Android shows a badge-count on app icon when service is started / stopped.
