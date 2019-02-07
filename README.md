@@ -39,17 +39,24 @@ Also available for [Cordova](https://github.com/transistorsoft/cordova-backgroun
 
 ## :large_blue_diamond: Installing the Plugin
 
-```
-$ npm install git+https://git@github.com:transistorsoft/react-native-background-geolocation-android.git --save
+### With `yarn`
 
+```shell
+yarn add https://github.com/transistorsoft/react-native-background-geolocation-android.git
 ```
 
+### With `npm`
+```shell
+npm install git+https://git@github.com:transistorsoft/react-native-background-geolocation-android.git --save
+```
+
+**Note:** For both `yarn add` and `npm install`, you can append a `#version` to the url (eg: `#2.15.0`).  See [Releases](https://github.com/transistorsoft/react-native-background-geolocation-android/releases) for a list of all available versions.
 
 ## :large_blue_diamond: Setup Guides
 
-### iOS
-:warning: If you're upgrading from the public `react-native-background-geolocation` version for iOS, you need to **completely remove that version now**.  This repo contains *both* iOS and Android.  Follow the iOS installation steps from scratch.
+:warning: If you're upgrading from the public `react-native-background-geolocation` version, you need to **completely remove that version now**.
 
+### iOS
 - [`react-native link` Setup](help/INSTALL-IOS-RNPM.md)
 - [Cocoapods](help/INSTALL-IOS-COCOAPODS.md)
 - [Manual Setup](help/INSTALL-IOS.md)
@@ -57,16 +64,6 @@ $ npm install git+https://git@github.com:transistorsoft/react-native-background-
 ### Android
 * [`react-native link` Setup](help/INSTALL-ANDROID-RNPM.md)
 * [Manual Setup](help/INSTALL-ANDROID.md)
-
-#### :information_source: Solving Android Gradle Conflicts.
-
-Once of the most common build-issues with Android apps are gradle conflicts between modules specifying different versions of:
-- `compileSdkVersion`
-- `buildToolsVersion`
-- Google `play-services` / `firebase` version.
-- Google support libraries (ie `appcompat-v4`, `appcompat-v7`)
-
-For more information, see the Wiki [Solving Android Gradle Conflicts](../../wiki/Solving-Android-Gradle-Conflicts)
 
 
 ## :large_blue_diamond: Configure your license
