@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## Unreleased
+- [Fixed] Added Android gradle dependency `appcompat-v7`
+- [Fixed] Minor change to Android `HeadlessTask` to fix possible issue with `Looper`.
+
 ## [2.15.0] 2019-02-07
 - [Added] New `DeviceSettings` API for redirecting user to Android Settings screens, including vendor-specific screens (eg: Huawei, OnePlus, Xiaomi, etc).  This is an attempt to help direct the user to appropriate device-settings screens for poor Android vendors as detailed in the site [Don't kill my app](https://dontkillmyapp.com/).
 - [Added] `schedule` can now be configured to optionally execute geofences-only mode (ie: `#startGeofences`) per schedule entry.  See `schedule` docs.
