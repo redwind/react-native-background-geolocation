@@ -48,6 +48,11 @@ const LOCATION_AUTHORIZATION_ALWAYS       = "Always";
 const LOCATION_AUTHORIZATION_WHEN_IN_USE  = "WhenInUse";
 const LOCATION_AUTHORIZATION_ANY          = "Any";
 
+const PERSIST_MODE_ALL                    = 2;
+const PERSIST_MODE_LOCATION               = 1;
+const PERSIST_MODE_GEOFENCE               = -1;
+const PERSIST_MODE_NONE                   = 0;
+
 const emptyFn = function() {}
 
 export default class BackgroundGeolocation {
@@ -80,6 +85,11 @@ export default class BackgroundGeolocation {
   static get LOCATION_AUTHORIZATION_ALWAYS()        { return LOCATION_AUTHORIZATION_ALWAYS}
   static get LOCATION_AUTHORIZATION_WHEN_IN_USE()   { return LOCATION_AUTHORIZATION_WHEN_IN_USE}
   static get LOCATION_AUTHORIZATION_ANY()           { return LOCATION_AUTHORIZATION_ANY}
+
+  static get PERSIST_MODE_ALL()       { return PERSIST_MODE_ALL; }
+  static get PERSIST_MODE_LOCATION()  { return PERSIST_MODE_LOCATION; }
+  static get PERSIST_MODE_GEOFENCE()  { return PERSIST_MODE_GEOFENCE; }
+  static get PERSIST_MODE_NONE()      { return PERSIST_MODE_NONE; }
 
   static get deviceSettings() {
     if (_deviceSettingsInstance === null) {
