@@ -2,6 +2,7 @@ package com.transistorsoft.rnbackgroundgeolocation;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.telecom.Call;
 import android.util.Log;
@@ -45,7 +46,9 @@ import com.transistorsoft.locationmanager.http.HttpResponse;
 import com.transistorsoft.locationmanager.location.TSCurrentPositionRequest;
 import com.transistorsoft.locationmanager.location.TSLocation;
 import com.transistorsoft.locationmanager.location.TSWatchPositionRequest;
+import com.transistorsoft.locationmanager.scheduler.TSScheduleManager;
 import com.transistorsoft.locationmanager.scheduler.ScheduleEvent;
+import com.transistorsoft.locationmanager.event.TerminateEvent;
 import com.transistorsoft.locationmanager.util.Sensors;
 import com.transistorsoft.locationmanager.logger.TSLog;
 import com.transistorsoft.locationmanager.device.DeviceSettingsRequest;
@@ -284,7 +287,11 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule im
     }
     @Override
     public void onHostPause() {
-
+        Context context = getReactApplicationContext();
+        TSConfig config = TSConfig.getInstance(context);
+        if (config.getEnabled() && config.getEnableHeadless() && !config.getStopOnTerminate()) {
+            TSScheduleManager.getInstance(context).oneShot(TerminateEvent.ACTION, 10000);
+        }
     }
     @Override
     public void onHostDestroy() {
@@ -690,7 +697,7 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule im
     }
 
     @ReactMethod
-    public void playSound( int soundId) {
+    public void playSound(String soundId) {
         getAdapter().startTone(soundId);
     }
 
