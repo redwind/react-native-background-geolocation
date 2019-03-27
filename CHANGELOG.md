@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## [3.0.0-rc.3] - 2019-03-27
+- [Fixed] An Android foreground-service is launched on first install and fails to stop.
+
 ## [3.0.0-rc.2] - 2019-03-27
 - [Updated] Re-generate docs.  Forgot to import my new typedoc plugin `typedoc-plugin-mediaplayer` to generate audio player for debug sounds in the docs.
 ![](https://dl.dropbox.com/s/zomejlm9egm1ujl/Screenshot%202019-03-26%2023.10.50.png?dl=1)
