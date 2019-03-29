@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [3.0.0-rc.4] - 2019-03-29
+- [Fixed] Android `NullPointerException` with `Bundle#getExtras` (#674).
+- [Fixed] Android not persisting `providerchange` location when location-services re-enabled.
+
 ## [3.0.0-rc.3] - 2019-03-27
 - [Fixed] An Android foreground-service is launched on first install and fails to stop.
 
