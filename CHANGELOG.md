@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## Unreleased
+- [Fixed] Fixed `NullPointerException BackgroundTaskManager$Task.start`
+
 ## [3.0.0-rc.5] - 2019-03-31
 - [Fixed] [Fixed] Another case of Android `NullPointerException` with `Bundle#getExtras` (#674).
 
