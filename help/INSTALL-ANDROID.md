@@ -4,17 +4,11 @@
 
 ```shell
 yarn add https://github.com/transistorsoft/react-native-background-geolocation-android.git
-
-react-native link react-native-background-geolocation-android
-react-native link react-native-background-fetch
 ```
 
 ### With `npm`
 ```shell
 npm install git+https://git@github.com:transistorsoft/react-native-background-geolocation-android.git --save
-
-react-native link react-native-background-geolocation-android
-react-native link react-native-background-fetch
 ```
 
 ## Gradle Configuration

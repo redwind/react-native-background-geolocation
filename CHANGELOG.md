@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## Unreleased
+## [3.0.0] - 2019-04-10
 - [Fixed] Fixed `NullPointerException BackgroundTaskManager$Task.start`
 
 ## [3.0.0-rc.5] - 2019-03-31
