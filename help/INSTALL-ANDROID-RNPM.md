@@ -20,51 +20,31 @@ react-native link cocoa-lumberjack
 
 ## Gradle Configuration
 
-react-native link does a nice job, but we need to do a bit of manual setup.
-
-### :open_file_folder: **`android/build.gradle`**
-
-Add the `googlePlayServicesLocation` Gradle variable.  This controls the version of `play-services:location` the SDK will use.
+The `react-native link` command has automatically added a new Gradle `ext` parameter **`googlePlayServicesLocationVersion`**.  You can Use this to control the version of `play-services:location` used by the Background Geolocation SDK.
 
 :information_source: You should always strive to use the latest available Google Play Services libraries.  You can determine the latest available version [here](https://developers.google.com/android/guides/setup).
+
+### :open_file_folder: **`android/build.gradle`**
 
 ```diff
 buildscript {
     ext {
++       googlePlayServicesLocationVersion = "16.0.0"
         buildToolsVersion = "28.0.3"
         minSdkVersion = 16
         compileSdkVersion = 28
         targetSdkVersion = 27
         supportLibVersion = "28.0.0"
-        // You can control the SDK's version of play-services:location
-        // You should always use the latest available version.
-+       googlePlayServicesLocationVersion = "16.0.0"
     }
     .
     .
     .
-}
-
-allprojects {
-    repositories {
-        mavenLocal()
-        google()
-        jcenter()
-        maven {
-            // All of React Native (JS, Obj-C sources, Android binaries) is installed from npm
-            url "$rootDir/../node_modules/react-native/android"
-        }
-+       maven {
-+           url "$rootDir/../node_modules/react-native-background-geolocation-android/android/libs"
-+       }
-+       maven {
-+           url "$rootDir/../node_modules/react-native-background-fetch/android/libs"
-+       }
-    }
 }
 ```
 
 ## AndroidManifest.xml
+
+Paste the following `<meta-data />` element into the `AndroidManifest`, replaced with your license key:
 
 ```diff
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
@@ -89,6 +69,8 @@ allprojects {
 
 
 ## Proguard Config
+
+If you've enabled **`def enableProguardInReleaseBuilds = true`** in your `app/build.gradle`, be sure to add the following items to your `proguard-rules.pro`:
 
 ### :open_file_folder: `proguard-rules.pro` (`android/app/proguard-rules.pro`)
 

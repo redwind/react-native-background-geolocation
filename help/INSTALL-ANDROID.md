@@ -82,6 +82,8 @@ dependencies {
 
 ## AndroidManifest.xml
 
+Paste the following `<meta-data />` element into the `AndroidManifest`, replaced with your license key:
+
 ```diff
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.transistorsoft.backgroundgeolocation.react">
@@ -124,6 +126,8 @@ public class MainApplication extends ReactApplication {
 ```
 
 ## Proguard Config
+
+If you've enabled **`def enableProguardInReleaseBuilds = true`** in your `app/build.gradle`, be sure to add the following items to your `proguard-rules.pro`:
 
 ### :open_file_folder: `proguard-rules.pro` (`android/app/proguard-rules.pro`)
 
