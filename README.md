@@ -54,7 +54,10 @@ npm install git+https://git@github.com:transistorsoft/react-native-background-ge
 
 ## :large_blue_diamond: Setup Guides
 
-:warning: If you're upgrading from the public `react-native-background-geolocation` version, you need to **completely remove that version now**.
+:warning: If you're upgrading from the public `react-native-background-geolocation` version, you need to **completely remove that version now**:
+```
+$ react-native unlink react-native-background-geolocation
+```
 
 ### iOS
 - [`react-native link` Setup](help/INSTALL-IOS-RNPM.md)
