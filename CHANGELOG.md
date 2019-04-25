@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [3.0.3] - 2019-04-25
+- [Fixed] Android bug where service repeatedly starts/stops after rebooting the device with plugin in *moving* state.
+- [Fixed] Android headless `heartbeat` events were failing (incorrect `Context` was supplied to the event).
+
 ## [3.0.2] - 2019-04-18
 - [Fixed] Windows bug in new `react-native link` script.
 - [Fixed] Android scheduler bug.  When app is terminated & restarted during a scheduled ON period, tracking-service does not restart.

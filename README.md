@@ -45,6 +45,13 @@ Also available for [Cordova](https://github.com/transistorsoft/cordova-backgroun
 yarn add https://github.com/transistorsoft/react-native-background-geolocation-android.git
 ```
 
+If you have problems installing with `yarn`, add the following to your `~/.ssh/config` file:
+
+```
+Host github.com
+        User git
+```
+
 ### With `npm`
 ```shell
 npm install git+https://git@github.com:transistorsoft/react-native-background-geolocation-android.git --save
