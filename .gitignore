@@ -10,3 +10,4 @@ android/local.properties
 android/*.iml
 xcuserdata
 package-lock.json
+yarn.lock
