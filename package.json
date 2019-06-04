@@ -44,7 +44,6 @@
     "fast-plist": "^0.1.2",
     "plist": "^2.0.1",
     "react-native-background-fetch": "~2.6.0",
-    "react-native-background-geolocation": "../react-native-background-geolocation",
     "xcode": "^0.9.1"
   },
   "peerDependencies": {
