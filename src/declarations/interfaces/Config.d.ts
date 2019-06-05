@@ -1539,7 +1539,7 @@ declare module "react-native-background-geolocation-android" {
     /**
     * Controls whether the plugin should first reset the configuration when `#ready` is executed before applying the supplied config `{}`.
     *
-    * Defaults to `false`.  The SDK can optionally re-apply its persisted configuration with each boot of your application, ignoring the config `{}`
+    * Defaults to `true`.  The SDK can optionally re-apply its persisted configuration with each boot of your application, ignoring the config `{}`
     * supplied to the `#ready` method.
     *
     * @break
