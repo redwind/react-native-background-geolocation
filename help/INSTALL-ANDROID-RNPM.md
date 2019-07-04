@@ -15,8 +15,22 @@ npm install git+https://git@github.com:transistorsoft/react-native-background-ge
 ```shell
 react-native link react-native-background-geolocation-android
 react-native link react-native-background-fetch
+```
+
+### `react-native < 0.60.0`
+
+If you're using react-native **`< 0.60.0`**, you must also install and link the following dependency:
+
+```shell
+// with yarn
+yarn add cocoa-lumberjack
+// with npm
+npm install cocoa-lumberjack
+
 react-native link cocoa-lumberjack
 ```
+
+:warning: If you're *upgrading* to `0.60.0`, you must **unlink and remove** `cocoa-lumberjack`.
 
 ## Gradle Configuration
 
