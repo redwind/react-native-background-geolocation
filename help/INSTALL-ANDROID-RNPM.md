@@ -70,7 +70,7 @@ react-native link react-native-background-fetch
 
 -----------------------------------------------------------------------------------
 
-### Gradle Configuration
+## Gradle Configuration
 
 The `react-native link` command has automatically added a new Gradle `ext` parameter **`googlePlayServicesLocationVersion`**.  You can Use this to control the version of `play-services:location` used by the Background Geolocation SDK.
 
