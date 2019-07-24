@@ -19,7 +19,7 @@ npm install react-native-background-fetch --save
 
 ### `react-native link`
 ```shell
-react-native link react-native-background-geolocation
+react-native link react-native-background-geolocation-android
 react-native link react-native-background-fetch
 ```
 
