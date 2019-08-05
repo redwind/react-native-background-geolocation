@@ -3,7 +3,7 @@
 ## [3.0.9] - 2019-07-04
 - [Changed] Implement `react-native.config.js` ahead of deprecated `rnpm` config.
 - [Fixed] Added logic to detect when app is configured to use **AndroidX** dependencies, adjusting the required `appcompat` dependency accordingly.  If the gradle config `ext.supportLibVersion` corresponds to an AndroidX version (eg: `1.0.0`), the plugin assumes AndroidX.
-- [Changed] Remove `cocoa-lumberjack` as a dependency since `react-native >= 0.60.0` iOS apps are all Cocoapods now.  There's no longer a need for this dependency now since the plugin's podspec can import `CocoaLumberjack` pod directly.  This is going to cause short-term pain for those using `< 0.60.0`, forcing one to manually install `cocao-lumberjack`.
+- [Changed] Remove `cocoa-lumberjack` as a dependency since `react-native >= 0.60.0` iOS apps are all Cocoapods now.  There's no longer a need for this dependency now since the plugin's podspec can import `CocoaLumberjack` pod directly.  This is going to cause short-term pain for those using `< 0.60.0`, forcing one to manually install `cocoa-lumberjack`.
 
 ## [3.0.8] - 2019-06-28
 - [Fixed] iOS / Android issues with odometer and `getCurrentPosition` when used with `maximumAge` constraint.  Incorrect, old location was being returned instead of latest available.
