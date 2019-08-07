@@ -38,8 +38,9 @@ buildscript {
         buildToolsVersion = "28.0.3"
         minSdkVersion = 16
         compileSdkVersion = 28
-        targetSdkVersion = 27
-+       supportLibVersion = "1.0.2"  # <-- IMPORTANT:  For new AndroidX compatibility.
+        targetSdkVersion = 28
++       supportLibVersion = "1.0.2" # <-- DEPRECATED in favour of appCompatVersion
++       appCompatVersion = "1.0.2"  # <-- IMPORTANT:  For new AndroidX compatibility.
     }
     .
     .

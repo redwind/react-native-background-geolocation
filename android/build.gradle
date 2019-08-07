@@ -3,7 +3,7 @@ apply plugin: 'com.android.library'
 // Android dependencies
 def DEFAULT_COMPILE_SDK_VERSION                     = 28
 def DEFAULT_TARGET_SDK_VERSION                      = 28
-def DEFAULT_SUPPORT_LIB_VERSION                     = "28.0.0"
+def DEFAULT_APP_COMPAT_VERSION                      = "28.0.0"
 
 // Plugin dependencies
 def DEFAULT_GOOGLE_PLAY_SERVICES_LOCATION_VERSION   = "17.0.0"
@@ -37,17 +37,18 @@ repositories{
 }
 
 dependencies {
-    def supportLibVersion = safeExtGet('supportLibVersion', DEFAULT_SUPPORT_LIB_VERSION)
+    // Prefer appCompatVersion vs supportLibVersion.
+    def appCompatVersion = safeExtGet('appCompatVersion', safeExtGet('supportLibVersion', DEFAULT_APP_COMPAT_VERSION))
+
+    def appCompatMajorVersion = appCompatVersion.split('\\.')[0] as int
+    def appCompatLibName =  (appCompatMajorVersion < 20) ? "androidx.appcompat:appcompat" : "com.android.support:appcompat-v7"
     def playServicesLocationVersion = safeExtGet('googlePlayServicesLocationVersion', DEFAULT_GOOGLE_PLAY_SERVICES_LOCATION_VERSION)
     def okHttpVersion = safeExtGet('okHttpVersion', DEFAULT_OK_HTTP_VERSION)
     def androidPermissionsVersion = safeExtGet('androidPermissionsVersion', DEFAULT_ANDROID_PERMISSIONS_VERSION)
     def eventBusVersion = safeExtGet('eventBusVersion', DEFAULT_EVENTBUS_VERSION)
 
-    def supportLibMajorVersion = supportLibVersion.split('\\.')[0] as int
-    def appCompatLibName =  (supportLibMajorVersion < 20) ? "androidx.appcompat:appcompat" : "com.android.support:appcompat-v7"
-
     compileOnly 'com.facebook.react:react-native:+'
-    implementation "$appCompatLibName:$supportLibVersion"
+    implementation "$appCompatLibName:$appCompatVersion"
     implementation "com.google.android.gms:play-services-location:$playServicesLocationVersion"
     implementation "org.greenrobot:eventbus:$eventBusVersion"
     implementation "com.squareup.okhttp3:okhttp:$okHttpVersion"
