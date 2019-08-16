@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## [3.2.0] - 2019-08-16
+- [Added] iOS 13 support.
+- [Added] Auto-linking support.  Do not use `react-native link` anymore.  See the Setup docs for Android and iOS.  Before installing `3.2.0`, first `react-native unlink` both `background-geolocation` and `background-fetch`.
+
+:warning: If you have a previous version of **`react-native-background-geolocation-android < 3.2.0`** installed into **`react-native >= 0.60`**, you should first `unlink` your previous version as `react-native link` is no longer required.
+
+```bash
+$ react-native unlink react-native-background-geolocation-android
+```
+
 ## [3.1.0] - 2019-08-07
 - [Fixed] Android Geofence `DWELL` transition (`notifyOnDwell: true`) not firing.
 - [Fixed] iOS `logMaxDays` was hard-coded to `7`; Config option not being respected.
