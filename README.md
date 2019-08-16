@@ -91,7 +91,7 @@ npm install git+https://git@github.com:transistorsoft/react-native-background-ge
 
 - [Auto-linking Setup](help/INSTALL-ANDROID-AUTO.md)
 
-### `react-native > 0.60`
+### `react-native < 0.60`
 
 * [`react-native link` Setup](help/INSTALL-ANDROID-RNPM.md) (**recommended**)
 * [Manual Setup](help/INSTALL-ANDROID.md)
