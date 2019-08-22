@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## [3.2.1] - 2019-08-22
+- [Fixed] Android Initial headless events can be missed when app booted due to motion transition event.
+- [Fixed] Android crash with EventBus `Subscriber already registered error`.
+- [Fixed] iOS `Crash: [TSHttpService postBatch:error:] + 6335064 (TSHttpService.m:253)`
+- [Changed] Minor changes to `build.gradle`: fetch `minSdkVersion` from `ext` instead of hard-coding, use `implementation` with `react` instead of `compileOnly`.
+
 ## [3.2.0] - 2019-08-16
 - [Added] iOS 13 support.
 - [Added] Auto-linking support.  Do not use `react-native link` anymore.  See the Setup docs for Android and iOS.  Before installing `3.2.0`, first `react-native unlink` both `background-geolocation` and `background-fetch`.
