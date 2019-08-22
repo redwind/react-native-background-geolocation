@@ -19,7 +19,7 @@ android {
     compileSdkVersion safeExtGet('compileSdkVersion', DEFAULT_COMPILE_SDK_VERSION)
 
     defaultConfig {
-        minSdkVersion 16
+        minSdkVersion safeExtGet('minSdkVersion', 16)
         targetSdkVersion safeExtGet('targetSdkVersion', DEFAULT_TARGET_SDK_VERSION)
         versionCode 1
         versionName "1.0"
@@ -43,7 +43,7 @@ dependencies {
     def androidPermissionsVersion = safeExtGet('androidPermissionsVersion', DEFAULT_ANDROID_PERMISSIONS_VERSION)
     def eventBusVersion = safeExtGet('eventBusVersion', DEFAULT_EVENTBUS_VERSION)
 
-    compileOnly 'com.facebook.react:react-native:+'
+    implementation "com.facebook.react:react-native:${safeExtGet('reactNativeVersion', '+')}"
     // tslocationmanager.aar
     implementation fileTree(include: ['*.aar'], dir: 'libs')
 
