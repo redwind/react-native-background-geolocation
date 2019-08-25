@@ -17,8 +17,22 @@ npm install git+https://git@github.com:transistorsoft/react-native-background-ge
 ```shell
 react-native link react-native-background-geolocation-android
 react-native link react-native-background-fetch
+```
+
+---------------------------------------------------------------
+
+:warning: For those **not** using Cocoapods (you *should* be), where your iOS app does **not** have a `Podfile`:
+```shell
+yarn add cocoa-lumberjack
+// <or npm>
+npm install cocoa-lumberjack
+
 react-native link cocoa-lumberjack
 ```
+
+The `cocoa-lumberjack` package is **deprecated** &mdash; it is no longer required when using *Cocoapods*.  If you have `cocoa-lumberjack` installed and you're using `Cocoapods`, **remove and `unlink`** `cocoa-lumberjack`.
+
+---------------------------------------------------------------
 
 ## XCode Configuration
 
