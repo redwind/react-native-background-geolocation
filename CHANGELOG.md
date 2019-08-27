@@ -1,6 +1,8 @@
 # CHANGELOG
 
-## [3.2.1] - 2019-08-22
+## Unreleased
+- [Changed] Upgrade `android-logback` dependency to `2.0.0`
+- [Changed] Android: move some plugin initialization into background-threds (eg: `performLogCleanup`) to help mitigate against ANR "`Context.startForegroundService` did not then call `Service.startForeground`".
 - [Fixed] Android Initial headless events can be missed when app booted due to motion transition event.
 - [Fixed] Android crash with EventBus `Subscriber already registered error`.
 - [Fixed] iOS `Crash: [TSHttpService postBatch:error:] + 6335064 (TSHttpService.m:253)`
