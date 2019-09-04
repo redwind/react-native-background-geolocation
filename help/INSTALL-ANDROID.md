@@ -50,29 +50,18 @@ buildscript {
     .
 }
 
-allprojects {
-    repositories {
-        mavenLocal()
-        google()
-        jcenter()
-        maven {
-            // All of React Native (JS, Obj-C sources, Android binaries) is installed from npm
-            url "$rootDir/../node_modules/react-native/android"
-        }
-+       maven {
-+           url "$rootDir/../node_modules/react-native-background-geolocation-android/android/libs"
-+       }
-+       maven {
-+           url "$rootDir/../node_modules/react-native-background-fetch/android/libs"
-+       }
-    }
-}
 ```
 
 ### :open_file_folder: **`android/app/build.gradle`**
 
 ```diff
+apply from: "../../node_modules/react-native/react.gradle"
 
++Project background_geolocation = project(':react-native-background-geolocation-android')
++apply from: "${background_geolocation.projectDir}/app.gradle"
+.
+.
+.
 dependencies {
 +   implementation project(':react-native-background-geolocation-android')
 +   implementation project(':react-native-background-fetch')
@@ -127,34 +116,34 @@ public class MainApplication extends ReactApplication {
 
 ## Proguard Config
 
-If you've enabled **`def enableProguardInReleaseBuilds = true`** in your `app/build.gradle`, be sure to add the following items to your `proguard-rules.pro`:
+If you've enabled **`def enableProguardInReleaseBuilds = true`** in your `app/build.gradle`, be sure to add the BackgroundGeolocation SDK's `proguard-rules.pro` to your **`proguardFiles`**:
 
-### :open_file_folder: `proguard-rules.pro` (`android/app/proguard-rules.pro`)
+### :open_file_folder: `android/app/build.gradle`)
 
-```proguard
--keepnames class com.transistorsoft.rnbackgroundgeolocation.RNBackgroundGeolocation
--keepnames class com.facebook.react.ReactActivity
-
-# BackgroundGeolocation
--keep class com.transistorsoft.** { *; }
--dontwarn com.transistorsoft.**
-
-# BackgroundGeolocation (EventBus)
--keepattributes *Annotation*
--keepclassmembers class ** {
-    @org.greenrobot.eventbus.Subscribe <methods>;
+```diff
+/**
+ * Run Proguard to shrink the Java bytecode in release builds.
+ */
+def enableProguardInReleaseBuilds = true
+.
+.
+.
+android {
+    .
+    .
+    .
+    buildTypes {
+        release {
+            minifyEnabled enableProguardInReleaseBuilds
+            proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+            // Add following proguardFiles (leave existing one above untouched)
++           proguardFiles "${background_geolocation.projectDir}/proguard-rules.pro"
+            signingConfig signingConfigs.release
+        }
+    }
 }
--keep enum org.greenrobot.eventbus.ThreadMode { *; }
--keepclassmembers class * extends org.greenrobot.eventbus.util.ThrowableFailureEvent {
-    <init>(java.lang.Throwable);
-}
-
-# logback
--keep class ch.qos.** { *; }
--keep class org.slf4j.** { *; }
--dontwarn ch.qos.logback.core.net.*
-
-
-# OkHttp3
--dontwarn okio.**
 ```
+
+:warning: If you get error `"ERROR: Could not get unknown property 'background_geolocation' for project ':app'"`, see [above](https://github.com/transistorsoft/react-native-background-geolocation-android/blob/integrate-proguard-rules/help/INSTALL-ANDROID-AUTO.md#open_file_folder-androidappbuildgradle) and make sure to define the `Project background_geolocation`.
+
+

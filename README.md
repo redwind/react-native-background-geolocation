@@ -39,7 +39,6 @@ Also available for [Cordova](https://github.com/transistorsoft/cordova-backgroun
 
 ## :large_blue_diamond: Installing the Plugin
 
--------------------------------------------------------------
 
 :warning: If you have a previous version of **`react-native-background-geolocation-android < 3.2.0`** installed into **`react-native >= 0.60`**, you should first `unlink` your previous version as `react-native link` is no longer required.
 
@@ -71,30 +70,29 @@ npm install git+https://git@github.com:transistorsoft/react-native-background-ge
 
 ## :large_blue_diamond: Setup Guides
 
-:warning: If you're upgrading from the public `react-native-background-geolocation` version, you need to **completely remove that version.**:
+:warning: If you're upgrading from the public `react-native-background-geolocation` version, you need to **completely remove that version.**
 
-## iOS
 
 ### `react-native >= 0.60`
 
+### iOS
 - [Auto-linking Setup](help/INSTALL-IOS-AUTO.md)
+
+### Android
+- [Auto-linking Setup](help/INSTALL-ANDROID-AUTO.md)
+
+------------------------------------------------------------------------
 
 ### `react-native < 0.60`
 
+### iOS
 - [`react-native link` Setup](help/INSTALL-IOS-RNPM.md) (**recommended**)
 - [Cocoapods](help/INSTALL-IOS-COCOAPODS.md)
 - [Manual Setup](help/INSTALL-IOS.md)
 
-## Android
-
-### `react-native >= 0.60`
-
-- [Auto-linking Setup](help/INSTALL-ANDROID-AUTO.md)
-
-### `react-native < 0.60`
-
-* [`react-native link` Setup](help/INSTALL-ANDROID-RNPM.md) (**recommended**)
-* [Manual Setup](help/INSTALL-ANDROID.md)
+### Android
+- [`react-native link` Setup](help/INSTALL-ANDROID-RNPM.md) (**recommended**)
+- [Manual Setup](help/INSTALL-ANDROID.md)
 
 
 ## :large_blue_diamond: Configure your license
