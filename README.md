@@ -184,7 +184,6 @@ export default class App extends Component {
     // 2.  Execute #ready method
     //
     BackgroundGeolocation.ready({
-      reset: true,
       // Geolocation Config
       desiredAccuracy: BackgroundGeolocation.DESIRED_ACCURACY_HIGH,
       distanceFilter: 10,
@@ -242,8 +241,6 @@ export default class App extends Component {
 
 ```
 
-:information_source: **NOTE:** The configuration **`{}`** provided to the `#ready` method is applied **only** when your app is **first booted** &mdash; for every launch thereafter, the plugin will automatically load the last known configuration from persistant storage.  If you wish to **force** the `#ready` method to *always* apply the supplied config `{}`, you can specify **`reset: true`**
-
 ```javascript
 BackgroundGeolocation.ready({
   reset: true,  // <-- true to always apply the supplied config
@@ -253,7 +250,7 @@ BackgroundGeolocation.ready({
 });
 ```
 
-:warning: Do not execute *any* API method which will require accessing location-services until the callback to **`#ready*` executes (eg: `#getCurrentPosition`, `#watchPosition`, `#start`).
+:warning: Do not execute *any* API method which will require accessing location-services until the callback to **`#ready`** executes (eg: `#getCurrentPosition`, `#watchPosition`, `#start`).
 
 ### Promise API
 
