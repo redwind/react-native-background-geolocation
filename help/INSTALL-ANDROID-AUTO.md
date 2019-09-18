@@ -112,7 +112,7 @@ android {
 }
 ```
 
-:warning: If you get error `"ERROR: Could not get unknown property 'background_geolocation' for project ':app'"`, see [above](https://github.com/transistorsoft/react-native-background-geolocation-android/blob/integrate-proguard-rules/help/INSTALL-ANDROID-AUTO.md#open_file_folder-androidappbuildgradle) and make sure to define the `Project background_geolocation`.
+:warning: If you get error `"ERROR: Could not get unknown property 'background_geolocation' for project ':app'"`, see [above](#open_file_folder-androidappbuildgradle) and make sure to define the `Project background_geolocation`.
 
 
 
