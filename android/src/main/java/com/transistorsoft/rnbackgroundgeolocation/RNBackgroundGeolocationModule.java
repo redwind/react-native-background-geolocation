@@ -295,7 +295,7 @@ public class RNBackgroundGeolocationModule extends ReactContextBaseJavaModule im
     public void onHostPause() {
         Context context = getReactApplicationContext();
         TSConfig config = TSConfig.getInstance(context);
-        if (config.getEnabled() && config.getEnableHeadless() && !config.getStopOnTerminate()) {
+        if (config.getEnabled()) {
             TSScheduleManager.getInstance(context).oneShot(TerminateEvent.ACTION, 10000);
         }
     }
