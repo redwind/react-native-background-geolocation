@@ -1,4 +1,5 @@
 # Android Auto-linking Installation
+
 ### `react-native >= 0.60`
 
 ### With `yarn`
