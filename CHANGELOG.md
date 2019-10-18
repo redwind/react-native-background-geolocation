@@ -1,6 +1,7 @@
 # CHANGELOG
 
-## Unreleased
+## [3.3.0] - 2019-10-17
+- [Fixed] Android: Fixed issue executing `#changePace` immediately after `#start`.
 - [Fixed] Android:  Add guard against NPR in `calculateMedianAccuracy`
 - [Added] Add new Geofencing methods: `#getGeofence(identifier)` and `#geofenceExists(identifier)`.
 - [Fixed] iOS issue using `disableMotionActivityUpdates: false` with `useSignificantChangesOnly: true` and `reset: true`.  Plugin will accidentally ask for Motion Permission.  Fixes #1992.
