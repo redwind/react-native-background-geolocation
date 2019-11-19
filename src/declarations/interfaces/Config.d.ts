@@ -1130,6 +1130,89 @@ declare module "react-native-background-geolocation-android" {
     disableAutoSyncOnCellular?: boolean;
 
     /**
+    * Encrypt location data in the SDK's SQLite datbase and HTTP requests (__`AES-256-CBC`__).
+    *
+    * Defaults to `false`.  When enabled, the SDK will encrypt location data in its SQLite database.  When executing HTTP requests, the SDK will encrypt the entire request payload and encode the result as `Base64`.
+    *
+    *
+    * ```javascript
+    * BackgroundGeolocation.ready({
+    *   encrypt: true
+    * });
+    * ```
+    *
+    * ## Encryption Password
+    *
+    * The SDK's encryption stack requires a configurable encryption *password*.
+    *
+    * ## iOS
+    *
+    * - ### React Native
+    * In your __`Info.plist`__, Add the `String` key `BACKGROUND_GEOLOCATION_ENCRYPTION_PASSWORD`.
+    *
+    * ![](https://www.dropbox.com/s/amea0siu9mxroh3/ios-encryption_password.png?dl=1)
+    *
+    * - ### Cordova
+    *
+    * 📂 __`config.xml`__
+    *
+    * ```xml
+    * <platform name="ios">
+    *     <config-file parent="BACKGROUND_GEOLOCATION_ENCRYPTION_PASSWORD" target="*-Info.plist">
+    *         <string>encryption_password_for_SQLite_and_HTTP_requests</string>
+    *     </config-file>
+    * </platform>
+    * ```
+    *
+    * ## Android
+    *
+    * - ### React Native
+    *
+    * In your __`AndroidManifest.xml`__, add the following `<meta-data>` element:
+    *
+    * ```xml
+    * <application>
+    *     .
+    *     .
+    *     .
+    *     <meta-data android:name="com.transistorsoft.locationmanager.ENCRYPTION_PASSWORD" android:value="your secret encryption password" />
+    * </application>
+    * ```
+    *
+    * - ### Cordova
+    *
+    * 📂 __`config.xml`__
+    *
+    * ```xml
+    * <platform name="android">
+    *     <config-file parent="/manifest/application" target="app/src/main/AndroidManifest.xml">
+    *         <meta-data android:name="com.transistorsoft.locationmanager.ENCRYPTION_PASSWORD" android:value="your secret encryption password" />
+    *     </config-file>
+    * </platform>
+    * ```
+    *
+    * ## RNCryptor Encryption Stack
+    *
+    * The SDK uses the [RNCryptor Encryption Stack](https://github.com/RNCryptor/RNCryptor-Spec/blob/master/RNCryptor-Spec-v3.md).  See [RNCypto](https://github.com/RNCryptor) for a list of available language implementations.
+    *
+    * ![](https://dl.dropbox.com/s/owp61pt3cqfij16/RNCrypto-DataFormat-Spec.png?dl=1)
+    *
+    * | Name             | Description                                       |
+    * |------------------|---------------------------------------------------|
+    * | `version`        | (1 byte): Data format version. (Currently `3`).   |
+    * | `options`        | (1 byte): bit 0 - uses password (Always `1`).     |
+    * | `encryptionSalt` | (8 bytes)                                         |
+    * | `HMACSalt`       | (8 bytes)                                         |
+    * | `IV`             | (16 bytes)                                        |
+    * | `ciphertext`     | (variable) -- Encrypted in CBC mode               |
+    * | `HMAC`           | (32 bytes)
+    *
+    * See [here](https://gist.github.com/christocracy/f814dd35cfd9eced5d4de3025c38333c) for a NodeJS-based decryption example.
+    *
+    */
+    encrypt?: boolean;
+
+    /**
     * Controls the order that locations are selected from the database (and uploaded to your server).
     *
     * Defaults to ascending (`ASC`), where oldest locations are synced first.  Descending (`DESC`) uploads latest locations first.
