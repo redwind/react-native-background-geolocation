@@ -5,7 +5,7 @@ declare module "react-native-background-geolocation-android" {
   * @example
   * ```typescript
   * BackgroundGeolocation.onHeartbeat(heartbeatEvent => {
-  *   console.log('[heartbeat] ', heartbeatEvent);
+  *   console.log("[heartbeat] ", heartbeatEvent);
   * });
   * ```
   */
