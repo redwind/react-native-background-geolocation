@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 3.5.0 - 2020-01-11
+## 3.5.0 - 2020-01-14
 - [Fixed] Android: launch-Intent for foreground-service notification was causing notification-click to re-launch the Activity rather than show existing.
 - [Changed] Android: Modify behaviour of geofences-only mode to not periodically request location-updates.  Will use a stationary-geofence of radius geofenceProximityRadius/2 as a trigger to re-evaluate geofences in proximity.
 - [Changed] iOS: Prefix FMDB method-names `databasePool` -> `ts_databasePool` after reports of apps being falsely rejected by Apple for "private API usage".
