@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 3.6.0 - 2020-02-10
+- [Changed] `react-native-background-fetch` dependency updated to `2.8.0` with new iOS 13 `BGTaskScheduler` API.
+
 ## 3.5.1 - 2020-01-17
 - [Added] Implement four new RPC commands `addGeofence`, `removeGeofence`, `addGeofences`, `removeGeofences`.  Document available RPC commands in "HttpGuide".
 
