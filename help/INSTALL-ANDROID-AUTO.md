@@ -6,15 +6,32 @@
 
 ```shell
 yarn add https://github.com/transistorsoft/react-native-background-geolocation-android.git
+```
 
+- __For `background-geolocation >= 3.6.0`:__
+```
 yarn add react-native-background-fetch
 ```
+
+- For __`background-geolocation <= 3.5.0`__
+```
+yarn add react-native-background-fetch@2.7.1
+```
+
 
 ### With `npm`
 ```shell
 npm install git+https://git@github.com:transistorsoft/react-native-background-geolocation-android.git --save
+```
 
+- For __`background-geolocation >= 3.6.0`:__
+```
 npm install react-native-background-fetch --save
+```
+
+- For __`background-geolocation <= 3.5.0`:__
+```
+npm install react-native-background-fetch@2.7.1 --save
 ```
 
 ## Gradle Configuration
