@@ -1,5 +1,10 @@
 # CHANGELOG
 
+# Unreleased
+- [Fixed] Allow firebase-adapter to validate license flavors on same key (eg: .development, .staging).
+- [Fixed] iOS geofence listeners on `onGeofence` method *could possibly* fail to be called when a geofence event causes iOS to re-launch the app in the background (this would **not** prevent the plugin posting the geofence event to your `Config.url`, only a failure of the Javascript `onGeofence` to be fired).
+- [Changed] Android library `tslocationmanager.aar` is now compiled using `androidx`.  For backwards-compatibility with those how haven't migrated to `androidX`, a *reverse-jetified* build is included.  Usage is detected automatically based upon `android.useAndroidX` in one's `gradle.properties`.
+
 ## 3.6.2 - 2020-04-08
 - [Added] [Android] Add new `Config.motionTriggerDelay (milliseconds)` for preventing false-positive triggering of location-tracking (while walking around one's house, for example).  If the motion API triggers back to `still` before `motionTriggerDelay` expires, triggering to the *moving* state will be cancelled.
 - [Fixed] Address issue with rare reports of iOS crashing with error referencing `SOMotionDetector.m`.
