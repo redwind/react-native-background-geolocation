@@ -1,6 +1,9 @@
 # CHANGELOG
 
 # Unreleased
+- [Fixed][Android] Ensure location failure callback is executed on main-thread.
+- [Changed][Android] Gradle import `tslocationmanager.aar` using `api` rather than `implementation` in order to allow overrides in `AndroidManifest.xml`.
+- [Fixed][iOS] When upgrading from a version previous to `3.4.0`, if any records exist within plugin's SQLite database, those records could fail to be properly migrated to new schema.
 - [Added] New method `BackgroundGeolocation.destroyLocation(uuid)` for destroying a single location by `Location.uuid`.
 - [Fixed] Allow firebase-adapter to validate license flavors on same key (eg: .development, .staging).
 - [Fixed] iOS geofence listeners on `onGeofence` method *could possibly* fail to be called when a geofence event causes iOS to re-launch the app in the background (this would **not** prevent the plugin posting the geofence event to your `Config.url`, only a failure of the Javascript `onGeofence` to be fired).
