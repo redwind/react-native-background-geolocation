@@ -50,6 +50,7 @@ dependencies {
     // tslocationmanager.aar
     if (useAndroidX) {
         api fileTree(include: ['*.aar'], dir: 'libs')
+        implementation "androidx.localbroadcastmanager:localbroadcastmanager:$localBroadcastManagerVersion"
     } else {
         api fileTree(include: ['*.aar'], dir: 'libs/reverse')
     }
@@ -61,5 +62,4 @@ dependencies {
     implementation 'org.slf4j:slf4j-api:1.7.25'
     implementation 'com.github.tony19:logback-android:2.0.0'
     implementation "com.intentfilter:android-permissions:$androidPermissionsVersion"
-    implementation "androidx.localbroadcastmanager:localbroadcastmanager:$localBroadcastManagerVersion"
 }
