@@ -1,6 +1,8 @@
 # CHANGELOG
 
 # Unreleased
+- [Fixed][Android] Android plugin was importing an `androidx` dependency `localbroadcastmanager` without first checking if `useAndroidX` was set to `true`.
+- [Fixed][iOS] When using `disableStopDetection: true` with `pausesLocationUpdatesAutomatically: true`, the `CLLocationManagerDelegate didPauseLocationUpdates` the `motionchange` event reported `isMoving: true`.
 - [Fixed][Android] Ensure location failure callback is executed on main-thread.
 - [Changed][Android] Gradle import `tslocationmanager.aar` using `api` rather than `implementation` in order to allow overrides in `AndroidManifest.xml`.
 - [Fixed][iOS] When upgrading from a version previous to `3.4.0`, if any records exist within plugin's SQLite database, those records could fail to be properly migrated to new schema.
