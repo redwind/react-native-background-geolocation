@@ -1,6 +1,7 @@
 # CHANGELOG
 
 # Unreleased
+- [Fixed][Android] `requestPermission` method was always returning `AUTHORIZATION_STATUS_ALWAYS` even when *When in Use* was selected.
 - [Fixed][Android] Android plugin was importing an `androidx` dependency `localbroadcastmanager` without first checking if `useAndroidX` was set to `true`.
 - [Fixed][iOS] When using `disableStopDetection: true` with `pausesLocationUpdatesAutomatically: true`, the `CLLocationManagerDelegate didPauseLocationUpdates` the `motionchange` event reported `isMoving: true`.
 - [Fixed][Android] Ensure location failure callback is executed on main-thread.
