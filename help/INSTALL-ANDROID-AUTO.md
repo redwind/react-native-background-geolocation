@@ -79,16 +79,9 @@ apply from: "../../node_modules/react-native/react.gradle"
 If you've **not** [purchased a license](https://www.transistorsoft.com/shop/products/react-native-background-geolocation#plans), **ignore this step** &mdash; the plugin is fully functional in *DEBUG* builds so you can try before you [buy](https://www.transistorsoft.com/shop/products/react-native-background-geolocation#plans).
 
 ```diff
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.transistorsoft.backgroundgeolocation.react">
+<manifest>
 
-  <application
-    android:name=".MainApplication"
-    android:allowBackup="true"
-    android:label="@string/app_name"
-    android:icon="@mipmap/ic_launcher"
-    android:theme="@style/AppTheme">
-
+  <application>
     <!-- react-native-background-geolocation licence -->
 +   <meta-data android:name="com.transistorsoft.locationmanager.license" android:value="YOUR_LICENCE_KEY_HERE" />
     .
@@ -99,6 +92,26 @@ If you've **not** [purchased a license](https://www.transistorsoft.com/shop/prod
 
 ```
 
+## Android 10 and *When in Use* Location Authorization
+
+Android 10 introduces *When in Use* location authorization.  If you're building with __`compileSdkVersion 29`__, add the following elements to your **`AndroidManifest.xml`**.  This allows your app to continue location-tracking when location-services are initiated while your app is in the foreground.  For example:
+
+```javascript
+onClickStartTracking() {
+    // Initiate tracking while app is in foreground.
+    BackgroundGeolocation.changePace(true);
+}
+```
+
+```diff
+<manifest>
+    <application>
++       <service android:name="com.transistorsoft.locationmanager.service.TrackingService" android:foregroundServiceType="location" />
++       <service android:name="com.transistorsoft.locationmanager.service.LocationRequestService" android:foregroundServiceType="location" />
+    </application>
+</manifest>
+
+```
 
 ## Proguard Config
 
