@@ -1,6 +1,7 @@
 # CHANGELOG
 
 # Unreleased
+- [Fixed][Android] `onGeofence` event-handler fails to be fired when `maxRecordsToPersist: 0`.  Fixes #897.
 - [Fixed][Android] `requestPermission` method was always returning `AUTHORIZATION_STATUS_ALWAYS` even when *When in Use* was selected.
 - [Fixed][Android] Android plugin was importing an `androidx` dependency `localbroadcastmanager` without first checking if `useAndroidX` was set to `true`.
 - [Fixed][iOS] When using `disableStopDetection: true` with `pausesLocationUpdatesAutomatically: true`, the `CLLocationManagerDelegate didPauseLocationUpdates` the `motionchange` event reported `isMoving: true`.
